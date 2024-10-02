@@ -1,3 +1,7 @@
+struct Lowercase(Box<str>);
+
+struct Identifier(Box<[Lowercase]>);
+
 enum DataType {
     Str(Box<str>),
     Int(i32),
@@ -5,7 +9,7 @@ enum DataType {
 }
 
 struct Variable {
-    name: Box<str>,
+    name: Identifier,
     data_type: DataType,
 }
 
@@ -13,7 +17,7 @@ enum Token {
     Text(Box<str>),
     Variable(Variable),
     Extract {
-        name: Box<str>,
+        name: Identifier,
         contents: Box<Token>,
     },
 }
