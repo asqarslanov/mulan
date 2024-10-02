@@ -1,25 +1,7 @@
-struct Lowercase(Box<str>);
+use types::Template;
 
-struct Identifier(Box<[Lowercase]>);
+mod types;
 
-enum DataType {
-    Str(Box<str>),
-    Int(i32),
-    Float(f64),
+fn parse_template(input: &str) -> Template {
+    todo!()
 }
-
-struct Variable {
-    name: Identifier,
-    data_type: DataType,
-}
-
-enum Token {
-    Text(Box<str>),
-    Variable(Variable),
-    Extract {
-        name: Identifier,
-        contents: Box<Token>,
-    },
-}
-
-struct Template(Box<[Token]>);

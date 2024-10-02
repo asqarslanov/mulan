@@ -24,7 +24,7 @@ enum Token {
     },
 }
 
-struct Template(Box<[Token]>);
+pub struct Template(Box<[Token]>);
 
 enum Element {
     Key(Template),
