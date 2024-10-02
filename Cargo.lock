@@ -257,6 +257,9 @@ dependencies = [
 [[package]]
 name = "mulan-parser"
 version = "0.0.0"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "newline-converter"
