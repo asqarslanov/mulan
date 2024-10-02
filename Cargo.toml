@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["mulan-cli"]
+members = ["mulan-cli", "mulan-parser"]
 default-members = ["mulan-cli"]
 
 [workspace.package]

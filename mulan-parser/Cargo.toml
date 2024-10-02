@@ -1,0 +1,12 @@
+[package]
+name = "mulan-parser"
+edition = "2021"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+license-file.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
