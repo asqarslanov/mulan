@@ -8,3 +8,11 @@ version = "0.0.0"
 authors = ["Asqar Arslanov"]
 description = "An innovative multi-language system"
 license-file = "LICENSE"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+
+[workspace.dependencies]
+anyhow = "1.0.89"
