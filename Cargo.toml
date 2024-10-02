@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = ["mulan-cli"]
+default-members = ["mulan-cli"]
+
+[workspace.package]
+version = "0.0.0"
+authors = ["Asqar Arslanov"]
+description = "An innovative multi-language system"
+license-file = "LICENSE"

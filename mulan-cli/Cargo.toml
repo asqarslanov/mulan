@@ -1,0 +1,3 @@
+[package]
+name = "mulan-cli"
+edition = "2021"
