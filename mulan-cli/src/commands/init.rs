@@ -25,31 +25,46 @@ enum LocaleLanguage {
 
 #[derive(Clone, Display, EnumIter)]
 enum TargetPlatform {
+    #[strum(serialize = "C/C++")]
+    CCpp,
+    Gleam,
+    Go,
+    Java,
+    Kotlin,
     Rust,
+    #[strum(serialize = "JavaScript/TypeScript")]
+    JavascriptTypescript,
+    Python,
+    React,
+    #[strum(serialize = "Solid.js")]
+    SolidJs,
+    Svelte,
+    Swift,
+    Vue,
 }
 
 pub fn init() -> Result<()> {
-    let locales_dir: PathBuf = Text::new("Locales directory:")
+    let _locales_dir: PathBuf = Text::new("Locales directory:")
         .with_placeholder("<DIRECTORY>")
         .with_initial_value("locales/")
         .prompt()?
         .into();
 
     // TODO: report a bug to the `inquire` craete.
-    let locale_extension = Select::new("Locale extension:", LocaleExtension::iter().collect())
+    let _locale_extension = Select::new("Locale extension:", LocaleExtension::iter().collect())
         // .with_vim_mode(true)
         // .without_filtering()
         .with_starting_cursor(LocaleExtension::iter().position(|it| it.is_toml()).unwrap())
         .prompt()?;
 
-    let locale_languages = MultiSelect::new("Locale languages:", LocaleLanguage::iter().collect())
+    let _locale_languages = MultiSelect::new("Locale languages:", LocaleLanguage::iter().collect())
         .with_default(&[LocaleLanguage::iter().position(|it| it.is_en_us()).unwrap()])
         .prompt()?;
 
-    let target_platforms =
+    let _target_platforms =
         MultiSelect::new("Target platforms:", TargetPlatform::iter().collect()).prompt()?;
 
-    let confirmation = Confirm::new("Everything good?")
+    let _confirmation = Confirm::new("Everything good?")
         .with_default(true)
         .prompt()?;
 
