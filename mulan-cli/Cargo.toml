@@ -10,6 +10,7 @@ license-file.workspace = true
 anyhow = { workspace = true }
 clap = { version = "4.5.19", features = ["cargo", "derive"] }
 inquire = "0.7.5"
+strum = { version = "0.26.3", features = ["derive"] }
 
 [lints]
 workspace = true

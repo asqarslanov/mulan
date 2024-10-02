@@ -13,7 +13,5 @@ fn main() -> Result<()> {
         Commands::Run => todo!(),
     }
 
-    std::fs::File::open("notexists")?;
-
     Ok(())
 }
