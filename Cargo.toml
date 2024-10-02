@@ -6,7 +6,7 @@ default-members = ["mulan-cli"]
 [workspace.package]
 version = "0.0.0"
 authors = ["Asqar Arslanov"]
-description = "An innovative multi-language system"
+description = "An innovative multi-language framework"
 license-file = "LICENSE"
 
 [workspace.lints.clippy]
