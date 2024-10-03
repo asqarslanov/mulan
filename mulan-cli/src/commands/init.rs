@@ -54,7 +54,11 @@ pub fn init() -> Result<()> {
     let _locale_extension = Select::new("Locale extension:", LocaleExtension::iter().collect())
         // .with_vim_mode(true)
         // .without_filtering()
-        .with_starting_cursor(LocaleExtension::iter().position(|it| it.is_toml()).unwrap())
+        .with_starting_cursor(
+            LocaleExtension::iter()
+                .position(|it| it.is_json_5())
+                .unwrap(),
+        )
         .prompt()?;
 
     let _locale_languages = MultiSelect::new("Locale languages:", LocaleLanguage::iter().collect())
