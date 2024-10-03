@@ -7,7 +7,11 @@ default-members = ["mulan-cli"]
 version = "0.0.0"
 authors = ["Asqar Arslanov"]
 description = "An innovative multi-language framework"
+readme = true
+repository = "https://github.com/asqarslanov/mulan"
 license-file = "LICENSE"
+keywords = ["i18n", "mulan"]
+categories = ["command-line-utilities", "internationalization"]
 
 [workspace.lints.clippy]
 all = "warn"
