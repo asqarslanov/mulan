@@ -1,5 +1,5 @@
 [package]
-name = "mulan"
+name = "mulan-rust"
 edition = "2021"
 version.workspace = true
 authors.workspace = true
@@ -11,11 +11,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-anyhow.workspace = true
-clap = { version = "4.5.19", features = ["cargo", "derive"] }
-inquire = "0.7.5"
-mulan-rust.path = "../mulan-rust"
 strum.workspace = true
+thiserror = "1.0.64"
 
 [lints]
 workspace = true

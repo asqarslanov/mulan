@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["mulan-cli", "mulan-parser"]
+members = ["mulan-cli", "mulan-parser", "mulan-rust"]
 default-members = ["mulan-cli"]
 
 [workspace.package]
@@ -20,3 +20,4 @@ nursery = "warn"
 
 [workspace.dependencies]
 anyhow = "1.0.89"
+strum = { version = "0.26.3", features = ["derive"] }
