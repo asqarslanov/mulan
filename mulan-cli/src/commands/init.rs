@@ -83,7 +83,7 @@ pub fn init() -> Result<bool> {
             console::style("Check `.mulan/mulan.toml`"),
         )?;
     } else {
-        cliclack::outro_cancel("See you later!")?;
+        cliclack::outro_cancel("Operation cancelled.")?;
     }
 
     Ok(confirmation)
