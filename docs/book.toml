@@ -1,0 +1,6 @@
+[book]
+authors = ["Asqar Arslanov"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Mulan Guide"
