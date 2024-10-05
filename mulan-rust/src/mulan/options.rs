@@ -1,8 +1,8 @@
 use strum::Display;
 
-pub use self::date::DateFormat;
+pub use self::date_format::DateFormat;
 
-mod date;
+mod date_format;
 
 #[derive(Debug, Display)]
 pub enum DecimalSeparator {
