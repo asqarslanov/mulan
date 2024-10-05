@@ -1,16 +1,47 @@
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 
 use anyhow::Result;
 use strum::{EnumIs, EnumIter, EnumMessage, IntoEnumIterator, IntoStaticStr};
 
-pub fn init() -> Result<bool> {
-    cliclack::intro("mulan init")?;
+fn header(text: impl Display) -> impl Display {
+    console::style(text).bold()
+}
 
-    let _locales_dir: PathBuf = cliclack::input("Locales directory")
+fn key(text: impl Display) -> impl Display {
+    console::style(format!(" {text} "))
+        .on_black()
+        .white()
+        .bright()
+        .bold()
+}
+
+fn multiselect_header(text: impl Display) -> impl Display {
+    let separator = console::style("/").yellow();
+
+    format!(
+        "{} {separator} {} {separator} {}",
+        header(text),
+        format!("{} to select", key("space")),
+        format!(
+            "{} to continue",
+            key(if cfg!(windows) { "enter" } else { "return" })
+        )
+    )
+}
+
+pub fn init() -> Result<bool> {
+    cliclack::intro(
+        console::style(" Mulan Project Wizard ")
+            .on_red()
+            .black()
+            .bold(),
+    )?;
+
+    let _locales_dir: PathBuf = cliclack::input(header("Locales directory"))
         .default_input("locales/")
         .interact()?;
 
-    let _locale_extension = cliclack::select("Locale extension")
+    let _locale_extension = cliclack::select(header("Locale extension"))
         .items(
             &LocaleExtension::iter()
                 .map(|it| (it, <&_>::from(it), it.get_message().unwrap()))
@@ -19,7 +50,7 @@ pub fn init() -> Result<bool> {
         .initial_value(LocaleExtension::Json5)
         .interact()?;
 
-    let _locale_languages = cliclack::multiselect("Locale languages / press 'Space' to select")
+    let _locale_languages = cliclack::multiselect(multiselect_header("Locale languages"))
         .filter_mode()
         .items(
             &LocaleLanguage::iter()
@@ -30,7 +61,7 @@ pub fn init() -> Result<bool> {
         .required(false)
         .interact()?;
 
-    let _target_platforms = cliclack::multiselect("Target platforms / press 'Space' to select")
+    let _target_platforms = cliclack::multiselect(multiselect_header("Target platforms"))
         .items(
             &TargetPlatform::iter()
                 .map(|it| (it, <&_>::from(it), ""))
@@ -39,12 +70,15 @@ pub fn init() -> Result<bool> {
         .required(false)
         .interact()?;
 
-    let confirmation = cliclack::confirm("Everything good?")
+    let confirmation = cliclack::confirm(header("Everything good?"))
         .initial_value(true)
         .interact()?;
 
     if confirmation {
-        cliclack::outro_note("You're all set!", "Check `.mulan/mulan.toml`")?;
+        cliclack::outro_note(
+            console::style("You're all set!").green().bold(),
+            console::style("Check `.mulan/mulan.toml`"),
+        )?;
     } else {
         cliclack::outro_cancel("See you later!")?;
     }

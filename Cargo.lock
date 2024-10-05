@@ -195,6 +195,7 @@ dependencies = [
  "anyhow",
  "clap",
  "cliclack",
+ "console",
  "mulan-rust",
  "strum",
 ]

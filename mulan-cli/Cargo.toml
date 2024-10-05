@@ -14,6 +14,7 @@ categories.workspace = true
 anyhow.workspace = true
 clap = { version = "4.5.19", features = ["cargo", "derive"] }
 cliclack = "0.3.5"
+console = "0.15.8"
 mulan-rust.path = "../mulan-rust"
 strum.workspace = true
 
