@@ -37,6 +37,9 @@ pub fn init() -> Result<bool> {
             .bold(),
     )?;
 
+    // HACK: make `cliclack` catch Ctrl+C signals.
+    ctrlc::set_handler(|| ())?;
+
     let _locales_dir: PathBuf = cliclack::input(header("Locales directory"))
         .default_input("locales/")
         .interact()?;
