@@ -13,7 +13,7 @@ categories.workspace = true
 [dependencies]
 anyhow.workspace = true
 clap = { version = "4.5.19", features = ["cargo", "derive"] }
-inquire = "0.7.5"
+cliclack = "0.3.5"
 mulan-rust.path = "../mulan-rust"
 strum.workspace = true
 

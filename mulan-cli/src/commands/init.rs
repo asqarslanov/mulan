@@ -1,21 +1,76 @@
 use std::path::PathBuf;
 
 use anyhow::Result;
-use inquire::{Confirm, MultiSelect, Select, Text};
-use strum::{Display, EnumIs, EnumIter, IntoEnumIterator};
+use strum::{EnumIs, EnumIter, EnumMessage, IntoEnumIterator, IntoStaticStr};
 
-#[derive(Clone, Display, EnumIs, EnumIter)]
+pub fn init() -> Result<bool> {
+    cliclack::intro("mulan init")?;
+
+    let _locales_dir: PathBuf = cliclack::input("Locales directory")
+        .default_input("locales/")
+        .interact()?;
+
+    let _locale_extension = cliclack::select("Locale extension")
+        .items(
+            &LocaleExtension::iter()
+                .map(|it| (it, <&_>::from(it), it.get_message().unwrap()))
+                .collect::<Box<_>>(),
+        )
+        .initial_value(LocaleExtension::Json5)
+        .interact()?;
+
+    let _locale_languages = cliclack::multiselect("Locale languages")
+        .filter_mode()
+        .items(
+            &LocaleLanguage::iter()
+                .map(|it| (it, <&_>::from(it), ""))
+                .collect::<Box<_>>(),
+        )
+        .initial_values(vec![LocaleLanguage::EnUs])
+        .required(false)
+        .interact()?;
+
+    let _target_platforms = cliclack::multiselect("Target platforms")
+        .items(
+            &TargetPlatform::iter()
+                .map(|it| (it, <&_>::from(it), ""))
+                .collect::<Box<_>>(),
+        )
+        .required(false)
+        .interact()?;
+
+    let confirmation = cliclack::confirm("Everything good?")
+        .initial_value(true)
+        .interact()?;
+
+    if confirmation {
+        cliclack::outro_note("You're all set!", "Check `.mulan/mulan.toml`")?;
+    } else {
+        cliclack::outro_cancel("See you later!")?;
+    }
+
+    Ok(confirmation)
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, EnumIter, EnumMessage, IntoStaticStr)]
 #[strum(serialize_all = "UPPERCASE")]
 enum LocaleExtension {
+    #[strum(message = "good old JSON, not very ergonomic but a solid choice")]
     Json,
+    #[strum(message = "recommended")]
     Json5,
-    #[strum(to_string = "Jsonnet")]
+    #[strum(
+        to_string = "Jsonnet",
+        message = "very powerful, but if you're not sure, choose JSON5"
+    )]
     Jsonnet,
+    #[strum(message = "not recommended because it doesn't support multiline tables")]
     Toml,
+    #[strum(message = "well, you do you...")]
     Yaml,
 }
 
-#[derive(Clone, Display, EnumIs, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, EnumIs, EnumIter, IntoStaticStr)]
 enum LocaleLanguage {
     #[strum(to_string = "en-US (English, United States)")]
     EnUs,
@@ -23,7 +78,7 @@ enum LocaleLanguage {
     RuRu,
 }
 
-#[derive(Clone, Display, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, EnumIter, IntoStaticStr)]
 enum TargetPlatform {
     #[strum(to_string = "C/C++")]
     CCpp,
@@ -41,36 +96,4 @@ enum TargetPlatform {
     Svelte,
     Swift,
     Vue,
-}
-
-pub fn init() -> Result<()> {
-    let _locales_dir: PathBuf = Text::new("Locales directory:")
-        .with_placeholder("<DIRECTORY>")
-        .with_initial_value("locales/")
-        .prompt()?
-        .into();
-
-    // TODO: report a bug to the `inquire` craete.
-    let _locale_extension = Select::new("Locale extension:", LocaleExtension::iter().collect())
-        // .with_vim_mode(true)
-        // .without_filtering()
-        .with_starting_cursor(
-            LocaleExtension::iter()
-                .position(|it| it.is_json_5())
-                .unwrap(),
-        )
-        .prompt()?;
-
-    let _locale_languages = MultiSelect::new("Locale languages:", LocaleLanguage::iter().collect())
-        .with_default(&[LocaleLanguage::iter().position(|it| it.is_en_us()).unwrap()])
-        .prompt()?;
-
-    let _target_platforms =
-        MultiSelect::new("Target platforms:", TargetPlatform::iter().collect()).prompt()?;
-
-    let _confirmation = Confirm::new("Everything good?")
-        .with_default(true)
-        .prompt()?;
-
-    Ok(())
 }
