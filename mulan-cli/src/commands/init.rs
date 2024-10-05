@@ -19,7 +19,7 @@ pub fn init() -> Result<bool> {
         .initial_value(LocaleExtension::Json5)
         .interact()?;
 
-    let _locale_languages = cliclack::multiselect("Locale languages")
+    let _locale_languages = cliclack::multiselect("Locale languages / press 'Space' to select")
         .filter_mode()
         .items(
             &LocaleLanguage::iter()
@@ -30,7 +30,7 @@ pub fn init() -> Result<bool> {
         .required(false)
         .interact()?;
 
-    let _target_platforms = cliclack::multiselect("Target platforms")
+    let _target_platforms = cliclack::multiselect("Target platforms / press 'Space' to select")
         .items(
             &TargetPlatform::iter()
                 .map(|it| (it, <&_>::from(it), ""))
@@ -55,7 +55,7 @@ pub fn init() -> Result<bool> {
 #[derive(Clone, Copy, PartialEq, Eq, EnumIter, EnumMessage, IntoStaticStr)]
 #[strum(serialize_all = "UPPERCASE")]
 enum LocaleExtension {
-    #[strum(message = "good old JSON, not very ergonomic but a solid choice")]
+    #[strum(message = "good ol' JSON, not very ergonomic but still a solid choice")]
     Json,
     #[strum(message = "recommended")]
     Json5,
@@ -64,7 +64,7 @@ enum LocaleExtension {
         message = "very powerful, but if you're not sure, choose JSON5"
     )]
     Jsonnet,
-    #[strum(message = "not recommended because it doesn't support multiline tables")]
+    #[strum(message = "not recommended, no support for multiline tables")]
     Toml,
     #[strum(message = "well, you do you...")]
     Yaml,
