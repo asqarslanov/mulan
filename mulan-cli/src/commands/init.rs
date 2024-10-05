@@ -9,7 +9,7 @@ use strum::{Display, EnumIs, EnumIter, IntoEnumIterator};
 enum LocaleExtension {
     Json,
     Json5,
-    #[strum(serialize = "Jsonnet")]
+    #[strum(to_string = "Jsonnet")]
     Jsonnet,
     Toml,
     Yaml,
@@ -17,26 +17,26 @@ enum LocaleExtension {
 
 #[derive(Clone, Display, EnumIs, EnumIter)]
 enum LocaleLanguage {
-    #[strum(serialize = "en-US (English, United States)")]
+    #[strum(to_string = "en-US (English, United States)")]
     EnUs,
-    #[strum(serialize = "ru-RU (Russian, Russia)")]
+    #[strum(to_string = "ru-RU (Russian, Russia)")]
     RuRu,
 }
 
 #[derive(Clone, Display, EnumIter)]
 enum TargetPlatform {
-    #[strum(serialize = "C/C++")]
+    #[strum(to_string = "C/C++")]
     CCpp,
     Gleam,
     Go,
     Java,
     Kotlin,
     Rust,
-    #[strum(serialize = "JavaScript/TypeScript")]
+    #[strum(to_string = "JavaScript/TypeScript")]
     JavascriptTypescript,
     Python,
     React,
-    #[strum(serialize = "Solid.js")]
+    #[strum(to_string = "Solid.js")]
     SolidJs,
     Svelte,
     Swift,
