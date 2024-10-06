@@ -12,6 +12,7 @@ categories.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+serde = { version = "1.0.210", features = ["derive"] }
 
 [lints]
 workspace = true
