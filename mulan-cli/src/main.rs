@@ -16,7 +16,7 @@ fn main() -> Result<ExitCode> {
                 return Ok(ExitCode::FAILURE);
             }
         }
-        Commands::Run => todo!(),
+        Commands::Apply(_) => todo!(),
     }
 
     Ok(ExitCode::SUCCESS)

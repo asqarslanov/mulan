@@ -13,13 +13,13 @@ pub struct Cli {
 pub enum Commands {
     /// Generate locale bindings [WIP]
     #[command(alias = "r")]
-    Run,
+    Apply(ApplyArgs),
     /// Initialize [WIP]
     Init(InitArgs),
 }
 
 #[derive(Args)]
-pub struct RunArgs {}
+pub struct ApplyArgs {}
 
 #[derive(Args)]
 pub struct InitArgs {}
