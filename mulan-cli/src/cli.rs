@@ -11,6 +11,8 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Dev mode
+    Test,
     /// Generate locale bindings [WIP]
     #[command(alias = "r")]
     Apply(ApplyArgs),
