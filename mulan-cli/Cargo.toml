@@ -16,6 +16,7 @@ clap = { version = "4.5.19", features = ["cargo", "derive"] }
 cliclack = "0.3.5"
 console = "0.15.8"
 ctrlc = "3.4.5"
+mulan-parser.path = "../mulan-parser"
 mulan-rust.path = "../mulan-rust"
 strum.workspace = true
 
