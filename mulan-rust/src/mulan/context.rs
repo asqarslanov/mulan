@@ -15,7 +15,7 @@ mod errors {
     }
 }
 
-pub fn init<ContextId>(path: ContextId) -> Result<(), ContextInitError<ContextId>>
+pub fn init<ContextId>(_path: ContextId) -> Result<(), ContextInitError<ContextId>>
 where
     ContextId: Eq + Hash,
 {
@@ -23,8 +23,8 @@ where
 }
 
 pub fn init_with<ContextId>(
-    path: ContextId,
-    options: Options,
+    _path: ContextId,
+    _options: Options,
 ) -> Result<(), ContextInitError<ContextId>>
 where
     ContextId: Eq + Hash,
