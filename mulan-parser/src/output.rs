@@ -43,6 +43,21 @@ fn convert_rhs(value: crate::input::Rhs, _identifier: &Identifier) -> Rhs {
         R::Expanded(obj) => Rhs::Text(Template(obj.text)),
         R::Bool(false) => Rhs::Unimplemented,
         R::Bool(true) => todo!("import short"),
-        R::Import(..) => todo!("import"),
+        R::Import(props) => {
+            use crate::input::ImportProps as P;
+            match props {
+                P::True => Rhs::Section(Translation(HashMap::from([(
+                    Identifier(Box::from([Box::from("imported"), Box::from("true")])),
+                    Rhs::Unimplemented,
+                )]))),
+                P::Path(p) => Rhs::Section(Translation(HashMap::from([(
+                    Identifier(Box::from([
+                        Box::from("imported"),
+                        Box::from(p.to_str().unwrap()),
+                    ])),
+                    Rhs::Unimplemented,
+                )]))),
+            }
+        }
     }
 }

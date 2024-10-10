@@ -1,6 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
+
+mod validate;
 
 pub type Name = Box<str>;
 pub type Translation = HashMap<Name, Rhs>;
@@ -11,17 +13,16 @@ pub enum Rhs {
     Text(Box<str>),
     Expanded(Expanded),
     Bool(bool),
-    Import(Import, ImportProps),
+    #[serde(deserialize_with = "validate::tag_import")]
+    Import(ImportProps),
 }
-
-#[derive(Deserialize)]
-#[serde(rename = "import")]
-pub struct Import;
 
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub enum ImportProps {
-    Bool(bool),
+    #[serde(deserialize_with = "validate::only_true")]
+    True,
+    Path(Box<Path>),
 }
 
 #[derive(Deserialize)]
