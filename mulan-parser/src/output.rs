@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
 #[derive(Debug)]
+pub struct Template(Box<str>);
+
+#[derive(Debug)]
 pub enum Rhs {
     Text(Template),
     Section(Translation),
@@ -12,8 +15,6 @@ pub struct Identifier(Box<[Box<str>]>);
 
 #[derive(Debug)]
 pub struct Translation(HashMap<Identifier, Rhs>);
-
-pub type Template = Box<str>;
 
 impl From<crate::input::Translation> for Translation {
     fn from(value: crate::input::Translation) -> Self {
@@ -38,8 +39,10 @@ fn convert_name(value: crate::input::Name) -> Identifier {
 fn convert_rhs(value: crate::input::Rhs, _identifier: &Identifier) -> Rhs {
     use crate::input::Rhs as R;
     match value {
-        R::String(s) => Rhs::Text(s),
+        R::Text(s) => Rhs::Text(Template(s)),
+        R::Expanded(obj) => Rhs::Text(Template(obj.text)),
         R::Bool(false) => Rhs::Unimplemented,
         R::Bool(true) => todo!("import short"),
+        R::Import(..) => todo!("import"),
     }
 }
