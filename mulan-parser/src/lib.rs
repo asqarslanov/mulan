@@ -1,16 +1,13 @@
-use std::{collections::HashMap, path::Path};
+use std::path::Path;
 
 use anyhow::Result;
 
-mod types;
+mod input;
+mod output;
 
-pub type Translation = HashMap<String, String>;
-
-pub fn parse_translation(name: &str) -> Result<Translation> {
-    read_file(Path::new("locales").join(name).join("locale.json5"));
-    todo!()
-}
-
-fn read_file(path: impl AsRef<Path>) -> String {
-    todo!()
+pub fn parse_translation(name: &str) -> Result<output::Translation> {
+    let path = Path::new("locales").join(name).join("locale.json5");
+    let raw = std::fs::read_to_string(path)?;
+    let parsed: input::Translation = json5::from_str(&raw)?;
+    Ok(parsed.into())
 }
