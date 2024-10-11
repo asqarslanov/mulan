@@ -15,6 +15,7 @@ categories = ["command-line-utilities", "internationalization"]
 
 [workspace.dependencies]
 anyhow = "1.0.89"
+serde = { version = "1.0.210", features = ["derive"] }
 strum = { version = "0.26.3", features = ["derive"] }
 
 [workspace.lints.clippy]
