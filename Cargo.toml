@@ -13,11 +13,11 @@ license-file = "LICENSE"
 keywords = ["i18n", "mulan"]
 categories = ["command-line-utilities", "internationalization"]
 
+[workspace.dependencies]
+anyhow = "1.0.89"
+strum = { version = "0.26.3", features = ["derive"] }
+
 [workspace.lints.clippy]
 all = "warn"
 pedantic = "warn"
 nursery = "warn"
-
-[workspace.dependencies]
-anyhow = "1.0.89"
-strum = { version = "0.26.3", features = ["derive"] }
