@@ -296,6 +296,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mulan-config"
+version = "0.0.0"
+
+[[package]]
 name = "mulan-parser"
 version = "0.0.0"
 dependencies = [
