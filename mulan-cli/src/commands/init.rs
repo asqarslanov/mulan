@@ -7,12 +7,16 @@ fn header(text: impl Display) -> impl Display {
     console::style(text).bold()
 }
 
-fn key(text: impl Display) -> impl Display {
-    console::style(format!(" {text} "))
+fn key(name: &str) -> impl Display {
+    console::style(format!(" {name} "))
         .on_black()
         .white()
         .bright()
         .bold()
+}
+
+fn key_description(name: impl Display, action: &str) -> impl Display {
+    format!("{} to {}", key("space"), action)
 }
 
 fn multiselect_header(text: impl Display) -> impl Display {
@@ -21,11 +25,8 @@ fn multiselect_header(text: impl Display) -> impl Display {
     format!(
         "{} {separator} {} {separator} {}",
         header(text),
-        format!("{} to select", key("space")),
-        format!(
-            "{} to continue",
-            key(if cfg!(windows) { "enter" } else { "return" })
-        )
+        key_description("space", "select"),
+        key_description(if cfg!(windows) { "enter" } else { "return" }, "continue"),
     )
 }
 
