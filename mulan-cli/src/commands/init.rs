@@ -15,8 +15,8 @@ fn key(name: &str) -> impl Display {
         .bold()
 }
 
-fn key_description(name: impl Display, action: &str) -> impl Display {
-    format!("{} to {}", key("space"), action)
+fn key_description(name: &str, action: &str) -> impl Display {
+    format!("{} to {}", key(name), action)
 }
 
 fn multiselect_header(text: impl Display) -> impl Display {
