@@ -312,6 +312,7 @@ dependencies = [
  "cliclack",
  "console",
  "ctrlc",
+ "mulan-config",
  "mulan-parser",
  "mulan-rust",
  "strum",
@@ -321,6 +322,7 @@ dependencies = [
 name = "mulan-config"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "serde",
  "toml",
 ]
