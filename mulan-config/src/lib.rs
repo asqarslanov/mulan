@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 
-use self::schema::Config;
+pub use self::schema::Config;
 
 mod schema;
 

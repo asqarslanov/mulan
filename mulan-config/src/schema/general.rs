@@ -7,10 +7,10 @@ use super::{locale, target};
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
-    locales_dir: Box<Path>,
-    main_locale: locale::Name,
-    locales: Box<[locale::Name]>,
-    integrations: Box<[target::Name]>,
+    pub locales_dir: Box<Path>,
+    pub main_locale: locale::Name,
+    pub locales: Box<[locale::Name]>,
+    pub integrations: Box<[target::Name]>,
 }
 
 impl Default for Config {
