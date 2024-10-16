@@ -6,10 +6,11 @@ use mulan_config::Config;
 mod input;
 mod output;
 
-pub fn parse_translation(name: &str, _config: &Config) -> Result<output::Translation> {
-    let entry_point = Path::new("locale").with_extension("json5");
+pub fn parse_translation(name: &str, config: &Config) -> Result<output::Translation> {
+    let entry_point = Path::new(&*config.general.entry_point)
+        .with_extension(<&'static str>::from(&config.general.locale_extension));
 
-    let path = Path::new("locales").join(name).join(entry_point);
+    let path = config.general.locales_dir.join(name).join(entry_point);
     let parsed = load_file(path)?;
     parsed.try_into()
 }

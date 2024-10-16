@@ -1,12 +1,13 @@
 use std::path::Path;
 
 use serde::Deserialize;
+use strum::IntoStaticStr;
 
 use super::{locale, target};
 
 mod default;
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, IntoStaticStr)]
 #[serde(rename_all = "lowercase")]
 pub enum LocaleExtension {
     #[default]
