@@ -12,3 +12,14 @@ pub struct Config {
     locales: Box<[locale::Name]>,
     integrations: Box<[target::Name]>,
 }
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            locales_dir: Box::from(Path::new("locales/")),
+            main_locale: locale::Name::default(),
+            locales: Box::default(),
+            integrations: Box::default(),
+        }
+    }
+}
