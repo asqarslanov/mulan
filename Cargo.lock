@@ -333,6 +333,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "json5",
+ "mulan-config",
  "serde",
  "serde_json",
 ]
