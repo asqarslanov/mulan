@@ -11,7 +11,7 @@ fn main() -> Result<ExitCode> {
     let cli = &*cli::CLI;
 
     match cli.command {
-        Commands::Test => return commands::test::main().map(|()| ExitCode::SUCCESS),
+        Commands::Test => commands::test::main(),
         Commands::Init(_) => {
             if !crate::commands::init::init()? {
                 return Ok(ExitCode::FAILURE);

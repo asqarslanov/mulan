@@ -31,6 +31,8 @@ fn multiselect_header(text: impl Display) -> impl Display {
 }
 
 pub fn init() -> Result<bool> {
+    // TODO: make styles instead of functions.
+
     cliclack::intro(
         console::style(" Mulan Project Wizard ")
             .on_red()
