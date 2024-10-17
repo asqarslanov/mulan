@@ -9,6 +9,7 @@ mod default;
 
 #[derive(Debug, Default, Deserialize, IntoStaticStr)]
 #[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
 pub enum LocaleExtension {
     #[default]
     Json5,
