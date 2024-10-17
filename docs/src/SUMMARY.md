@@ -1,30 +1,31 @@
 # Summary
 
+[Locales](locales.md)
+[Config](config.md)
+
 # Getting Started
 
 - [Introduction](introduction.md)
 - [Installation]()
 - [Quick Start]()
 
-# Reference Guide
+# Locale Templates
 
-- [Locale Templates]()
+- [Overview]()
+- [Pluralization]()
+- [Interpolation]()
 
-  - [Overview]()
-  - [Pluralization]()
-  - [Interpolation]()
+# Command Line Tool
 
-- [Command Line Tool]()
+- [init]()
+- [check]()
+- [run]()
 
-  - [init]()
-  - [check]()
-  - [run]()
+# Programming Language Bindings
 
-- [Programming Language Bindings]()
-
-  - [C/C++]()
-  - [Go]()
-  - [JavaScript/TypeScript]()
-  - [Python]()
-  - [Rust]()
-  - [Zig]()
+- [C/C++]()
+- [Go]()
+- [JavaScript/TypeScript]()
+- [Python]()
+- [Rust]()
+- [Zig]()
