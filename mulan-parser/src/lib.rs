@@ -8,7 +8,7 @@ mod output;
 
 pub fn parse_translation(name: &str, config: &Config) -> Result<output::Translation> {
     let entry_point = Path::new(&*config.general.entry_point)
-        .with_extension(<&'static str>::from(&config.general.locale_extension));
+        .with_extension(<&str>::from(&config.general.locale_extension));
 
     let path = config.general.locales_dir.join(name).join(entry_point);
     let parsed = load_file(path)?;
