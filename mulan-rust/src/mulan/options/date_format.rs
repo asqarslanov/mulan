@@ -1,9 +1,7 @@
-use std::{
-    fmt::{self, Debug, Formatter},
-    marker::PhantomData,
-};
+use std::fmt::{self, Debug, Formatter};
+use std::marker::PhantomData;
 
-use private::{AddComponent, DateFormatBuilder, Unit};
+use builder::{AddComponent, DateFormatBuilder, Unit};
 
 pub struct DateFormat {
     units: Box<[Unit]>,
@@ -34,7 +32,7 @@ impl Debug for DateFormat {
     }
 }
 
-mod private {
+mod builder {
     use std::marker::PhantomData;
 
     use strum::IntoStaticStr;
