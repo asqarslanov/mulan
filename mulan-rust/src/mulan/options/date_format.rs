@@ -1,56 +1,31 @@
-use std::fmt::{self, Debug, Formatter};
+use std::{
+    fmt::{self, Debug, Formatter},
+    marker::PhantomData,
+};
 
-use strum::IntoStaticStr;
+use private::{AddComponent, DateFormatBuilder, Unit};
 
-#[derive(IntoStaticStr)]
-#[strum(serialize_all = "lowercase")]
-enum Component {
-    Yy,
-    Yyyy,
-    M,
-    Mm,
-    Mmm,
-    Mmmm,
-    D,
-    Dd,
-    Ddd,
-    Dddd,
+pub struct DateFormat {
+    units: Box<[Unit]>,
 }
 
-#[derive(IntoStaticStr)]
-enum Separator {
-    #[strum(to_string = "/")]
-    Slash,
-    #[strum(to_string = ".")]
-    Dot,
-    #[strum(to_string = "-")]
-    Dash,
-    #[strum(to_string = " ")]
-    Space,
-}
-
-enum Unit {
-    Component(Component),
-    Separator(Separator),
-}
-
-impl From<&Unit> for &'static str {
-    fn from(value: &Unit) -> Self {
-        match value {
-            Unit::Component(it) => it.into(),
-            Unit::Separator(it) => it.into(),
+impl DateFormat {
+    #[must_use]
+    pub fn builder() -> DateFormatBuilder<AddComponent> {
+        const UNITS: usize = 5;
+        DateFormatBuilder {
+            units: Vec::with_capacity(UNITS),
+            state: PhantomData,
         }
     }
 }
-
-pub struct DateFormat(Box<[Unit]>);
 
 impl Debug for DateFormat {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DateFormat")
             .field(
                 &self
-                    .0
+                    .units
                     .iter()
                     .map(<&'static str>::from)
                     .collect::<Box<str>>(),
@@ -59,92 +34,146 @@ impl Debug for DateFormat {
     }
 }
 
-impl DateFormat {
-    #[must_use]
-    pub fn builder() -> AddComponent {
-        const UNITS: usize = 5;
-        AddComponent(Vec::with_capacity(UNITS))
-    }
-}
+mod private {
+    use std::marker::PhantomData;
 
-pub struct AddComponent(Vec<Unit>);
+    use strum::IntoStaticStr;
 
-pub struct AddSeparator(Vec<Unit>);
+    use super::DateFormat;
 
-impl AddComponent {
-    pub fn yy(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Yy));
-        AddSeparator(self.0)
+    pub struct DateFormatBuilder<S: State> {
+        pub units: Vec<Unit>,
+        pub state: PhantomData<S>,
     }
 
-    pub fn yyyy(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Yyyy));
-        AddSeparator(self.0)
+    pub trait State {}
+
+    impl State for AddComponent {}
+    pub enum AddComponent {}
+
+    impl State for AddSeparator {}
+    pub enum AddSeparator {}
+
+    #[derive(IntoStaticStr)]
+    #[strum(serialize_all = "lowercase")]
+    pub enum Component {
+        Yy,
+        Yyyy,
+        M,
+        Mm,
+        Mmm,
+        Mmmm,
+        D,
+        Dd,
+        Ddd,
+        Dddd,
     }
 
-    pub fn m(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::M));
-        AddSeparator(self.0)
+    #[derive(IntoStaticStr)]
+    pub enum Separator {
+        #[strum(to_string = "/")]
+        Slash,
+        #[strum(to_string = ".")]
+        Dot,
+        #[strum(to_string = "-")]
+        Dash,
+        #[strum(to_string = " ")]
+        Space,
     }
 
-    pub fn mm(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Mm));
-        AddSeparator(self.0)
+    pub enum Unit {
+        Component(Component),
+        Separator(Separator),
     }
 
-    pub fn mmm(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Mmm));
-        AddSeparator(self.0)
+    impl From<&Unit> for &'static str {
+        fn from(value: &Unit) -> Self {
+            match value {
+                Unit::Component(it) => it.into(),
+                Unit::Separator(it) => it.into(),
+            }
+        }
     }
 
-    pub fn mmmm(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Mmmm));
-        AddSeparator(self.0)
+    impl DateFormatBuilder<AddComponent> {
+        fn add_component(mut self, component: Component) -> DateFormatBuilder<AddSeparator> {
+            self.units.push(Unit::Component(component));
+            DateFormatBuilder {
+                units: self.units,
+                state: PhantomData,
+            }
+        }
+
+        pub fn yy(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Yy)
+        }
+
+        pub fn yyyy(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Yyyy)
+        }
+
+        pub fn m(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::M)
+        }
+
+        pub fn mm(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Mm)
+        }
+
+        pub fn mmm(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Mmm)
+        }
+
+        pub fn mmmm(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Mmmm)
+        }
+
+        pub fn d(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::D)
+        }
+
+        pub fn dd(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Dd)
+        }
+
+        pub fn ddd(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Ddd)
+        }
+
+        pub fn dddd(self) -> DateFormatBuilder<AddSeparator> {
+            self.add_component(Component::Dddd)
+        }
     }
 
-    pub fn d(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::D));
-        AddSeparator(self.0)
-    }
+    impl DateFormatBuilder<AddSeparator> {
+        fn add_separator(mut self, separator: Separator) -> DateFormatBuilder<AddComponent> {
+            self.units.push(Unit::Separator(separator));
+            DateFormatBuilder {
+                units: self.units,
+                state: PhantomData,
+            }
+        }
 
-    pub fn dd(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Dd));
-        AddSeparator(self.0)
-    }
+        pub fn slash(self) -> DateFormatBuilder<AddComponent> {
+            self.add_separator(Separator::Slash)
+        }
 
-    pub fn ddd(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Ddd));
-        AddSeparator(self.0)
-    }
+        pub fn dot(self) -> DateFormatBuilder<AddComponent> {
+            self.add_separator(Separator::Dot)
+        }
 
-    pub fn dddd(mut self) -> AddSeparator {
-        self.0.push(Unit::Component(Component::Dddd));
-        AddSeparator(self.0)
-    }
-}
+        pub fn dash(self) -> DateFormatBuilder<AddComponent> {
+            self.add_separator(Separator::Dash)
+        }
 
-impl AddSeparator {
-    pub fn build(self) -> DateFormat {
-        DateFormat(self.0.into_boxed_slice())
-    }
+        pub fn space(self) -> DateFormatBuilder<AddComponent> {
+            self.add_separator(Separator::Space)
+        }
 
-    pub fn slash(mut self) -> AddComponent {
-        self.0.push(Unit::Separator(Separator::Slash));
-        AddComponent(self.0)
-    }
-
-    pub fn dot(mut self) -> AddComponent {
-        self.0.push(Unit::Separator(Separator::Dot));
-        AddComponent(self.0)
-    }
-
-    pub fn dash(mut self) -> AddComponent {
-        self.0.push(Unit::Separator(Separator::Dash));
-        AddComponent(self.0)
-    }
-
-    pub fn space(mut self) -> AddComponent {
-        self.0.push(Unit::Separator(Separator::Space));
-        AddComponent(self.0)
+        pub fn build(self) -> DateFormat {
+            DateFormat {
+                units: self.units.into_boxed_slice(),
+            }
+        }
     }
 }
