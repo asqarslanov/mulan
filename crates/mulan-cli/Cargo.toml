@@ -11,6 +11,8 @@ categories.workspace = true
 publish.workspace = true
 
 [dependencies]
+clap = { workspace = true, features = ["cargo", "derive", "wrap_help"] }
+miette = { workspace = true, features = ["fancy"] }
 
 [lints]
 workspace = true
