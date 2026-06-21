@@ -1,0 +1,45 @@
+[workspace]
+resolver = "3"
+members = ["crates/*/"]
+default-members = ["crates/mulan-cli/"]
+
+[workspace.package]
+version = "0.0.0"
+description = "A multi-language i18n framework"
+readme = true
+repository = "https://github.com/asqarslanov/mulan"
+license-file = "LICENSE"
+keywords = [
+  "cli",
+  "framework",
+  "i18n",
+  "internationalization",
+  "intl",
+  "l10n",
+  "localization",
+  "mulan",
+]
+categories = [
+  "command-line-utilities",
+  "development-tools",
+  "internationalization",
+  "localization",
+]
+publish = false
+
+[workspace.dependencies]
+mulan-config = { path = "crates/mulan-config/" }
+mulan-parser = { path = "crates/mulan-parser/" }
+
+[workspace.lints.clippy]
+all = "warn"
+missing-errors-doc = { level = "allow", priority = 1 }
+missing-panics-doc = { level = "allow", priority = 1 }
+nursery = "warn"
+pedantic = "warn"
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
+codegen-units = 1

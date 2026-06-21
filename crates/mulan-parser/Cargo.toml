@@ -1,0 +1,16 @@
+[package]
+name = "mulan-parser"
+version.workspace = true
+edition = "2024"
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
