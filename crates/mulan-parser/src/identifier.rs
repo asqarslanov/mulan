@@ -32,10 +32,9 @@ mod parser {
         ) -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
             Word::chumsky_parser()
                 .map(|part| part.inner)
-                .repeated()
-                .at_least(1)
                 .to_slice()
                 .separated_by(just(delimiter))
+                .at_least(1)
                 .collect()
                 .map(|them: Vec<_>| {
                     let words = {
