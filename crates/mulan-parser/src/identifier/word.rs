@@ -4,8 +4,8 @@ use compact_str::CompactString;
 
 /// A part of an [`Identifier`](crate::identifier::Identifier).
 ///
-/// For example, the identifier `student-bs23-id006` consists of three [`Word`]s:
-/// `student`, `bs23`, and `id006`.
+/// For example, the identifier `student-bs23-id006` consists of three
+/// [`Word`]s: `student`, `bs23`, and `id006`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Word {
     pub(super) inner: CompactString,
