@@ -21,7 +21,7 @@ pub struct MessageTemplate {
 #[derive(Debug)]
 enum MessagePart {
     /// ...
-    Raw(CompactString),
+    Text(CompactString),
 
     /// ...
     Placeholder(Parameter),
