@@ -36,3 +36,25 @@ mod parser {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use chumsky::Parser as _;
+    use rstest::rstest;
+
+    use super::*;
+
+    #[rstest]
+    #[case("a", Ok)]
+    fn parse(#[case] input: &str, #[case] expected_output: fn(()) -> Result<(), ()>) {
+        let parser = Word::chumsky_parser();
+        let parse_result = parser.parse(input).into_result();
+        assert_eq!(parse_result.is_ok(), expected_output(()).is_ok());
+        if let Ok(parsed_word) = parse_result {
+            let input_word = Word {
+                inner: CompactString::new(input),
+            };
+            assert_eq!(input_word, parsed_word);
+        }
+    }
+}

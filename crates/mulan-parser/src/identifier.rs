@@ -79,7 +79,7 @@ mod tests {
         "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
         &["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"],
     )]
-    fn valid_keys_kebab(#[case] input: &str, #[case] expected_output: &[&str]) {
+    fn parse_kebab_valid(#[case] input: &str, #[case] expected_output: &[&str]) {
         let parser = Identifier::chumsky_parser_kebab();
         let actual_output = parser.parse(input).unwrap();
         let expected_output = Identifier {
