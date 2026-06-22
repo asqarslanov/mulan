@@ -62,6 +62,7 @@ mod tests {
     #[case("e", Some(["e"].as_slice()))]
     #[case("foo", Some(["foo"].as_slice()))]
     #[case("lorem-ipsum", Some(["lorem", "ipsum"].as_slice()))]
+    #[case("aa-aa-aa", Some(["aa", "aa", "aa"].as_slice()))]
     #[case("i18n", Some(["i18n"].as_slice()))]
     #[case("r2-d2", Some(["r2", "d2"].as_slice()))]
     #[case(
@@ -69,6 +70,19 @@ mod tests {
         Some(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
     )]
     #[case("", None)]
+    #[case(" ", None)]
+    #[case("7", None)]
+    #[case("7up", None)]
+    #[case("r-2-d-2", None)]
+    #[case("a_b", None)]
+    #[case(" a-b", None)]
+    #[case("a-b ", None)]
+    #[case(" a-b ", None)]
+    #[case("A", None)]
+    #[case("AAA", None)]
+    #[case("aAa", None)]
+    #[case("a.a", None)]
+    #[case("a b", None)]
     fn parse_kebab(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser_kebab();
         let actual_output = parser.parse(input).into_result().ok();
