@@ -6,7 +6,13 @@ use self::word::Word;
 
 mod word;
 
-/// ...
+/// A name that can be converted to an
+/// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages)) in
+/// any major programming language. Can be used as a message path segment (key) or
+/// as a parameter placeholder (variable name).
+///
+/// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace, every
+/// word starts with a Latin letter, etc.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,
