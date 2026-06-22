@@ -13,8 +13,9 @@ pub struct Word {
 
 mod parser {
     use chumsky::prelude::*;
+    use compact_str::CompactString;
 
-    use super::*;
+    use super::Word;
 
     impl Word {
         #[must_use]

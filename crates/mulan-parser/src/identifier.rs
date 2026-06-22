@@ -16,7 +16,7 @@ mod parser {
     use chumsky::prelude::*;
     use compact_str::CompactString;
 
-    use super::*;
+    use super::{Identifier, Word};
 
     impl Identifier {
         /// Parses identifiers `like-this1`. Reject identifiers
