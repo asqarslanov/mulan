@@ -25,21 +25,13 @@ mod parser {
     use super::{Identifier, Word};
 
     impl Identifier {
-        /// Parses identifiers `like-this1`. Rejects identifiers
-        /// `with_underscores` or `CapitalLetters`.
         #[must_use]
-        pub fn chumsky_parser_kebab<'src>()
+        pub fn chumsky_parser<'src>()
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
-            Self::chumsky_parser('-')
-        }
-
-        fn chumsky_parser<'src>(
-            delimiter: char,
-        ) -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
             Word::chumsky_parser()
                 .map(|part| part.inner)
                 .to_slice()
-                .separated_by(just(delimiter))
+                .separated_by(just('-'))
                 .at_least(1)
                 .collect()
                 .map(|them: Vec<_>| {
@@ -91,8 +83,8 @@ mod tests {
     #[case("aAa", None)]
     #[case("a.a", None)]
     #[case("a b", None)]
-    fn parse_kebab(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let parser = Identifier::chumsky_parser_kebab();
+    fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
+        let parser = Identifier::chumsky_parser();
         let actual_output = parser.parse(input).into_result().ok();
         let expected_output = expected_output.map(|raw_words| {
             let words = {
