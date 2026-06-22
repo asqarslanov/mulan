@@ -15,5 +15,8 @@ chumsky = { workspace = true }
 compact_str = { workspace = true }
 smallvec = { workspace = true }
 
+[dev-dependencies]
+rstest = { workspace = true }
+
 [lints]
 workspace = true

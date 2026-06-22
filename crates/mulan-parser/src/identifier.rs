@@ -60,3 +60,38 @@ mod parser {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use chumsky::Parser as _;
+    use compact_str::CompactString;
+    use rstest::rstest;
+
+    use super::*;
+
+    #[rstest]
+    #[case("e", &["e"])]
+    #[case("foo", &["foo"])]
+    #[case("lorem-ipsum", &["lorem", "ipsum"])]
+    #[case("i18n", &["i18n"])]
+    #[case("r2-d2", &["r2", "d2"])]
+    #[case(
+        "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
+        &["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"],
+    )]
+    fn valid_keys_kebab(#[case] input: &str, #[case] expected_output: &[&str]) {
+        let parser = Identifier::chumsky_parser_kebab();
+        let actual_output = parser.parse(input).unwrap();
+        let expected_output = Identifier {
+            words: {
+                expected_output
+                    .iter()
+                    .map(|it| Word {
+                        inner: CompactString::new(it),
+                    })
+                    .collect()
+            },
+        };
+        assert_eq!(actual_output, expected_output)
+    }
+}
