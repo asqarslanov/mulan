@@ -42,7 +42,7 @@ mod parser {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
                     .repeated()
                     .at_least(1)
-                    .collect::<String>()
+                    .to_slice()
                     .map(|it| Self::Text(CompactString::new(it)))
             };
             let expr = {
