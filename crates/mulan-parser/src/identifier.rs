@@ -7,17 +7,6 @@ use self::word::Word;
 mod word;
 
 /// ...
-///
-/// ## Valid Examples
-///
-/// `e`, `foo`, `lorem-ipsum`, `i18n`, `r2-d2`,
-/// `v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts`.
-///
-/// ## Invalid Examples
-///
-/// - `` (empty string)
-/// - `my-5-cents` ()
-/// - ...
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,
@@ -30,7 +19,8 @@ mod parser {
     use super::*;
 
     impl Identifier {
-        /// ...
+        /// Parses identifiers `like-this1`. Reject identifiers
+        /// `with_underscores` or `CapitalLetters`.
         #[must_use]
         pub fn chumsky_parser_kebab<'src>()
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
