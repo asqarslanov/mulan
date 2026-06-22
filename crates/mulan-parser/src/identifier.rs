@@ -25,7 +25,7 @@ mod parser {
     use super::{Identifier, Word};
 
     impl Identifier {
-        /// Parses identifiers `like-this1`. Reject identifiers
+        /// Parses identifiers `like-this1`. Rejects identifiers
         /// `with_underscores` or `CapitalLetters`.
         #[must_use]
         pub fn chumsky_parser_kebab<'src>()
