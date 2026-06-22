@@ -30,8 +30,9 @@ enum TemplatePart {
 mod parser {
     use chumsky::prelude::*;
     use compact_str::CompactString;
+    use smallvec::SmallVec;
 
-    use super::{Parameter, TemplatePart};
+    use super::{Parameter, Template, TemplatePart};
     use crate::identifier::Identifier;
 
     impl TemplatePart {
@@ -52,6 +53,20 @@ mod parser {
                     .map(|name| Self::Placeholder(Parameter { name }))
             };
             choice((text, expr))
+        }
+    }
+
+    impl Template {
+        #[must_use]
+        pub fn chumsky_parser<'src>()
+        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+            TemplatePart::chumsky_parser()
+                .repeated()
+                .collect()
+                .then_ignore(end())
+                .map(|parts: Vec<_>| Self {
+                    parts: SmallVec::from_vec(parts),
+                })
         }
     }
 }
