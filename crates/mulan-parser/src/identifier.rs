@@ -60,18 +60,22 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case("e", &["e"])]
-    #[case("foo", &["foo"])]
-    #[case("lorem-ipsum", &["lorem", "ipsum"])]
-    #[case("i18n", &["i18n"])]
-    #[case("r2-d2", &["r2", "d2"])]
+    #[case("e", Ok(["e"].as_slice()))]
+    #[case("foo", Ok(["foo"].as_slice()))]
+    #[case("lorem-ipsum", Ok(["lorem", "ipsum"].as_slice()))]
+    #[case("i18n", Ok(["i18n"].as_slice()))]
+    #[case("r2-d2", Ok(["r2", "d2"].as_slice()))]
     #[case(
         "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
-        &["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"],
+        Ok(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
     )]
-    fn parse_kebab_valid(#[case] input: &str, #[case] expected_output: &[&str]) {
+    fn parse_kebab(#[case] input: &str, #[case] expected_output: Result<&[&str], ()>) {
         let parser = Identifier::chumsky_parser_kebab();
-        let actual_output = parser.parse(input).unwrap();
+        let actual_output = parser.parse(input).into_result();
+        assert_eq!(actual_output.is_ok(), expected_output.is_ok());
+        let (Ok(actual_output), Ok(expected_output)) = (actual_output, expected_output) else {
+            return;
+        };
         let expected_output = Identifier {
             words: {
                 expected_output
