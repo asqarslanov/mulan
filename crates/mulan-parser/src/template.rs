@@ -13,13 +13,13 @@ pub struct Parameter {
 
 /// ...
 #[derive(Debug)]
-pub struct MessageTemplate {
-    parts: SmallVec<[MessagePart; 1]>,
+pub struct Template {
+    parts: SmallVec<[TemlpatePart; 1]>,
 }
 
 /// ...
 #[derive(Debug)]
-enum MessagePart {
+enum TemlpatePart {
     /// ...
     Text(CompactString),
 

@@ -1,2 +1,2 @@
 mod identifier;
-mod message_template;
+mod template;
