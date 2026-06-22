@@ -60,32 +60,30 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case("e", Ok(["e"].as_slice()))]
-    #[case("foo", Ok(["foo"].as_slice()))]
-    #[case("lorem-ipsum", Ok(["lorem", "ipsum"].as_slice()))]
-    #[case("i18n", Ok(["i18n"].as_slice()))]
-    #[case("r2-d2", Ok(["r2", "d2"].as_slice()))]
+    #[case("e", Some(["e"].as_slice()))]
+    #[case("foo", Some(["foo"].as_slice()))]
+    #[case("lorem-ipsum", Some(["lorem", "ipsum"].as_slice()))]
+    #[case("i18n", Some(["i18n"].as_slice()))]
+    #[case("r2-d2", Some(["r2", "d2"].as_slice()))]
     #[case(
         "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
-        Ok(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
+        Some(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
     )]
-    fn parse_kebab(#[case] input: &str, #[case] expected_output: Result<&[&str], ()>) {
+    #[case("", None)]
+    fn parse_kebab(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser_kebab();
-        let actual_output = parser.parse(input).into_result();
-        assert_eq!(actual_output.is_ok(), expected_output.is_ok());
-        let (Ok(actual_output), Ok(expected_output)) = (actual_output, expected_output) else {
-            return;
-        };
-        let expected_output = Identifier {
-            words: {
-                expected_output
+        let actual_output = parser.parse(input).into_result().ok();
+        let expected_output = expected_output.map(|raw_words| {
+            let words = {
+                raw_words
                     .iter()
                     .map(|it| Word {
                         inner: CompactString::new(it),
                     })
                     .collect()
-            },
-        };
-        assert_eq!(actual_output, expected_output)
+            };
+            Identifier { words }
+        });
+        assert_eq!(actual_output, expected_output);
     }
 }
