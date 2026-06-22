@@ -83,6 +83,7 @@ mod tests {
     #[case("hash#", Err)]
     #[case("slash/", Err)]
     #[case("dot.", Err)]
+    #[case("newline\n", Err)]
     fn parse(#[case] input: &str, #[case] expected_output: fn(()) -> Result<(), ()>) {
         let parser = Word::chumsky_parser();
         let parse_result = parser.parse(input).into_result();
