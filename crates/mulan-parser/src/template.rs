@@ -6,7 +6,7 @@ use smallvec::SmallVec;
 use crate::identifier::Identifier;
 
 /// ...
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Parameter {
     name: Identifier,
 }
@@ -18,7 +18,7 @@ pub struct Template {
 }
 
 /// ...
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum TemplatePart {
     /// ...
     Text(CompactString),
@@ -68,5 +68,36 @@ mod parser {
                     parts: SmallVec::from_vec(parts),
                 })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use chumsky::Parser as _;
+
+    use super::*;
+
+    #[test]
+    fn parse() {
+        let ident_parser = Identifier::chumsky_parser();
+        let msg_parser = Template::chumsky_parser();
+        let actual_output = {
+            msg_parser
+                .parse("aaa{bbb}ccc{{ddd}}eee{{{  fff  }}}ggg{{{{hhh}}}}iii")
+                .unwrap()
+                .parts
+        };
+        let expected_output = [
+            TemplatePart::Text("aaa".into()),
+            TemplatePart::Placeholder(Parameter {
+                name: ident_parser.parse("bbb").unwrap(),
+            }),
+            TemplatePart::Text("ccc{ddd}eee{".into()),
+            TemplatePart::Placeholder(Parameter {
+                name: ident_parser.parse("fff").unwrap(),
+            }),
+            TemplatePart::Text("}ggg{{hhh}}iii".into()),
+        ];
+        assert_eq!(actual_output, expected_output.into());
     }
 }
