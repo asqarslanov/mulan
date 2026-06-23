@@ -30,7 +30,6 @@ pub struct Parameter {
 mod parser {
     use chumsky::prelude::*;
     use compact_str::CompactString;
-    use smallvec::SmallVec;
 
     use super::{Parameter, Template, TemplatePart};
     use crate::identifier::Identifier;
