@@ -13,7 +13,7 @@ mod word;
 ///
 /// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace, every
 /// word starts with a Latin letter, etc.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,
 }
@@ -85,7 +85,7 @@ mod tests {
     #[case("a b", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser();
-        let actual_output = parser.parse(input).into_result().ok();
+        let actual_output = parser.parse(input).into_output();
         let expected_output = expected_output.map(|raw_words| {
             let words = {
                 raw_words

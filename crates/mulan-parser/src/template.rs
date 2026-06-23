@@ -6,19 +6,19 @@ use smallvec::SmallVec;
 use crate::identifier::Identifier;
 
 /// ...
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Parameter {
     name: Identifier,
 }
 
 /// ...
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Template {
     parts: SmallVec<[TemplatePart; 1]>,
 }
 
 /// ...
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum TemplatePart {
     /// ...
     Text(CompactString),
@@ -74,30 +74,69 @@ mod parser {
 #[cfg(test)]
 mod tests {
     use chumsky::Parser as _;
+    use rstest::rstest;
 
+    use self::PseudoTemplatePart::{Txt, Var};
     use super::*;
 
-    #[test]
-    fn parse() {
-        let ident_parser = Identifier::chumsky_parser();
+    enum PseudoTemplatePart {
+        Txt(&'static str),
+        Var(&'static str),
+    }
+
+    #[rstest]
+    #[case("", Some([].as_slice()))]
+    #[case("  ", Some([Txt("  ")].as_slice()))]
+    #[case("a\nb", Some([Txt("a\nb")].as_slice()))]
+    #[case("Hey{{", Some([Txt("Hey{")].as_slice()))]
+    #[case("Hey}}", Some([Txt("Hey}")].as_slice()))]
+    #[case("Hello, {name}!", Some([Txt("Hello, "), Var("name"), Txt("!")].as_slice()))]
+    #[case(
+        "I have {n} apples! {n}!",
+        Some([Txt("I have "), Var("n"), Txt(" apples! "), Var("n"), Txt("!")].as_slice()))
+    ]
+    #[case("{{lorem-ipsum}}", Some([Txt("{lorem-ipsum}")].as_slice()))]
+    #[case("{{{lorem-ipsum}}}", Some([Txt("{"), Var("lorem-ipsum"), Txt("}")].as_slice()))]
+    #[case("{{{ lorem-ipsum  }}}", Some([Txt("{"), Var("lorem-ipsum"), Txt("}")].as_slice()))]
+    #[case("{{{{lorem-ipsum}}}}", Some([Txt("{{lorem-ipsum}}")].as_slice()))]
+    #[case("{{{{  lorem-ipsum   }}}}", Some([Txt("{{  lorem-ipsum   }}")].as_slice()))]
+    #[case("{{{{{lorem-ipsum}}}}}", Some([Txt("{{"), Var("lorem-ipsum"), Txt("}}")].as_slice()))]
+    #[case(
+        "aaa{bbb}ccc{{ddd}}eee{{{  fff  }}}ggg{{{{hhh}}}}iii",
+        Some(
+            [
+                Txt("aaa"),
+                Var("bbb"),
+                Txt("ccc{ddd}eee{"),
+                Var("fff"),
+                Txt("}ggg{{hhh}}iii")
+            ]
+            .as_slice(),
+        ),
+    )]
+    #[case("{}", None)]
+    #[case("{lorem_ipsum}", None)]
+    #[case("{", None)]
+    #[case("}", None)]
+    #[case("He}y", None)]
+    #[case("He{y", None)]
+    fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let msg_parser = Template::chumsky_parser();
-        let actual_output = {
-            msg_parser
-                .parse("aaa{bbb}ccc{{ddd}}eee{{{  fff  }}}ggg{{{{hhh}}}}iii")
-                .unwrap()
-                .parts
-        };
-        let expected_output = [
-            TemplatePart::Text("aaa".into()),
-            TemplatePart::Placeholder(Parameter {
-                name: ident_parser.parse("bbb").unwrap(),
-            }),
-            TemplatePart::Text("ccc{ddd}eee{".into()),
-            TemplatePart::Placeholder(Parameter {
-                name: ident_parser.parse("fff").unwrap(),
-            }),
-            TemplatePart::Text("}ggg{{hhh}}iii".into()),
-        ];
-        assert_eq!(actual_output, expected_output.into());
+        let ident_parser = Identifier::chumsky_parser();
+        let actual_output = msg_parser.parse(input).into_output();
+        let expected_output = expected_output.map(|raw_parts| Template {
+            parts: {
+                raw_parts
+                    .iter()
+                    .map(|part| match part {
+                        Txt(it) => TemplatePart::Text(CompactString::new(it)),
+                        Var(it) => TemplatePart::Placeholder(Parameter {
+                            name: ident_parser.parse(it).unwrap(),
+                        }),
+                    })
+                    .collect()
+            },
+        });
+        assert_eq!(actual_output, expected_output);
     }
 }
