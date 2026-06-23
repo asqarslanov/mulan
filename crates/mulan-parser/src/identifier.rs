@@ -1,10 +1,7 @@
 //! See [`Identifier`].
 
+use compact_str::CompactString;
 use smallvec::SmallVec;
-
-use self::word::Word;
-
-mod word;
 
 /// A generic name that can be converted to an
 /// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
@@ -20,8 +17,18 @@ pub struct Identifier {
     words: SmallVec<[Word; 2]>,
 }
 
+/// A part of an [`Identifier`](crate::identifier::Identifier).
+///
+/// For example, the identifier `student-bs23-id006` consists of three
+/// [`Word`]s: `student`, `bs23`, and `id006`.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Word {
+    pub(super) inner: CompactString,
+}
+
 mod parser {
     use chumsky::prelude::*;
+    use compact_str::CompactString;
 
     use super::{Identifier, Word};
 
@@ -37,6 +44,21 @@ mod parser {
                 .map(|raw_words: Vec<_>| Self {
                     words: raw_words.into_iter().map(|inner| Word { inner }).collect(),
                 })
+        }
+    }
+
+    impl Word {
+        #[must_use]
+        pub fn chumsky_parser<'src>()
+        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+            let letter = one_of('a'..='z').labelled("small latin letter");
+            let consecutive_letters = letter.clone().repeated().at_least(1);
+            let consecutive_digits = text::digits(10);
+            let letter_digit_mix = choice((consecutive_letters, consecutive_digits)).repeated();
+            let word = letter.then(letter_digit_mix);
+            word.to_slice().map(|it: &str| Self {
+                inner: CompactString::new(it),
+            })
         }
     }
 }
@@ -60,6 +82,15 @@ mod tests {
         "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
         Some(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
     )]
+    #[case("fn", Some(["fn"].as_slice()))]
+    #[case("def", Some(["def"].as_slice()))]
+    #[case("gen", Some(["gen"].as_slice()))]
+    #[case("for", Some(["for"].as_slice()))]
+    #[case("in", Some(["in"].as_slice()))]
+    #[case("if", Some(["if"].as_slice()))]
+    #[case("while", Some(["while"].as_slice()))]
+    #[case("not", Some(["not"].as_slice()))]
+    #[case("let", Some(["let"].as_slice()))]
     #[case("", None)]
     #[case(" ", None)]
     #[case("7", None)]
@@ -72,10 +103,24 @@ mod tests {
     #[case("-aa", None)]
     #[case("a-A", None)]
     #[case("A", None)]
-    #[case("AAA", None)]
-    #[case("aAa", None)]
     #[case("a.a", None)]
     #[case("a b", None)]
+    #[case("ALLCAPS", None)]
+    #[case("oneCapital", None)]
+    #[case("apostrophe'", None)]
+    #[case("diacriticñ", None)]
+    #[case("cyrillicж", None)]
+    #[case("dash-", None)]
+    #[case("underscore_", None)]
+    #[case("colon:", None)]
+    #[case("semi;", None)]
+    #[case("at@", None)]
+    #[case("amp&", None)]
+    #[case("star*", None)]
+    #[case("hash#", None)]
+    #[case("slash/", None)]
+    #[case("dot.", None)]
+    #[case("newline\n", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser();
         let actual_output = parser.parse(input).into_output();
