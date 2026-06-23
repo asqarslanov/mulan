@@ -82,6 +82,15 @@ mod tests {
         "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
         Some(["v3ry", "l0n9", "str1n9", "of", "l3tt3rs", "and", "d1g1ts"].as_slice()),
     )]
+    #[case("fn", Some(["fn"].as_slice()))]
+    #[case("def", Some(["def"].as_slice()))]
+    #[case("gen", Some(["gen"].as_slice()))]
+    #[case("for", Some(["for"].as_slice()))]
+    #[case("in", Some(["in"].as_slice()))]
+    #[case("if", Some(["if"].as_slice()))]
+    #[case("while", Some(["while"].as_slice()))]
+    #[case("not", Some(["not"].as_slice()))]
+    #[case("let", Some(["let"].as_slice()))]
     #[case("", None)]
     #[case(" ", None)]
     #[case("7", None)]
@@ -94,10 +103,24 @@ mod tests {
     #[case("-aa", None)]
     #[case("a-A", None)]
     #[case("A", None)]
-    #[case("AAA", None)]
-    #[case("aAa", None)]
     #[case("a.a", None)]
     #[case("a b", None)]
+    #[case("ALLCAPS", None)]
+    #[case("oneCapital", None)]
+    #[case("apostrophe'", None)]
+    #[case("diacriticñ", None)]
+    #[case("cyrillicж", None)]
+    #[case("dash-", None)]
+    #[case("underscore_", None)]
+    #[case("colon:", None)]
+    #[case("semi;", None)]
+    #[case("at@", None)]
+    #[case("amp&", None)]
+    #[case("star*", None)]
+    #[case("hash#", None)]
+    #[case("slash/", None)]
+    #[case("dot.", None)]
+    #[case("newline\n", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser();
         let actual_output = parser.parse(input).into_output();
@@ -113,57 +136,5 @@ mod tests {
             Identifier { words }
         });
         assert_eq!(actual_output, expected_output);
-    }
-
-    #[rstest]
-    #[case("w", Ok)]
-    #[case("manylettersofthelatinalphabet", Ok)]
-    #[case("manylettersofthelatinalphabet2", Ok)]
-    #[case("manydigits281348214378912347892", Ok)]
-    #[case("onedigit1", Ok)]
-    #[case("digitin1themiddle", Ok)]
-    #[case("fn", Ok)]
-    #[case("def", Ok)]
-    #[case("gen", Ok)]
-    #[case("for", Ok)]
-    #[case("in", Ok)]
-    #[case("if", Ok)]
-    #[case("while", Ok)]
-    #[case("not", Ok)]
-    #[case("let", Ok)]
-    #[case("", Err)]
-    #[case(" ", Err)]
-    #[case("spaceattheend ", Err)]
-    #[case(" spaceatthebeginning", Err)]
-    #[case("1", Err)]
-    #[case("123", Err)]
-    #[case("1digitatthebeginning", Err)]
-    #[case("ALLCAPS", Err)]
-    #[case("oneCapital", Err)]
-    #[case("W", Err)]
-    #[case("apostrophe'", Err)]
-    #[case("diacriticñ", Err)]
-    #[case("cyrillicж", Err)]
-    #[case("dash-", Err)]
-    #[case("underscore_", Err)]
-    #[case("colon:", Err)]
-    #[case("semi;", Err)]
-    #[case("at@", Err)]
-    #[case("amp&", Err)]
-    #[case("star*", Err)]
-    #[case("hash#", Err)]
-    #[case("slash/", Err)]
-    #[case("dot.", Err)]
-    #[case("newline\n", Err)]
-    fn parse_word(#[case] input: &str, #[case] expected_output: fn(()) -> Result<(), ()>) {
-        let parser = Word::chumsky_parser();
-        let parse_result = parser.parse(input).into_result();
-        assert_eq!(parse_result.is_ok(), expected_output(()).is_ok());
-        if let Ok(parsed_word) = parse_result {
-            let input_word = Word {
-                inner: CompactString::new(input),
-            };
-            assert_eq!(input_word, parsed_word);
-        }
     }
 }
