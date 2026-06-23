@@ -23,13 +23,13 @@ pub struct Template {
     parts: SmallVec<[TemplatePart; 1]>,
 }
 
-/// ...
+/// A part of a [`Template`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum TemplatePart {
-    /// ...
+    /// Plain text to be used verbatim.
     Text(CompactString),
 
-    /// ...
+    /// A stand-in for a variable (`{foo}`).
     Placeholder(Parameter),
 }
 
