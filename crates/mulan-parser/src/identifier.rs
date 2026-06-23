@@ -30,19 +30,11 @@ mod parser {
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
             Word::chumsky_parser()
                 .map(|part| part.inner)
-                .to_slice()
                 .separated_by(just('-'))
                 .at_least(1)
                 .collect::<Box<[_]>>()
-                .map(|them| {
-                    let words = {
-                        them.into_iter()
-                            .map(|it: &str| Word {
-                                inner: CompactString::new(it),
-                            })
-                            .collect()
-                    };
-                    Self { words }
+                .map(|raw_words| Self {
+                    words: raw_words.into_iter().map(|inner| Word { inner }).collect(),
                 })
         }
     }
