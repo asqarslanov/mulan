@@ -122,6 +122,7 @@ mod tests {
     #[case("he{y", None)]
     #[case("{a", None)]
     #[case("a}", None)]
+    #[case("{six seven}", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let msg_parser = Template::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser();
