@@ -42,7 +42,6 @@ mod parser {
             TemplatePart::chumsky_parser()
                 .repeated()
                 .collect()
-                .then_ignore(end())
                 .map(|parts| Self { parts })
         }
     }
