@@ -32,8 +32,8 @@ mod parser {
                 .map(|part| part.inner)
                 .separated_by(just('-'))
                 .at_least(1)
-                .collect::<Box<[_]>>()
-                .map(|raw_words| Self {
+                .collect()
+                .map(|raw_words: Vec<_>| Self {
                     words: raw_words.into_iter().map(|inner| Word { inner }).collect(),
                 })
         }
