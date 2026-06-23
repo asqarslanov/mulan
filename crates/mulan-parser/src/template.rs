@@ -5,7 +5,19 @@ use smallvec::SmallVec;
 
 use crate::identifier::Identifier;
 
-/// ...
+/// A message template that consists of raw text and variable placeholders.
+/// For example:
+///
+/// ```txt
+/// Hello, {name}!
+/// ```
+///
+/// This template can later be converted to different syntaxes.
+/// For example (JavaScript):
+///
+/// ```js
+/// `Hello, ${name}!`
+/// ```
 #[derive(Debug, PartialEq, Eq)]
 pub struct Template {
     parts: SmallVec<[TemplatePart; 1]>,
