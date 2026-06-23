@@ -6,12 +6,6 @@ use smallvec::SmallVec;
 use crate::identifier::Identifier;
 
 /// ...
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Parameter {
-    name: Identifier,
-}
-
-/// ...
 #[derive(Debug, PartialEq, Eq)]
 pub struct Template {
     parts: SmallVec<[TemplatePart; 1]>,
@@ -25,6 +19,12 @@ enum TemplatePart {
 
     /// ...
     Placeholder(Parameter),
+}
+
+/// ...
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Parameter {
+    name: Identifier,
 }
 
 mod parser {
