@@ -33,8 +33,8 @@ mod parser {
                 .to_slice()
                 .separated_by(just('-'))
                 .at_least(1)
-                .collect()
-                .map(|them: Vec<_>| {
+                .collect::<Box<[_]>>()
+                .map(|them| {
                     let words = {
                         them.into_iter()
                             .map(|it: &str| Word {

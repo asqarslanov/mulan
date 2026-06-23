@@ -43,9 +43,7 @@ mod parser {
                 .repeated()
                 .collect()
                 .then_ignore(end())
-                .map(|parts: Vec<_>| Self {
-                    parts: SmallVec::from_vec(parts),
-                })
+                .map(|parts| Self { parts })
         }
     }
 
@@ -58,7 +56,7 @@ mod parser {
                     .repeated()
                     .at_least(1)
                     .collect::<CompactString>()
-                    .map(|it| Self::Text(CompactString::new(it)))
+                    .map(Self::Text)
             };
             let expr = {
                 Identifier::chumsky_parser()
