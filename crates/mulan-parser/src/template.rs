@@ -1,4 +1,4 @@
-//! See [`MessageTemplate`].
+//! See [`Template`].
 
 use compact_str::CompactString;
 use smallvec::SmallVec;
