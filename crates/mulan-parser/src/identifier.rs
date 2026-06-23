@@ -6,51 +6,36 @@ use self::word::Word;
 
 mod word;
 
-/// A name that can be converted to an
-/// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages)) in
-/// any major programming language. Can be used as a message path segment (key)
-/// or as a parameter placeholder (variable name).
+/// A generic name that can be converted to an
+/// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
+/// in any major programming language.
 ///
-/// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace, every
-/// word starts with a Latin letter, etc.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+/// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace,
+/// every word starts with a Latin letter, etc.
+///
+/// This type serves as the underlying representation of
+/// [`Parameter`](crate::template::Parameter) or a message path segment(key).
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,
 }
 
 mod parser {
     use chumsky::prelude::*;
-    use compact_str::CompactString;
 
     use super::{Identifier, Word};
 
     impl Identifier {
-        /// Parses identifiers `like-this1`. Rejects identifiers
-        /// `with_underscores` or `CapitalLetters`.
         #[must_use]
-        pub fn chumsky_parser_kebab<'src>()
+        pub fn chumsky_parser<'src>()
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
-            Self::chumsky_parser('-')
-        }
-
-        fn chumsky_parser<'src>(
-            delimiter: char,
-        ) -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
             Word::chumsky_parser()
                 .map(|part| part.inner)
-                .to_slice()
-                .separated_by(just(delimiter))
+                .separated_by(just('-'))
                 .at_least(1)
                 .collect()
-                .map(|them: Vec<_>| {
-                    let words = {
-                        them.into_iter()
-                            .map(|it: &str| Word {
-                                inner: CompactString::new(it),
-                            })
-                            .collect()
-                    };
-                    Self { words }
+                .map(|raw_words: Vec<_>| Self {
+                    words: raw_words.into_iter().map(|inner| Word { inner }).collect(),
                 })
         }
     }
@@ -91,9 +76,9 @@ mod tests {
     #[case("aAa", None)]
     #[case("a.a", None)]
     #[case("a b", None)]
-    fn parse_kebab(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let parser = Identifier::chumsky_parser_kebab();
-        let actual_output = parser.parse(input).into_result().ok();
+    fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
+        let parser = Identifier::chumsky_parser();
+        let actual_output = parser.parse(input).into_output();
         let expected_output = expected_output.map(|raw_words| {
             let words = {
                 raw_words
