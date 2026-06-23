@@ -118,8 +118,10 @@ mod tests {
     #[case("{lorem_ipsum}", None)]
     #[case("{", None)]
     #[case("}", None)]
-    #[case("He}y", None)]
-    #[case("He{y", None)]
+    #[case("he}y", None)]
+    #[case("he{y", None)]
+    #[case("{a", None)]
+    #[case("a}", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let msg_parser = Template::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser();
