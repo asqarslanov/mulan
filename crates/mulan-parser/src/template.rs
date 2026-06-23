@@ -55,13 +55,13 @@ mod parser {
                     .collect()
                     .map(Self::Text)
             };
-            let expr = {
+            let placeholder = {
                 Identifier::chumsky_parser()
                     .padded()
                     .delimited_by(just('{'), just('}'))
                     .map(|name| Self::Placeholder(Parameter { name }))
             };
-            choice((text, expr))
+            choice((text, placeholder))
         }
     }
 }
