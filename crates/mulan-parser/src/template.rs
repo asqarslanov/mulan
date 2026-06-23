@@ -46,6 +46,7 @@ mod parser {
     use crate::identifier::Identifier;
 
     impl Template {
+        /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
         #[must_use]
         pub fn chumsky_parser<'src>()
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
@@ -57,6 +58,7 @@ mod parser {
     }
 
     impl TemplatePart {
+        /// Differentiates between different template part types.
         #[must_use]
         pub fn chumsky_parser<'src>()
         -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
@@ -67,13 +69,20 @@ mod parser {
                     .collect()
                     .map(Self::Text)
             };
-            let placeholder = {
-                Identifier::chumsky_parser()
-                    .padded()
-                    .delimited_by(just('{'), just('}'))
-                    .map(|name| Self::Placeholder(Parameter { name }))
-            };
+            let placeholder = Parameter::chumsky_parser().map(Self::Placeholder);
             choice((text, placeholder))
+        }
+    }
+
+    impl Parameter {
+        /// Extracts `x` from `{x}`.
+        #[must_use]
+        pub fn chumsky_parser<'src>()
+        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+            Identifier::chumsky_parser()
+                .padded()
+                .delimited_by(just('{'), just('}'))
+                .map(|name| Self { name })
         }
     }
 }
