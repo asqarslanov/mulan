@@ -29,7 +29,6 @@ pub struct Parameter {
 
 mod parser {
     use chumsky::prelude::*;
-    use compact_str::CompactString;
 
     use super::{Parameter, Template, TemplatePart};
     use crate::identifier::Identifier;
@@ -53,7 +52,7 @@ mod parser {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
                     .repeated()
                     .at_least(1)
-                    .collect::<CompactString>()
+                    .collect()
                     .map(Self::Text)
             };
             let expr = {
