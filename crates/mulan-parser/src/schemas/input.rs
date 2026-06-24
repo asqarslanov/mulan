@@ -54,7 +54,8 @@ pub struct RawNamespace {
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum RawNode {
-    /// Raw text that will later be properly parsed to a [`Template`](crate::Template).
+    /// Raw text that will later be properly parsed
+    /// to a [`Template`](crate::Template).
     Message(CompactString),
 
     /// A nested namespace.
