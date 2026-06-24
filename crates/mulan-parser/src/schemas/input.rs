@@ -54,7 +54,7 @@ pub struct RawNamespace {
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum RawNode {
-    /// A raw message template to be parsed properly later.
+    /// Raw text that will later be properly parsed to a [`Template`].
     Message(CompactString),
 
     /// A nested namespace.
