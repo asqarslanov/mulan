@@ -17,6 +17,7 @@ foldhash = { workspace = true }
 mulan-config = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 smallvec = { workspace = true }
+thiserror = { workspace = true }
 
 [dev-dependencies]
 rstest = { workspace = true }
