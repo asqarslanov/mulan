@@ -3,7 +3,6 @@
 //! Most notably, [`Input`] and [`Output`].
 
 use std::fs;
-use std::io::BufReader;
 use std::iter;
 use std::path::PathBuf;
 
