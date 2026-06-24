@@ -12,7 +12,10 @@ publish.workspace = true
 
 [dependencies]
 chumsky = { workspace = true }
-compact_str = { workspace = true }
+compact_str = { workspace = true, features = ["serde"] }
+foldhash = { workspace = true }
+mulan-config = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 smallvec = { workspace = true }
 
 [dev-dependencies]

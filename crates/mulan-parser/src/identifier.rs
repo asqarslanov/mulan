@@ -17,7 +17,7 @@ pub struct Identifier {
     words: SmallVec<[Word; 2]>,
 }
 
-/// A part of an [`Identifier`](crate::identifier::Identifier).
+/// A part of an [`Identifier`].
 ///
 /// For example, the identifier `student-bs23-id006` consists of three
 /// [`Word`]s: `student`, `bs23`, and `id006`.
