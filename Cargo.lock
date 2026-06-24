@@ -436,6 +436,7 @@ dependencies = [
  "chumsky",
  "compact_str",
  "foldhash 0.2.0",
+ "mulan-config",
  "rstest",
  "serde",
  "smallvec",
