@@ -65,7 +65,10 @@ pub struct Definition {
 /// ```
 #[derive(Debug, Deserialize)]
 pub struct RawNamespace {
-    /// ...
+    /// Maps raw keys to namespace nodes (see [`RawNode`]).
+    ///
+    /// All nodes within a namespace must have unique keys
+    /// (i.e., a message can't have the same key as a sibling namespace).
     #[serde(flatten)]
     map: HashMap<CompactString, RawNode>,
 }
