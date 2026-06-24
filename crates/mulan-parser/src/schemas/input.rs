@@ -16,14 +16,14 @@ pub struct Definition {
 }
 
 #[derive(Debug, Deserialize)]
-struct RawNamespace {
+pub struct RawNamespace {
     #[serde(flatten)]
     map: HashMap<CompactString, RawNode>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
-enum RawNode {
+pub enum RawNode {
     Message(CompactString),
     Namespace(RawNamespace),
 }
