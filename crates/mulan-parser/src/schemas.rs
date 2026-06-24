@@ -5,3 +5,9 @@
 use self::input::Input;
 
 mod input;
+
+impl Input {
+    fn read() -> Self {
+        todo!();
+    }
+}
