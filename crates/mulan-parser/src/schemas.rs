@@ -2,7 +2,7 @@
 //!
 //! Most notably, [`Input`] and [`Output`].
 
-use std::fs::File;
+use std::fs;
 use std::io::BufReader;
 use std::iter;
 use std::path::PathBuf;
@@ -22,11 +22,11 @@ enum ReadError {
 impl Input {
     fn read() -> Result<Self, ReadError> {
         let path = PathBuf::from("locales/en-US/locale.yaml");
-        let file = File::open(&path).map_err(|_| ReadError::Fs(path))?;
-        let en_us: Definition =
-            serde_saphyr::from_reader(BufReader::new(file)).map_err(ReadError::Yaml)?;
+        let file_contents = fs::read_to_string(&path).map_err(|_| ReadError::Fs(path))?;
+        let definition: Definition =
+            serde_saphyr::from_str(&file_contents).map_err(ReadError::Yaml)?;
         let result = Input {
-            locales: iter::once((Language::EnUs, en_us)).collect(),
+            locales: iter::once((Language::EnUs, definition)).collect(),
         };
         Ok(result)
     }
