@@ -41,7 +41,28 @@ pub struct Definition {
     root: RawNamespace,
 }
 
-/// ...
+/// A "grouping" of messages to organize them conveniently.
+///
+/// Keys from different namespaces don't collide and can take the same values.
+///
+/// ```yaml
+/// ns1:
+///   msg1: "Foo"
+///   msg2: "Bar"
+/// ns2:
+///   msg1: "Lorem"
+///   msg2: "Ipsum"
+/// ```
+///
+/// Namespaces can nest to produce more complex hieararchies of messages.
+///
+/// ```yaml
+/// one-namespace:
+///   foo: "Lorem"
+///   bar: "Ipsum"
+///   another-namespace:
+///     baz: "Dolor"
+/// ```
 #[derive(Debug, Deserialize)]
 pub struct RawNamespace {
     /// ...
