@@ -6,8 +6,11 @@ use self::input::Input;
 
 mod input;
 
+#[derive(Debug)]
+enum ReadError {}
+
 impl Input {
-    fn read() -> Self {
+    fn read() -> Result<Self, ReadError> {
         todo!();
     }
 }
