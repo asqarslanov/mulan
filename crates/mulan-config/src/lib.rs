@@ -1,1 +1,6 @@
-
+/// ...
+#[derive(Debug)]
+pub enum Language {
+    /// ...
+    EnUs,
+}
