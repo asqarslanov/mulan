@@ -49,7 +49,7 @@ pub struct RawNamespace {
     map: HashMap<CompactString, RawNode>,
 }
 
-/// A value in a locale definition. Can either be a message template
+/// A value in a locale [`Definition`]. Can either be a message template
 /// or a namespace.
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
