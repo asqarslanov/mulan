@@ -1,3 +1,5 @@
+//! See [`Input`].
+
 use compact_str::CompactString;
 use foldhash::HashMap;
 use mulan_config::Language;
