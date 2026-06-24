@@ -5,14 +5,16 @@ use foldhash::HashMap;
 use mulan_config::Language;
 use serde::Deserialize;
 
-/// ...
+/// A simple collection of locale [`Definition`]s parsed with [`serde`].
+/// This type is used to quickly map the contents of locale files
+/// to Rust values. Later, it will be converted into the more useful
+/// [`mulan_parser::Output`](crate::Output) type.
 #[derive(Debug)]
 pub struct Input {
-    /// ...
-    pub default_locale: Definition,
-
-    /// ...
-    pub other_locales: HashMap<Language, Definition>,
+    /// Maps a language tag to the contents of the corresponding locale.
+    ///
+    /// May not include all locales specified in [`mulan_config::Config`].
+    pub locales: HashMap<Language, Definition>,
 }
 
 /// A single-language definition of a locale read from a locale file
