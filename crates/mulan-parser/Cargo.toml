@@ -16,6 +16,7 @@ compact_str = { workspace = true, features = ["serde"] }
 foldhash = { workspace = true }
 mulan-config = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+serde-saphyr = { workspace = true, features = ["miette"] }
 smallvec = { workspace = true }
 
 [dev-dependencies]
