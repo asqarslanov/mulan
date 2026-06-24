@@ -33,11 +33,8 @@ pub struct Input {
 #[derive(Debug, Deserialize)]
 pub struct Definition {
     /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]).
-    ///
-    /// A definition is considered flat if it only has one outermost
-    /// namespace---the **root namespace**. However, the root namespace
-    /// is always present, even if the locale definition is empty.
+    /// (see [`RawNamespace`]). The **root namespace** is the outermost
+    /// namespace. It is always present, even if the locale definition is empty.
     #[serde(flatten)]
     root: RawNamespace,
 }
