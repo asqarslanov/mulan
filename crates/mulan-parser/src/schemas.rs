@@ -49,25 +49,27 @@ mod tests {
     use super::*;
 
     #[rstest]
+    #[case(<&str>::default(), iter::empty())]
     #[case(
         indoc! {r#"
             foo: "Hello"
         "#},
-        RawNamespace {
-            map: [(
-                CompactString::new("foo"),
-                RawNode::Message(CompactString::new("Hello")),
-            )]
-            .into_iter()
-            .collect(),
-        },
+        [(
+            CompactString::new("foo"),
+            RawNode::Message(CompactString::new("Hello")),
+        )]
     )]
-    fn read_definition(#[case] input: &str, #[case] expected_output: RawNamespace) {
+    fn read_definition(
+        #[case] input: &str,
+        #[case] expected_output: impl IntoIterator<Item = (CompactString, RawNode)>,
+    ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
         let actual_output = Definition::read(file.path().to_owned()).unwrap();
         let expected_output = Definition {
-            root: expected_output,
+            root: RawNamespace {
+                map: expected_output.into_iter().collect(),
+            },
         };
         assert_eq!(actual_output, expected_output);
     }
