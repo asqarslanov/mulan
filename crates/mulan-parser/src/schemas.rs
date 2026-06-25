@@ -120,7 +120,6 @@ mod tests {
             ),
         ]),
     )]
-    // more tests on namespaces
     fn read_definition(
         #[case] input: &str,
         #[case] expected_output: Option<impl IntoIterator<Item = (CompactString, RawNode)>>,
