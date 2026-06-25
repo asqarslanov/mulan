@@ -13,14 +13,19 @@ use self::input::{Definition, Input};
 
 mod input;
 
+/// Errors of [`Input::read`].
 #[derive(Debug)]
-enum ReadError {
+pub enum ReadError {
+    /// Failed to read a file.
     Io { path: PathBuf, error: io::Error },
+
+    /// Failed to parse a YAML file according to the schema.
     Format(serde_saphyr::Error),
 }
 
 impl Input {
-    fn read() -> Result<Self, ReadError> {
+    /// Locates and parses YAML locale definition files to Rust values.
+    pub fn read() -> Result<Self, ReadError> {
         let en_us_path = PathBuf::from("locales/en-US/locale.yaml");
         let en_us_definition = Definition::read(en_us_path)?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
@@ -29,6 +34,7 @@ impl Input {
 }
 
 impl Definition {
+    /// Parses a YAML locale definition file to a Rust value.
     fn read(path: PathBuf) -> Result<Self, ReadError> {
         let file_contents =
             fs::read_to_string(&path).map_err(|error| ReadError::Io { error, path })?;
