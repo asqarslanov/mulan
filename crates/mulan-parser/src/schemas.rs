@@ -78,17 +78,6 @@ mod tests {
         #[case] input: &str,
         #[case] expected_output: Option<impl IntoIterator<Item = (CompactString, RawNode)>>,
     ) {
-        [
-            (
-                CompactString::new("foo"),
-                RawNode::Message(CompactString::new("Hello")),
-            ),
-            (
-                CompactString::new("foo"),
-                RawNode::Message(CompactString::new("Hello")),
-            ),
-        ];
-
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
         let actual_output = Definition::read(file.path().to_owned()).ok();
