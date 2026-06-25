@@ -11,7 +11,7 @@ pub struct Output {
 }
 
 #[derive(Debug)]
-struct Namespace {
+pub struct Namespace {
     map: BTreeMap<Key, Node>,
 }
 
@@ -21,13 +21,13 @@ pub struct Key {
 }
 
 #[derive(Debug)]
-enum Node {
+pub enum Node {
     Message(Translations),
     Namespace(Namespace),
 }
 
 #[derive(Debug)]
-struct Translations {
+pub struct Translations {
     default: Template,
     others: BTreeMap<Language, Template>,
 }
