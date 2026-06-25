@@ -73,6 +73,77 @@ mod tests {
         "#},
         None::<[_; 0]>,
     )]
+    #[case(
+        indoc! {r#"
+            foo:
+              a: "Lorem"
+              b: "Ipsum"
+              bar:
+                a: "Dolor"
+                b: "Sit"
+                c: "Amet"
+            baz:
+              a: "Lorem Ipsum"
+              b: "Dolor Sit Amet"
+        "#},
+        Some([
+            (
+                CompactString::new("foo"),
+                RawNode::Namespace(RawNamespace {
+                    map: [
+                        (
+                            CompactString::new("a"),
+                            RawNode::Message(CompactString::new("Lorem")),
+                        ),
+                        (
+                            CompactString::new("b"),
+                            RawNode::Message(CompactString::new("Ipsum")),
+                        ),
+                        (
+                            CompactString::new("bar"),
+                            RawNode::Namespace(RawNamespace {
+                                map: [
+                                    (
+                                        CompactString::new("a"),
+                                        RawNode::Message(CompactString::new("Dolor")),
+                                    ),
+                                    (
+                                        CompactString::new("b"),
+                                        RawNode::Message(CompactString::new("Sit")),
+                                    ),
+                                    (
+                                        CompactString::new("c"),
+                                        RawNode::Message(CompactString::new("Amet")),
+                                    ),
+                                ]
+                                .into_iter()
+                                .collect(),
+                            }),
+                        ),
+                    ]
+                    .into_iter()
+                    .collect(),
+                }),
+            ),
+            (
+                CompactString::new("baz"),
+                RawNode::Namespace(RawNamespace {
+                    map: [
+                        (
+                            CompactString::new("a"),
+                            RawNode::Message(CompactString::new("Lorem Ipsum")),
+                        ),
+                        (
+                            CompactString::new("b"),
+                            RawNode::Message(CompactString::new("Dolor Sit Amet")),
+                        ),
+                    ]
+                    .into_iter()
+                    .collect(),
+                }),
+            ),
+        ]),
+    )]
     // more tests on namespaces
     fn read_definition(
         #[case] input: &str,
