@@ -9,7 +9,8 @@ use std::path::PathBuf;
 
 use mulan_config::Language;
 
-use self::input::{Definition, Input};
+use self::input::Definition;
+pub use self::input::Input; // TODO: use it privately
 
 mod input;
 
