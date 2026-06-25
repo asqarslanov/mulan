@@ -1,15 +1,19 @@
 use std::process::ExitCode;
 
+use miette::miette;
+
 #[derive(clap::Args)]
 pub struct Args;
 
 impl self::Args {
-    /// Execute the subcommand:
+    /// Executes the subcommand:
     ///
     /// ```sh
     /// $ mulan gen ...
     /// ```
     pub fn execute(self) -> miette::Result<ExitCode> {
-        todo!();
+        let input = mulan_parser::Input::read().map_err(|err| miette!("{err:?}"));
+        println!("{input:?}");
+        Ok(ExitCode::SUCCESS)
     }
 }

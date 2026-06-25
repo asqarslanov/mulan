@@ -32,12 +32,15 @@ chumsky = "0.13.0"
 clap = "4.6.1"
 compact_str = "0.9.1"
 foldhash = "0.2.0"
+indoc = "2.0.7"
 miette = "7.6.0"
 mulan-config = { path = "crates/mulan-config/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 rstest = "0.26.1"
 serde = "1.0.228"
+serde-saphyr = "0.0.28"
 smallvec = "1.15.2"
+tempfile = "3.27.0"
 
 [workspace.lints.clippy]
 all = "warn"
