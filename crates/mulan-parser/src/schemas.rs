@@ -53,11 +53,18 @@ mod tests {
     #[case(
         indoc! {r#"
             foo: "Hello"
+            bar: "Hi"
         "#},
-        Some([(
-            CompactString::new("foo"),
-            RawNode::Message(CompactString::new("Hello")),
-        )]),
+        Some([
+            (
+                CompactString::new("foo"),
+                RawNode::Message(CompactString::new("Hello")),
+            ),
+            (
+                CompactString::new("bar"),
+                RawNode::Message(CompactString::new("Hi")),
+            ),
+        ]),
     )]
     #[case(
         indoc! {r#"
@@ -66,10 +73,22 @@ mod tests {
         "#},
         None::<[_; 0]>,
     )]
+    // more tests on namespaces
     fn read_definition(
         #[case] input: &str,
         #[case] expected_output: Option<impl IntoIterator<Item = (CompactString, RawNode)>>,
     ) {
+        [
+            (
+                CompactString::new("foo"),
+                RawNode::Message(CompactString::new("Hello")),
+            ),
+            (
+                CompactString::new("foo"),
+                RawNode::Message(CompactString::new("Hello")),
+            ),
+        ];
+
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
         let actual_output = Definition::read(file.path().to_owned()).ok();
