@@ -32,13 +32,13 @@ pub struct Input {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct Definition {
     /// A locale definition is ultimately a tree of nested namespaces
     /// (see [`RawNamespace`]). The **root namespace** is the outermost
     /// namespace. It is always present, even if the locale definition is empty.
     #[serde(flatten)]
-    root: RawNamespace,
+    pub(super) root: RawNamespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.
@@ -63,19 +63,19 @@ pub struct Definition {
 ///   another-namespace:
 ///     baz: "Dolor"
 /// ```
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct RawNamespace {
     /// Maps raw keys to namespace nodes (see [`RawNode`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
     #[serde(flatten)]
-    map: HashMap<CompactString, RawNode>,
+    pub(super) map: HashMap<CompactString, RawNode>,
 }
 
 /// A value in a locale [`Definition`]. Can either be a message template
 /// or a namespace.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum RawNode {
     /// Raw text that will later be properly parsed

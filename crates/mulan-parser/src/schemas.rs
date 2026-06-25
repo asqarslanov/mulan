@@ -35,3 +35,40 @@ impl Definition {
         serde_saphyr::from_str(&file_contents).map_err(ReadError::Format)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::io::Write as _;
+
+    use compact_str::CompactString;
+    use indoc::indoc;
+    use rstest::rstest;
+    use tempfile::NamedTempFile;
+
+    use super::input::{RawNamespace, RawNode};
+    use super::*;
+
+    #[rstest]
+    #[case(
+        indoc! {r#"
+            foo: "Hello"
+        "#},
+        RawNamespace {
+            map: [(
+                CompactString::new("foo"),
+                RawNode::Message(CompactString::new("Hello")),
+            )]
+            .into_iter()
+            .collect(),
+        },
+    )]
+    fn read_definition(#[case] input: &str, #[case] expected_output: RawNamespace) {
+        let mut file = NamedTempFile::new().unwrap();
+        write!(file, "{input}").unwrap();
+        let actual_output = Definition::read(file.path().to_owned()).unwrap();
+        let expected_output = Definition {
+            root: expected_output,
+        };
+        assert_eq!(actual_output, expected_output);
+    }
+}
