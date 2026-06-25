@@ -27,7 +27,7 @@ pub enum ReadError {
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
     pub fn read() -> Result<Self, ReadError> {
-        let en_us_path = PathBuf::from("locales/en-US/locale.yaml");
+        let en_us_path = PathBuf::from("locales/en-US.yaml");
         let en_us_definition = Definition::read(en_us_path)?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
         Ok(Input { locales })
