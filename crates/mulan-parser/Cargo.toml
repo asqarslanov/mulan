@@ -21,6 +21,7 @@ smallvec = { workspace = true }
 
 [dev-dependencies]
 rstest = { workspace = true }
+tempfile = { workspace = true }
 
 [lints]
 workspace = true
