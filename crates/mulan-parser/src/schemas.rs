@@ -75,6 +75,14 @@ mod tests {
     )]
     #[case(
         indoc! {r#"
+            namespace:
+              foo: "Hello"
+              foo: "Hi"
+        "#},
+        None::<[_; 0]>,
+    )]
+    #[case(
+        indoc! {r#"
             foo:
               a: "Lorem"
               b: "Ipsum"
