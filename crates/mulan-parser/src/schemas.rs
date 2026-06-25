@@ -41,6 +41,7 @@ mod tests {
     use std::io::Write as _;
 
     use compact_str::CompactString;
+    use foldhash::HashMap;
     use indoc::indoc;
     use rstest::rstest;
     use tempfile::NamedTempFile;
@@ -56,14 +57,8 @@ mod tests {
             bar: "Hi"
         "#},
         Some([
-            (
-                CompactString::new("foo"),
-                RawNode::Message(CompactString::new("Hello")),
-            ),
-            (
-                CompactString::new("bar"),
-                RawNode::Message(CompactString::new("Hi")),
-            ),
+            ("foo".into(), RawNode::Message("Hello".into())),
+            ("bar".into(), RawNode::Message("Hi".into())),
         ]),
     )]
     #[case(
@@ -96,58 +91,31 @@ mod tests {
         "#},
         Some([
             (
-                CompactString::new("foo"),
+                "foo".into(),
                 RawNode::Namespace(RawNamespace {
-                    map: [
+                    map: HashMap::from_iter([
+                        ("a".into(), RawNode::Message("Lorem".into())),
+                        ("b".into(), RawNode::Message("Ipsum".into())),
                         (
-                            CompactString::new("a"),
-                            RawNode::Message(CompactString::new("Lorem")),
-                        ),
-                        (
-                            CompactString::new("b"),
-                            RawNode::Message(CompactString::new("Ipsum")),
-                        ),
-                        (
-                            CompactString::new("bar"),
+                            "bar".into(),
                             RawNode::Namespace(RawNamespace {
-                                map: [
-                                    (
-                                        CompactString::new("a"),
-                                        RawNode::Message(CompactString::new("Dolor")),
-                                    ),
-                                    (
-                                        CompactString::new("b"),
-                                        RawNode::Message(CompactString::new("Sit")),
-                                    ),
-                                    (
-                                        CompactString::new("c"),
-                                        RawNode::Message(CompactString::new("Amet")),
-                                    ),
-                                ]
-                                .into_iter()
-                                .collect(),
+                                map: HashMap::from_iter([
+                                    ("a".into(), RawNode::Message("Dolor".into())),
+                                    ("b".into(), RawNode::Message("Sit".into())),
+                                    ("c".into(), RawNode::Message("Amet".into())),
+                                ]),
                             }),
                         ),
-                    ]
-                    .into_iter()
-                    .collect(),
+                    ]),
                 }),
             ),
             (
-                CompactString::new("baz"),
+                "baz".into(),
                 RawNode::Namespace(RawNamespace {
-                    map: [
-                        (
-                            CompactString::new("a"),
-                            RawNode::Message(CompactString::new("Lorem Ipsum")),
-                        ),
-                        (
-                            CompactString::new("b"),
-                            RawNode::Message(CompactString::new("Dolor Sit Amet")),
-                        ),
-                    ]
-                    .into_iter()
-                    .collect(),
+                    map: HashMap::from_iter([
+                        ("a".into(), RawNode::Message("Lorem Ipsum".into())),
+                        ("b".into(), RawNode::Message("Dolor Sit Amet".into())),
+                    ]),
                 }),
             ),
         ]),
