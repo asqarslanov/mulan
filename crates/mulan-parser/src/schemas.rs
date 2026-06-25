@@ -57,7 +57,14 @@ mod tests {
         Some([(
             CompactString::new("foo"),
             RawNode::Message(CompactString::new("Hello")),
-        )])
+        )]),
+    )]
+    #[case(
+        indoc! {r#"
+            foo: "Hello"
+            foo: "Hi"
+        "#},
+        None::<[_; 0]>,
     )]
     fn read_definition(
         #[case] input: &str,
