@@ -3,6 +3,7 @@
 //! Most notably, [`Input`] and [`Output`].
 
 use std::fs;
+use std::io;
 use std::iter;
 use std::path::PathBuf;
 
@@ -14,8 +15,8 @@ mod input;
 
 #[derive(Debug)]
 enum ReadError {
-    Fs(PathBuf),
-    Yaml(serde_saphyr::Error),
+    Io { path: PathBuf, error: io::Error },
+    Format(serde_saphyr::Error),
 }
 
 impl Input {
@@ -28,8 +29,9 @@ impl Input {
 }
 
 impl Definition {
-    fn read(file_path: PathBuf) -> Result<Self, ReadError> {
-        let file_contents = fs::read_to_string(&file_path).map_err(|_| ReadError::Fs(file_path))?;
-        serde_saphyr::from_str(&file_contents).map_err(ReadError::Yaml)
+    fn read(path: PathBuf) -> Result<Self, ReadError> {
+        let file_contents =
+            fs::read_to_string(&path).map_err(|error| ReadError::Io { error, path })?;
+        serde_saphyr::from_str(&file_contents).map_err(ReadError::Format)
     }
 }
