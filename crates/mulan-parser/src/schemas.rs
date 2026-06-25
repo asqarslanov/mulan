@@ -13,6 +13,7 @@ use self::input::Definition;
 pub use self::input::Input; // TODO: use it privately
 
 mod input;
+mod output;
 
 /// Errors of [`Input::read`].
 #[derive(Debug)]
