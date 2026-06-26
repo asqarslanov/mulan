@@ -1,4 +1,4 @@
-//! ...
+//! See [`Output`].
 
 use std::collections::BTreeMap;
 
