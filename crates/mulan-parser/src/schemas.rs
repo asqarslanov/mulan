@@ -2,10 +2,8 @@
 //!
 //! Most notably, [`Input`] and [`Output`].
 
-use std::fs;
-use std::io;
-use std::iter;
 use std::path::PathBuf;
+use std::{fs, io, iter};
 
 use mulan_config::Language;
 
