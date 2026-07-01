@@ -75,6 +75,7 @@ pub struct RawNamespace {
 }
 
 /// A value in a [namespace](RawNamespace) of a locale [`Definition`].
+///
 /// Can either be a message template or another namespace.
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]

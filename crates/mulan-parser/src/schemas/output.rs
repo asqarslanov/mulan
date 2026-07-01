@@ -13,6 +13,7 @@ use crate::template::Template;
 ///
 /// Use [`.iter()`](Self::iter) to traverse through [`Node`]s.
 /// Message nodes store all translations alongside each other.
+/// Data is stored alphabetically to ensure deterministic output.
 #[derive(Debug)]
 pub struct Output {
     /// [`Output`] is ultimately a tree of nested namespaces
@@ -45,8 +46,9 @@ pub struct Key {
     value: Identifier,
 }
 
-/// A value in a [`Namespace`]. Can either be a message template's
-/// [`Translations`] or another namespace.
+/// A value in a [`Namespace`].
+///
+/// Can either be a message template's [`Translations`] or another namespace.
 #[derive(Debug)]
 pub enum Node {
     /// All translations of a single message.
@@ -56,12 +58,17 @@ pub enum Node {
     Namespace(Namespace),
 }
 
-/// ...
+/// All user-defined translations of a single message.
+///
+/// Data is stored alphabetically to ensure deterministic output.
+/// The default translation is always present.
 #[derive(Debug)]
 pub struct Translations {
-    /// ...
+    /// The message written in the default locale.
     default: Template,
 
-    /// ...
+    /// Other translations of the message.
+    ///
+    /// May not include all locales specified in [`mulan_config::Config`].
     others: BTreeMap<Language, Template>,
 }
