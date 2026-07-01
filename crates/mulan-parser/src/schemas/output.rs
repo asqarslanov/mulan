@@ -45,13 +45,14 @@ pub struct Key {
     value: Identifier,
 }
 
-/// ...
+/// A value in a [`Namespace`]. Can either be a message template's
+/// [`Translations`] or another namespace.
 #[derive(Debug)]
 pub enum Node {
-    /// ...
+    /// All translations of a single message.
     Message(Translations),
 
-    /// ...
+    /// A nested namespace.
     Namespace(Namespace),
 }
 

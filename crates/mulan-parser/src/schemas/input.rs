@@ -73,8 +73,8 @@ pub struct RawNamespace {
     pub(super) map: HashMap<CompactString, RawNode>,
 }
 
-/// A value in a locale [`Definition`]. Can either be a message template
-/// or a namespace.
+/// A value in a [namespace](RawNamespace) of a locale [`Definition`].
+/// Can either be a message template or another namespace.
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum RawNode {
