@@ -7,8 +7,8 @@ use mulan_config::Language;
 use crate::identifier::Identifier;
 use crate::template::Template;
 
-/// The final parsing result used to generate locale bindings.
-/// Strictly-typed and validated.
+/// All messages from all user locales, strictly-typed, validated, and
+/// organized. The final parsing result used to generate locale bindings.
 ///
 /// Use [`.iter()`](Self::iter) to traverse through [`Node`]s.
 /// Message nodes store all translations alongside each other.
