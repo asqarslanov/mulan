@@ -29,7 +29,7 @@ impl Input {
         let en_us_path = PathBuf::from("locales/en-US.yaml");
         let en_us_definition = Definition::read(en_us_path)?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
-        Ok(Input { locales })
+        Ok(Self { locales })
     }
 }
 

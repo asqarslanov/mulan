@@ -6,6 +6,7 @@ use mulan_config::Language;
 use serde::Deserialize;
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
+///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
 /// [`mulan_parser::Output`](crate::Output) type.
