@@ -11,7 +11,7 @@ use smallvec::SmallVec;
 /// every word starts with a Latin letter, etc.
 ///
 /// This type serves as the underlying representation of
-/// [`Parameter`](crate::template::Parameter) or a message path segment(key).
+/// [`Parameter`](crate::template::Parameter) or [`Key`](crate::Key).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,

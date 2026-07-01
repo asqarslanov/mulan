@@ -6,6 +6,7 @@ use mulan_config::Language;
 use serde::Deserialize;
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
+///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
 /// [`mulan_parser::Output`](crate::Output) type.
@@ -35,7 +36,7 @@ pub struct Input {
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct Definition {
     /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]). The **root namespace** is the outermost
+    /// (see [`RawNamespace`]). The `root` namespace is the outermost
     /// namespace. It is always present, even if the locale definition is empty.
     #[serde(flatten)]
     pub(super) root: RawNamespace,
@@ -73,8 +74,9 @@ pub struct RawNamespace {
     pub(super) map: HashMap<CompactString, RawNode>,
 }
 
-/// A value in a locale [`Definition`]. Can either be a message template
-/// or a namespace.
+/// A value in a [namespace](RawNamespace) of a locale [`Definition`].
+///
+/// Can either be a message template or another namespace.
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum RawNode {

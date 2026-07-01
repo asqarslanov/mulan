@@ -2,10 +2,8 @@
 //!
 //! Most notably, [`Input`] and [`Output`].
 
-use std::fs;
-use std::io;
-use std::iter;
 use std::path::PathBuf;
+use std::{fs, io, iter};
 
 use mulan_config::Language;
 
@@ -13,6 +11,7 @@ use self::input::Definition;
 pub use self::input::Input; // TODO: use it privately
 
 mod input;
+pub mod output;
 
 /// Errors of [`Input::read`].
 #[derive(Debug)]
@@ -30,7 +29,7 @@ impl Input {
         let en_us_path = PathBuf::from("locales/en-US.yaml");
         let en_us_definition = Definition::read(en_us_path)?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
-        Ok(Input { locales })
+        Ok(Self { locales })
     }
 }
 
