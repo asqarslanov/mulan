@@ -28,7 +28,10 @@ pub struct Output {
 /// for visual examples.
 #[derive(Debug)]
 pub struct Namespace {
-    /// ...
+    /// Maps raw keys to namespace nodes (see [`Node`]).
+    ///
+    /// All nodes within a namespace must have unique keys
+    /// (i.e., a message can't have the same key as a sibling namespace).
     map: BTreeMap<Key, Node>,
 }
 
