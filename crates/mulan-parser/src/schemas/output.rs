@@ -35,10 +35,12 @@ pub struct Namespace {
     map: BTreeMap<Key, Node>,
 }
 
-/// ...
+/// A path segment of a message.
+///
+/// E.g., the path `frontend.user-settings.account` has [`Key`]s
+/// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Key {
-    /// ...
     value: Identifier,
 }
 
