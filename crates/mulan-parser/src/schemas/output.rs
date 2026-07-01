@@ -24,8 +24,8 @@ pub struct Output {
 ///
 /// Keys from different namespaces don't collide and can take the same values.
 ///
-/// See [`RawNamespace`](crate::schemas::input::RawNamespace) for visual
-/// examples.
+/// See [`RawNamespace`](crate::schemas::input::RawNamespace)
+/// for visual examples.
 #[derive(Debug)]
 pub struct Namespace {
     /// ...
