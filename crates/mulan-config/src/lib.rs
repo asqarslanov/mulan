@@ -1,6 +1,6 @@
 //! See [`Config`].
 
-use std::collections::BTreeSet;
+use mitsein::btree_set1::BTreeSet1;
 
 /// A [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)
 /// used as a locale name (e.g., `en-US` or `ru-RU`).
@@ -17,5 +17,5 @@ pub struct Config {
     pub default_locale: Language,
 
     /// ...
-    pub locales: BTreeSet<Language>,
+    pub locales: BTreeSet1<Language>,
 }
