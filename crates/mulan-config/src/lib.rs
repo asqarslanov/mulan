@@ -22,7 +22,15 @@ struct Config {
     pub default_locale: Language,
 }
 
+enum ParseConfigError {}
+
 impl Config {
+    /// ...
+    pub fn parse() -> Result<Self, ParseConfigError> {
+        todo!();
+    }
+
+    /// ...
     fn validate(&self) -> Result<(), String> {
         if !self.locales.contains(&self.default_locale) {
             return Err(format!(
