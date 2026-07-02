@@ -22,7 +22,7 @@ impl Language {
     pub fn tag(&self) -> &'static str {
         match self {
             Self::EnUs => "en-US",
-            Self::FrCa => "en-US",
+            Self::FrCa => "fr-CA",
             Self::RuRu => "ru-RU",
         }
     }
