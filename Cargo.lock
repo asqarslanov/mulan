@@ -704,6 +704,8 @@ dependencies = [
 name = "mulan-config"
 version = "0.0.0"
 dependencies = [
+ "indoc",
+ "rstest",
  "serde",
  "serde_with",
  "serdev",
