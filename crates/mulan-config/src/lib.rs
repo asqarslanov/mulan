@@ -27,7 +27,7 @@ impl Language {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
-struct Input {
+struct Config {
     /// ...
     #[serde_as(as = "SetPreventDuplicates<_>")]
     pub locales: BTreeSet<Language>,
@@ -36,7 +36,7 @@ struct Input {
     pub default_locale: Language,
 }
 
-impl Input {
+impl Config {
     fn validate(&self) -> Result<(), String> {
         if !self.locales.contains(&self.default_locale) {
             return Err(format!(
