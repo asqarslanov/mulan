@@ -704,8 +704,8 @@ dependencies = [
 name = "mulan-config"
 version = "0.0.0"
 dependencies = [
- "serde",
  "serde_with",
+ "serdev",
 ]
 
 [[package]]
@@ -1077,6 +1077,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84d57bc0c8b9a17920c178daa6bb924850d54a9c97ab45194bb8c17ad66bb660"
 dependencies = [
  "darling",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "serdev"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e4fe8a010ca6819b605a68e11a592b787f1b9cda352491c1fc6c1c3b64d1393"
+dependencies = [
+ "serde",
+ "serdev_derive",
+]
+
+[[package]]
+name = "serdev_derive"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98a619df9c5d492c6d3ce259fd546e965991582e0b07e4a438cac0df57eb675c"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn",
