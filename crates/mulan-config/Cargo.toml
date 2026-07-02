@@ -13,6 +13,7 @@ publish.workspace = true
 [dependencies]
 mitsein = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true }
 
 [lints]
 workspace = true
