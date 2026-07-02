@@ -34,6 +34,7 @@ compact_str = "0.9.1"
 foldhash = "0.2.0"
 indoc = "2.0.7"
 miette = "7.6.0"
+mitsein = "0.9.0"
 mulan-config = { path = "crates/mulan-config/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 rstest = "0.26.1"
