@@ -125,7 +125,7 @@ mod tests {
         "#},
         None,
     )]
-    fn parse(#[case] input: &str, #[case] expected_output: Option<Config>) {
+    fn read(#[case] input: &str, #[case] expected_output: Option<Config>) {
         figment2::Jail::expect_with(|jail| {
             jail.create_file("mulan.toml", input)?;
             let actual_output = Config::locate_and_read().ok();
