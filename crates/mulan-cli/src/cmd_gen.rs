@@ -12,7 +12,9 @@ impl self::Args {
     /// $ mulan gen ...
     /// ```
     pub fn execute(self) -> miette::Result<ExitCode> {
-        let input = mulan_parser::Input::read().map_err(|err| miette!("{err:?}"));
+        let config = mulan_config::Config::locate_and_read().map_err(|err| miette!("{err:?}"))?;
+        println!("{config:?}");
+        let input = mulan_parser::Input::read().map_err(|err| miette!("{err:?}"))?;
         println!("{input:?}");
         Ok(ExitCode::SUCCESS)
     }

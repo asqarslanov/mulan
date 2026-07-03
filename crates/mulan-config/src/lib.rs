@@ -16,7 +16,7 @@ mod language;
 #[derive(Debug, PartialEq, Eq, serdev::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
-struct Config {
+pub struct Config {
     /// ...
     #[serde_as(as = "SetPreventDuplicates<_>")]
     pub locales: BTreeSet<Language>,
@@ -26,7 +26,8 @@ struct Config {
 }
 
 /// Errors of [`Config::locate_and_read`].
-enum ReadConfigError {
+#[derive(Debug)]
+pub enum ReadConfigError {
     /// Failed to read the file.
     Io { path: PathBuf, error: io::Error },
 
