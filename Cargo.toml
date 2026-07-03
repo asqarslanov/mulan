@@ -31,6 +31,7 @@ publish = false
 chumsky = "0.13.0"
 clap = "4.6.1"
 compact_str = "0.9.1"
+figment2 = "0.11.5"
 foldhash = "0.2.0"
 indoc = "2.0.7"
 miette = "7.6.0"
