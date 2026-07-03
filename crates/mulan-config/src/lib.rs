@@ -129,16 +129,15 @@ mod tests {
         figment2::Jail::expect_with(|jail| {
             jail.create_file("mulan.toml", input)?;
             let actual_output = Config::locate_and_read().ok();
-            if actual_output == expected_output {
-                Ok(())
-            } else {
-                Err(formatdoc! {"
+            if actual_output != expected_output {
+                return Err(formatdoc! {"
                     assertion `left == right` failed
                       left: {actual_output:?}
                      right: {expected_output:?}\
                 "}
-                .into())
+                .into());
             }
+            Ok(())
         });
     }
 }
