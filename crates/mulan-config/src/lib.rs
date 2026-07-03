@@ -37,12 +37,13 @@ pub enum ReadConfigError {
 }
 
 impl Config {
-    /// ...
+    /// Tries to find the most appropriate config file in the filesystem
+    /// and read + validate it.
     pub fn locate_and_read() -> figment2::Result<Self> {
         Figment::from(Toml::file("mulan.toml")).extract()
     }
 
-    /// ...
+    /// Used at deserialization with [`mod@serdev`].
     fn validate(&self) -> Result<(), String> {
         if !self.locales.contains(&self.default_locale) {
             return Err(format!(
