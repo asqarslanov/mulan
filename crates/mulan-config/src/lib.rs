@@ -135,7 +135,7 @@ mod tests {
                 Err(formatdoc! {"
                     assertion `left == right` failed
                       left: {actual_output:?}
-                     right: {expected_output:?}
+                     right: {expected_output:?}\
                 "}
                 .into())
             }
