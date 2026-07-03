@@ -39,7 +39,7 @@ pub enum ReadConfigError {
 impl Config {
     /// ...
     pub fn locate_and_read() -> figment2::Result<Self> {
-        Figment::new().merge(Toml::file("mulan.toml")).extract()
+        Figment::from(Toml::file("mulan.toml")).extract()
     }
 
     /// ...
