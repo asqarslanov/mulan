@@ -1,10 +1,8 @@
 //! See [`Input`].
 
 use std::borrow::Cow;
-use std::fs;
-use std::io;
-use std::iter;
 use std::path::{Path, PathBuf};
+use std::{fs, io, iter};
 
 use compact_str::CompactString;
 use foldhash::HashMap;
