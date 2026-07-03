@@ -39,6 +39,8 @@ pub enum ReadConfigError {
 impl Config {
     /// Tries to find the most appropriate config file in the filesystem
     /// and read + validate it.
+    ///
+    /// Uses [`mod@figment2`] under the hood.
     pub fn locate_and_read() -> figment2::Result<Self> {
         Figment::from(Toml::file("mulan.toml")).extract()
     }
