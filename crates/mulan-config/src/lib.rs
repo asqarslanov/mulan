@@ -12,17 +12,32 @@ pub use self::language::Language;
 
 mod language;
 
-/// ...
+/// # Mulan Config
+///
+/// This file is used to configure Mulan project-wide.
+///
+/// Mulan is an i18n framework.
+/// See <https://github.com/asqarslanov/mulan> for more details.
 #[serde_as]
 #[derive(Debug, PartialEq, Eq, serdev::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
 pub struct Config {
-    /// ...
+    /// All languages you want to translate your app into.
+    ///
+    /// A list of non-duplicate
+    /// [BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
+    ///
+    /// Must include `default-locale`.
     #[serde_as(as = "SetPreventDuplicates<_>")]
     pub locales: BTreeSet<Language>,
 
-    /// ...
+    /// The main locale of your application.
+    ///
+    /// All other locales have to conform to its schema.
+    ///
+    /// Acts as a fallback locale if a translation does not exist
+    /// in another locale.
     pub default_locale: Language,
 }
 
