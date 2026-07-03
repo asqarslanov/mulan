@@ -35,13 +35,9 @@ enum ParseConfigError {
 
 impl Config {
     /// ...
-    pub fn parse() -> Result<Self, ParseConfigError> {
-        const PATH: &str = "mulan.toml";
-
-        let file_contents = fs::read_to_string(PATH).map_err(|error| ParseConfigError::Io {
-            path: PathBuf::from(PATH),
-            error,
-        })?;
+    pub fn read(path: PathBuf) -> Result<Self, ParseConfigError> {
+        let file_contents =
+            fs::read_to_string(&path).map_err(|error| ParseConfigError::Io { path, error })?;
         toml::from_str(&file_contents).map_err(ParseConfigError::Format)
     }
 
@@ -59,8 +55,11 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Write as _;
+
     use indoc::indoc;
     use rstest::rstest;
+    use tempfile::NamedTempFile;
 
     use super::*;
 
@@ -129,7 +128,9 @@ mod tests {
         None,
     )]
     fn parse(#[case] input: &str, #[case] expected_output: Option<Config>) {
-        let actual_output: Option<Config> = toml::from_str(input).ok();
+        let mut file = NamedTempFile::new().unwrap();
+        write!(file, "{input}").unwrap();
+        let actual_output = Config::read(file.path().to_owned()).ok();
         assert_eq!(actual_output, expected_output);
     }
 }
