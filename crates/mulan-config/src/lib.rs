@@ -1,10 +1,11 @@
 //! See [`Config`].
 
-use std::borrow::Cow;
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
-use std::{fs, io};
+use std::io;
+use std::path::PathBuf;
 
+use figment2::Figment;
+use figment2::providers::{Format, Toml};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -37,17 +38,8 @@ pub enum ReadConfigError {
 
 impl Config {
     /// ...
-    pub fn locate_and_read() -> Result<Self, ReadConfigError> {
-        Self::read(Path::new("mulan.toml").into())
-    }
-
-    /// ...
-    fn read(path: Cow<'_, Path>) -> Result<Self, ReadConfigError> {
-        let file_contents = fs::read_to_string(&path).map_err(|error| ReadConfigError::Io {
-            path: path.into_owned(),
-            error,
-        })?;
-        toml::from_str(&file_contents).map_err(ReadConfigError::Format)
+    pub fn locate_and_read() -> figment2::Result<Self> {
+        Figment::new().merge(Toml::file("mulan.toml")).extract()
     }
 
     /// ...
@@ -64,11 +56,8 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Write as _;
-
-    use indoc::indoc;
+    use indoc::{formatdoc, indoc};
     use rstest::rstest;
-    use tempfile::NamedTempFile;
 
     use super::*;
 
@@ -137,9 +126,19 @@ mod tests {
         None,
     )]
     fn parse(#[case] input: &str, #[case] expected_output: Option<Config>) {
-        let mut file = NamedTempFile::new().unwrap();
-        write!(file, "{input}").unwrap();
-        let actual_output = Config::read(file.path().into()).ok();
-        assert_eq!(actual_output, expected_output);
+        figment2::Jail::expect_with(|jail| {
+            jail.create_file("mulan.toml", input)?;
+            let actual_output = Config::locate_and_read().ok();
+            if actual_output == expected_output {
+                Ok(())
+            } else {
+                Err(formatdoc! {"
+                    assertion `left == right` failed
+                      left: {actual_output:?}
+                     right: {expected_output:?}
+                "}
+                .into())
+            }
+        });
     }
 }
