@@ -23,7 +23,8 @@ impl Language {
     /// Returns the corresponding
     /// [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)
     /// (e.g., `en`, `fr-CA`, or `eo`).
-    pub fn tag(&self) -> &'static str {
+    #[must_use]
+    pub const fn tag(&self) -> &'static str {
         match self {
             Self::EnUs => "en-US",
             Self::FrCa => "fr-CA",
