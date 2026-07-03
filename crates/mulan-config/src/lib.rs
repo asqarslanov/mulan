@@ -1,6 +1,9 @@
 //! See [`Config`].
 
 use std::collections::BTreeSet;
+use std::fs;
+use std::io;
+use std::path::PathBuf;
 
 use serde_with::{SetPreventDuplicates, serde_as};
 
@@ -22,12 +25,21 @@ struct Config {
     pub default_locale: Language,
 }
 
-enum ParseConfigError {}
+enum ParseConfigError {
+    Io { path: PathBuf, error: io::Error },
+    Format(toml::de::Error),
+}
 
 impl Config {
     /// ...
     pub fn parse() -> Result<Self, ParseConfigError> {
-        todo!();
+        const PATH: &str = "mulan.toml";
+
+        let file_contents = fs::read_to_string(PATH).map_err(|error| ParseConfigError::Io {
+            path: PathBuf::from(PATH),
+            error,
+        })?;
+        toml::from_str(&file_contents).map_err(ParseConfigError::Format)
     }
 
     /// ...
