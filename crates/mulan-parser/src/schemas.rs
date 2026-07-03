@@ -16,7 +16,7 @@ pub mod output;
 
 /// Errors of [`Input::read`].
 #[derive(Debug)]
-pub enum ReadError {
+pub enum ReadLocaleError {
     /// Failed to read a file.
     Io { path: PathBuf, error: io::Error },
 
@@ -26,7 +26,7 @@ pub enum ReadError {
 
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn read() -> Result<Self, ReadError> {
+    pub fn read() -> Result<Self, ReadLocaleError> {
         let en_us_path = Path::new("locales/en-US.yaml");
         let en_us_definition = Definition::read(en_us_path.into())?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
@@ -36,12 +36,12 @@ impl Input {
 
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: Cow<'_, Path>) -> Result<Self, ReadError> {
-        let file_contents = fs::read_to_string(&path).map_err(|error| ReadError::Io {
+    fn read(path: Cow<'_, Path>) -> Result<Self, ReadLocaleError> {
+        let file_contents = fs::read_to_string(&path).map_err(|error| ReadLocaleError::Io {
             error,
             path: path.into_owned(),
         })?;
-        serde_saphyr::from_str(&file_contents).map_err(ReadError::Format)
+        serde_saphyr::from_str(&file_contents).map_err(ReadLocaleError::Format)
     }
 }
 

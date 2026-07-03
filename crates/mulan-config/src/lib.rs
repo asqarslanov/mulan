@@ -25,8 +25,8 @@ struct Config {
     pub default_locale: Language,
 }
 
-/// ...
-enum ParseConfigError {
+/// Errors of [`Config::locate_and_read`].
+enum ReadConfigError {
     /// ...
     Io { path: PathBuf, error: io::Error },
 
@@ -36,17 +36,17 @@ enum ParseConfigError {
 
 impl Config {
     /// ...
-    pub fn locate_and_read() -> Result<Self, ParseConfigError> {
+    pub fn locate_and_read() -> Result<Self, ReadConfigError> {
         Self::read(Path::new("mulan.toml").into())
     }
 
     /// ...
-    fn read(path: Cow<'_, Path>) -> Result<Self, ParseConfigError> {
-        let file_contents = fs::read_to_string(&path).map_err(|error| ParseConfigError::Io {
+    fn read(path: Cow<'_, Path>) -> Result<Self, ReadConfigError> {
+        let file_contents = fs::read_to_string(&path).map_err(|error| ReadConfigError::Io {
             path: path.into_owned(),
             error,
         })?;
-        toml::from_str(&file_contents).map_err(ParseConfigError::Format)
+        toml::from_str(&file_contents).map_err(ReadConfigError::Format)
     }
 
     /// ...
