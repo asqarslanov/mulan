@@ -1,9 +1,8 @@
 //! See [`Config`].
 
 use std::collections::BTreeSet;
-use std::fs;
-use std::io;
 use std::path::PathBuf;
+use std::{fs, io};
 
 use serde_with::{SetPreventDuplicates, serde_as};
 
