@@ -11,6 +11,15 @@ categories.workspace = true
 publish.workspace = true
 
 [dependencies]
+figment2 = { workspace = true, features = ["test", "toml"] }
+serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true }
+serdev = { workspace = true }
+toml = { workspace = true }
+
+[dev-dependencies]
+indoc = { workspace = true }
+rstest = { workspace = true }
 
 [lints]
 workspace = true

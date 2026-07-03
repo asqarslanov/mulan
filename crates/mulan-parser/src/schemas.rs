@@ -2,7 +2,8 @@
 //!
 //! Most notably, [`Input`] and [`Output`].
 
-use std::path::PathBuf;
+use std::borrow::Cow;
+use std::path::{Path, PathBuf};
 use std::{fs, io, iter};
 
 use mulan_config::Language;
@@ -15,7 +16,7 @@ pub mod output;
 
 /// Errors of [`Input::read`].
 #[derive(Debug)]
-pub enum ReadError {
+pub enum ReadLocaleError {
     /// Failed to read a file.
     Io { path: PathBuf, error: io::Error },
 
@@ -25,9 +26,9 @@ pub enum ReadError {
 
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn read() -> Result<Self, ReadError> {
-        let en_us_path = PathBuf::from("locales/en-US.yaml");
-        let en_us_definition = Definition::read(en_us_path)?;
+    pub fn read() -> Result<Self, ReadLocaleError> {
+        let en_us_path = Path::new("locales/en-US.yaml");
+        let en_us_definition = Definition::read(en_us_path.into())?;
         let locales = iter::once((Language::EnUs, en_us_definition)).collect();
         Ok(Self { locales })
     }
@@ -35,10 +36,12 @@ impl Input {
 
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: PathBuf) -> Result<Self, ReadError> {
-        let file_contents =
-            fs::read_to_string(&path).map_err(|error| ReadError::Io { error, path })?;
-        serde_saphyr::from_str(&file_contents).map_err(ReadError::Format)
+    fn read(path: Cow<'_, Path>) -> Result<Self, ReadLocaleError> {
+        let file_contents = fs::read_to_string(&path).map_err(|error| ReadLocaleError::Io {
+            error,
+            path: path.into_owned(),
+        })?;
+        serde_saphyr::from_str(&file_contents).map_err(ReadLocaleError::Format)
     }
 }
 
@@ -132,7 +135,7 @@ mod tests {
     ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
-        let actual_output = Definition::read(file.path().to_owned()).ok();
+        let actual_output = Definition::read(file.path().into()).ok();
         let expected_output = expected_output.map(|pairs| Definition {
             root: RawNamespace {
                 map: pairs.into_iter().collect(),

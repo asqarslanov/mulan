@@ -31,6 +31,7 @@ publish = false
 chumsky = "0.13.0"
 clap = "4.6.1"
 compact_str = "0.9.1"
+figment2 = "0.11.5"
 foldhash = "0.2.0"
 indoc = "2.0.7"
 miette = "7.6.0"
@@ -39,8 +40,11 @@ mulan-parser = { path = "crates/mulan-parser/" }
 rstest = "0.26.1"
 serde = "1.0.228"
 serde-saphyr = "0.0.28"
+serde_with = "3.21.0"
+serdev = "0.3.2"
 smallvec = "1.15.2"
 tempfile = "3.27.0"
+toml = { version = "1.1.2", features = ["fast_hash"] }
 
 [workspace.lints.clippy]
 all = "warn"
