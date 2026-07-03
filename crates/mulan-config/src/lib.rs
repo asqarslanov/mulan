@@ -36,7 +36,12 @@ enum ParseConfigError {
 
 impl Config {
     /// ...
-    pub fn read(path: Cow<'_, Path>) -> Result<Self, ParseConfigError> {
+    pub fn locate_and_read() -> Result<Self, ParseConfigError> {
+        Self::read(Path::new("mulan.toml").into())
+    }
+
+    /// ...
+    fn read(path: Cow<'_, Path>) -> Result<Self, ParseConfigError> {
         let file_contents = fs::read_to_string(&path).map_err(|error| ParseConfigError::Io {
             path: path.into_owned(),
             error,
