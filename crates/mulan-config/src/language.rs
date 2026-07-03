@@ -1,7 +1,9 @@
 use serde::Deserialize;
 
-/// A [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)
-/// used as a locale name (e.g., `en-US` or `ru-RU`).
+/// A unique identifier of a human language
+/// (e.g., English, Canadian French, or Esperanto).
+///
+/// Uses [`Self::tag`] for de/serialization.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub enum Language {
     /// English (United States)
@@ -18,7 +20,9 @@ pub enum Language {
 }
 
 impl Language {
-    /// ...
+    /// Returns the corresponding
+    /// [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)
+    /// (e.g., `en`, `fr-CA`, or `eo`).
     pub fn tag(&self) -> &'static str {
         match self {
             Self::EnUs => "en-US",
