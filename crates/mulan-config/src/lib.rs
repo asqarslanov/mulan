@@ -24,8 +24,12 @@ struct Config {
     pub default_locale: Language,
 }
 
+/// ...
 enum ParseConfigError {
+    /// ...
     Io { path: PathBuf, error: io::Error },
+
+    /// ...
     Format(toml::de::Error),
 }
 
