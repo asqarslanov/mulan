@@ -1,7 +1,8 @@
 //! See [`Config`].
 
+use std::borrow::Cow;
 use std::collections::BTreeSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 use serde_with::{SetPreventDuplicates, serde_as};
@@ -35,9 +36,11 @@ enum ParseConfigError {
 
 impl Config {
     /// ...
-    pub fn read(path: PathBuf) -> Result<Self, ParseConfigError> {
-        let file_contents =
-            fs::read_to_string(&path).map_err(|error| ParseConfigError::Io { path, error })?;
+    pub fn read(path: Cow<'_, Path>) -> Result<Self, ParseConfigError> {
+        let file_contents = fs::read_to_string(&path).map_err(|error| ParseConfigError::Io {
+            path: path.into_owned(),
+            error,
+        })?;
         toml::from_str(&file_contents).map_err(ParseConfigError::Format)
     }
 
@@ -130,7 +133,7 @@ mod tests {
     fn parse(#[case] input: &str, #[case] expected_output: Option<Config>) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
-        let actual_output = Config::read(file.path().to_owned()).ok();
+        let actual_output = Config::read(file.path().into()).ok();
         assert_eq!(actual_output, expected_output);
     }
 }
