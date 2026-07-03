@@ -19,7 +19,7 @@ pub struct Output {
     /// [`Output`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
     /// It is always present, even if the default locale definition is empty.
-    root: Namespace,
+    pub(super) root: Namespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.

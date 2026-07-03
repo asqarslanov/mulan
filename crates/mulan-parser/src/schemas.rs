@@ -21,5 +21,5 @@ fn transform(mut input: Input, config: &mulan_config::Config) -> Result<Output, 
             .ok_or(TransformError::NoDefaultLocale)?
     };
     // for (key, node) in default_locale.root.map {}
-    Ok(Output { root })
+    Ok(Output { root: todo!() })
 }
