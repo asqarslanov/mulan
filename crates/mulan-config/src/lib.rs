@@ -27,10 +27,10 @@ struct Config {
 
 /// Errors of [`Config::locate_and_read`].
 enum ReadConfigError {
-    /// ...
+    /// Failed to read the file.
     Io { path: PathBuf, error: io::Error },
 
-    /// ...
+    /// Failed to parse the TOML file according to the schema.
     Format(toml::de::Error),
 }
 
