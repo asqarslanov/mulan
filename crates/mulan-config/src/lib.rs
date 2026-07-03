@@ -5,7 +5,7 @@ use std::io;
 use std::path::PathBuf;
 
 use figment2::Figment;
-use figment2::providers::{Format, Toml};
+use figment2::providers::{Format as _, Toml};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
