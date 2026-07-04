@@ -56,6 +56,7 @@ impl Config {
     /// and read + validate it.
     ///
     /// Uses [`mod@figment2`] under the hood.
+    #[allow(clippy::result_large_err)]
     pub fn locate_and_read() -> figment2::Result<Self> {
         Figment::from(Toml::file("mulan.toml")).extract()
     }
