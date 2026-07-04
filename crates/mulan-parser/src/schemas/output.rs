@@ -2,7 +2,6 @@
 
 use std::collections::BTreeMap;
 
-use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
 use crate::identifier::Identifier;
@@ -72,31 +71,4 @@ pub struct Translations {
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
     others: BTreeMap<Language, Template>,
-}
-
-impl Output {
-    /// ...
-    fn iter(&self) -> impl Iterator<Item = NodeData<'_>> {
-        self.root.iter(&[])
-    }
-}
-
-impl Namespace {
-    /// ...
-    fn iter<'a>(&'a self, parent_path: &'a [&'a Key]) -> impl Iterator<Item = NodeData<'a>> {
-        self.map.iter().map(|(key, node)| {
-            let mut path = SmallVec1::from_rtail_and_head(parent_path.iter().cloned(), key);
-            path.push(key);
-            NodeData { path, node }
-        })
-    }
-}
-
-/// ...
-pub struct NodeData<'a> {
-    /// ...
-    path: SmallVec1<[&'a Key; 2]>,
-
-    /// ...
-    node: &'a Node,
 }
