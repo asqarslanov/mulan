@@ -1,4 +1,4 @@
-//! See [`Input`].
+//! Defines the [`Input`] struct and the logic to read it from the filesystem.
 
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};

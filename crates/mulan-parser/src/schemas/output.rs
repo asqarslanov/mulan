@@ -1,4 +1,4 @@
-//! See [`Output`].
+//! Defines the [`Output`] struct and its methods.
 
 use std::collections::BTreeMap;
 
