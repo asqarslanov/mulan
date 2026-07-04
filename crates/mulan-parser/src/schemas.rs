@@ -8,11 +8,14 @@ use self::output::Output;
 mod input;
 pub mod output;
 
+/// ...
 #[derive(Debug)]
 enum TransformError {
+    /// ...
     NoDefaultLocale,
 }
 
+/// ...
 fn transform(mut input: Input, config: &mulan_config::Config) -> Result<Output, TransformError> {
     let default_locale = {
         input
