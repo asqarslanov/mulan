@@ -14,7 +14,6 @@ publish.workspace = true
 chumsky = { workspace = true }
 compact_str = { workspace = true, features = ["serde"] }
 foldhash = { workspace = true }
-mitsein = { workspace = true, features = ["smallvec"] }
 mulan-config = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde-saphyr = { workspace = true, features = ["miette"] }

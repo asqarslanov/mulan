@@ -371,12 +371,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
-name = "either"
-version = "1.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -648,15 +642,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 
 [[package]]
-name = "itertools"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
-dependencies = [
- "either",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -746,20 +731,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mitsein"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a49aef75c004fb496a23f175395415ecfe2a630e4c6175ae6f7d9cc1a19332e"
-dependencies = [
- "either",
- "indexmap 2.14.0",
- "itertools",
- "schemars 1.2.1",
- "serde",
- "smallvec",
-]
-
-[[package]]
 name = "mulan"
 version = "0.0.0"
 dependencies = [
@@ -790,7 +761,6 @@ dependencies = [
  "compact_str",
  "foldhash 0.2.0",
  "indoc",
- "mitsein",
  "mulan-config",
  "rstest",
  "serde",
@@ -1086,7 +1056,6 @@ dependencies = [
  "ref-cast",
  "serde",
  "serde_json",
- "smallvec",
 ]
 
 [[package]]
