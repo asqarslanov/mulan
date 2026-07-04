@@ -6,6 +6,7 @@ use std::{fs, io, iter};
 
 use compact_str::CompactString;
 use foldhash::HashMap;
+use mitsein::iter1::IntoIterator1;
 use mulan_config::Language;
 use serde::Deserialize;
 
@@ -121,6 +122,24 @@ impl Definition {
         })?;
         serde_saphyr::from_str(&file_contents).map_err(ReadLocaleError::Format)
     }
+
+    /// ...
+    pub fn at<'a>(&self, path: impl IntoIterator1<Item = &'a str>) -> Option<&RawNode> {
+        let mut namespace = &self.root;
+        let mut keys = path.into_iter().peekable();
+        while let Some(key) = keys.next() {
+            let node = namespace.map.get(key)?;
+            if keys.peek().is_some() {
+                match node {
+                    RawNode::Namespace(inner_namespace) => namespace = inner_namespace,
+                    RawNode::Message(_) => return None,
+                }
+            } else {
+                return Some(node);
+            }
+        }
+        unreachable!();
+    }
 }
 
 #[cfg(test)]
@@ -219,5 +238,10 @@ mod tests {
             },
         });
         assert_eq!(actual_output, expected_output);
+    }
+
+    #[test]
+    fn definition_at() {
+        todo!();
     }
 }

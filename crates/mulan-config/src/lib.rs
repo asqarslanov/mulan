@@ -61,6 +61,14 @@ impl Config {
         Figment::from(Toml::file("mulan.toml")).extract()
     }
 
+    /// ...
+    pub fn locales_except_default(&self) -> impl Iterator<Item = Language> {
+        self.locales
+            .iter()
+            .copied()
+            .filter(|&locale| locale != self.default_locale)
+    }
+
     /// Used at deserialization with [`mod@serdev`].
     fn validate(&self) -> Result<(), String> {
         if !self.locales.contains(&self.default_locale) {
