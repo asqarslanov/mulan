@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
 use crate::identifier::Identifier;
@@ -44,6 +45,12 @@ pub struct Namespace {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Key {
     value: Identifier,
+}
+
+// ...
+#[derive(Debug)]
+pub struct CompoundKey {
+    path: SmallVec1<[Key; 2]>,
 }
 
 /// A value in a [`Namespace`].
