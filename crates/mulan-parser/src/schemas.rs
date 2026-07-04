@@ -1,6 +1,6 @@
-//! Defines structures this crate operates on and operations on them.
+//! The parent module of [`mod@input`] and [`mod@output`].
 //!
-//! Most notably, [`Input`] and [`Output`].
+//! Defines the transformation logic from [`Input`] to [`Output`].
 
 pub use self::input::Input; // TODO: use it privately
 use self::output::Output;
