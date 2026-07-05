@@ -182,6 +182,7 @@ mod tests {
 
     use super::*;
     use crate::chumsky_parse::ChumskyParser as _;
+    use crate::identifier::Identifier;
     use crate::{Key, Subkey};
 
     #[rstest]
@@ -327,7 +328,9 @@ mod tests {
               b: "Dolor Sit Amet"
         "#};
 
-        let key_parser = Key::chumsky_parser();
+        let identifier_parser = Identifier::chumsky_parser();
+        let subkey_parser = Subkey::chumsky_parser(&identifier_parser);
+        let key_parser = Key::chumsky_parser(&subkey_parser);
         let key = key_parser.mulan_parse(input).unwrap();
         let definition = {
             let mut file = NamedTempFile::new().unwrap();

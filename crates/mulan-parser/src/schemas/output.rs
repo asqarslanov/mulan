@@ -100,14 +100,18 @@ mod parser {
     use crate::identifier::Identifier;
 
     impl Subkey {
-        pub(super) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
-            Identifier::chumsky_parser().map(|value| Self { value })
+        pub(crate) fn chumsky_parser<'src>(
+            identifier_parser: &impl ChumskyParser<'src, Identifier>,
+        ) -> impl ChumskyParser<'src, Self> {
+            identifier_parser.map(|value| Self { value })
         }
     }
 
     impl Key {
-        pub(crate) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
-            Subkey::chumsky_parser()
+        pub(crate) fn chumsky_parser<'src>(
+            subkey_parser: &impl ChumskyParser<'src, Subkey>,
+        ) -> impl ChumskyParser<'src, Self> {
+            subkey_parser
                 .separated_by(just('.'))
                 .at_least(1)
                 .collect()
@@ -144,10 +148,11 @@ mod tests {
     #[case("foo1 .bar2", None)]
     #[case("foo1 bar2", None)]
     fn parse_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let key_parser = Key::chumsky_parser();
+        let identifier_parser = Identifier::chumsky_parser();
+        let subkey_parser = Subkey::chumsky_parser(&identifier_parser);
+        let key_parser = Key::chumsky_parser(&subkey_parser);
         let actual_output = key_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_segments| {
-            let subkey_parser = Subkey::chumsky_parser();
             let segments = {
                 raw_segments
                     .iter()
