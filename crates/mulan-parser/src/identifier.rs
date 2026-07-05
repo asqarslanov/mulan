@@ -1,7 +1,7 @@
 //! See [`Identifier`].
 
 use compact_str::{CompactString, CompactStringExt as _};
-use smallvec::SmallVec;
+use mitsein::small_vec1::SmallVec1;
 
 /// A generic name that can be converted to an
 /// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
@@ -14,7 +14,7 @@ use smallvec::SmallVec;
 /// [`Parameter`](crate::template::Parameter) or [`Subkey`](crate::Subkey).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
-    words: SmallVec<[Word; 2]>,
+    words: SmallVec1<[Word; 2]>,
 }
 
 impl Identifier {
@@ -36,7 +36,8 @@ pub struct Word {
 /// ...
 mod parser {
     use chumsky::prelude::*;
-    use compact_str::CompactString;
+    use mitsein::iter1::IteratorExt;
+    use smallvec::SmallVec;
 
     use super::{Identifier, Word};
     use crate::chumsky_parse::ChumskyParser;
@@ -48,9 +49,14 @@ mod parser {
                 .map(|part| part.inner)
                 .separated_by(just('-'))
                 .at_least(1)
-                .collect()
-                .map(|raw_words: Vec<_>| Self {
-                    words: raw_words.into_iter().map(|inner| Word { inner }).collect(),
+                .collect::<SmallVec<[_; 2]>>()
+                .map(|raw_words| Self {
+                    words: raw_words
+                        .into_iter()
+                        .try_into_iter1()
+                        .expect(".at_least(1)")
+                        .map(|inner| Word { inner })
+                        .collect1(),
                 })
         }
     }
@@ -63,16 +69,14 @@ mod parser {
             let consecutive_digits = text::digits(10);
             let letter_digit_mix = choice((consecutive_letters, consecutive_digits)).repeated();
             let word = letter.then(letter_digit_mix);
-            word.to_slice().map(|it: &str| Self {
-                inner: CompactString::new(it),
-            })
+            word.to_slice().map(|it: &str| Self { inner: it.into() })
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use compact_str::CompactString;
+    use mitsein::iter1::IteratorExt;
     use rstest::rstest;
 
     use super::*;
@@ -135,10 +139,10 @@ mod tests {
             let words = {
                 raw_words
                     .iter()
-                    .map(|it| Word {
-                        inner: CompactString::new(it),
-                    })
-                    .collect()
+                    .try_into_iter1()
+                    .unwrap()
+                    .map(|&it| Word { inner: it.into() })
+                    .collect1()
             };
             Identifier { words }
         });
