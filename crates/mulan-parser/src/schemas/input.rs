@@ -152,10 +152,10 @@ impl Definition {
     /// definition.at(["foo", "doesntexist"])
     /// => None
     /// ```
-    pub fn at<'a, P>(&self, path: P) -> Option<&RawNode>
+    pub fn at<'a, I>(&self, path: I) -> Option<&RawNode>
     where
-        P: IntoIterator1<Item = &'a str>,
-        P::IntoIter: DoubleEndedIterator,
+        I: IntoIterator1<Item = &'a str>,
+        I::IntoIter: DoubleEndedIterator,
     {
         let mut namespace = &self.root;
         let (keys, last_key) = path.into_iter1().into_rtail_and_head();
