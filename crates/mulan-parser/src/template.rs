@@ -25,7 +25,7 @@ pub struct Template {
 
 /// A part of a [`Template`].
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum TemplatePart {
+pub enum TemplatePart {
     /// Plain text to be used verbatim.
     Text(CompactString),
 
@@ -50,18 +50,19 @@ mod parser {
     impl Template {
         /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
         #[must_use]
-        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
-            TemplatePart::chumsky_parser()
-                .repeated()
-                .collect()
-                .map(|parts| Self { parts })
+        pub fn chumsky_parser<'src>(
+            part_parser: &impl ChumskyParser<'src, TemplatePart>,
+        ) -> impl ChumskyParser<'src, Self> {
+            part_parser.repeated().collect().map(|parts| Self { parts })
         }
     }
 
     impl TemplatePart {
         /// Differentiates between different template part types.
         #[must_use]
-        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
+        pub fn chumsky_parser<'src>(
+            param_parser: &impl ChumskyParser<'src, Parameter>,
+        ) -> impl ChumskyParser<'src, Self> {
             let text = {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
                     .repeated()
@@ -69,7 +70,7 @@ mod parser {
                     .collect()
                     .map(Self::Text)
             };
-            let placeholder = Parameter::chumsky_parser().map(Self::Placeholder);
+            let placeholder = param_parser.map(Self::Placeholder);
             choice((text, placeholder))
         }
     }
@@ -77,8 +78,10 @@ mod parser {
     impl Parameter {
         /// Extracts `x` from `{x}`.
         #[must_use]
-        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
-            Identifier::chumsky_parser()
+        pub fn chumsky_parser<'src>(
+            ident_parser: &impl ChumskyParser<'src, Identifier>,
+        ) -> impl ChumskyParser<'src, Self> {
+            ident_parser
                 .padded()
                 .delimited_by(just('{'), just('}'))
                 .map(|name| Self { name })
@@ -93,6 +96,7 @@ mod tests {
     use self::PseudoTemplatePart::{Txt, Var};
     use super::*;
     use crate::chumsky_parse::ChumskyParser as _;
+    use crate::identifier::Word;
 
     enum PseudoTemplatePart {
         Txt(&'static str),
@@ -139,8 +143,11 @@ mod tests {
     #[case("a}", None)]
     #[case("{six seven}", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
-        let msg_parser = Template::chumsky_parser();
-        let ident_parser = Identifier::chumsky_parser();
+        let word_parser = Word::chumsky_parser();
+        let ident_parser = Identifier::chumsky_parser(&word_parser);
+        let param_parser = Parameter::chumsky_parser(&ident_parser);
+        let msg_part_parser = TemplatePart::chumsky_parser(&param_parser);
+        let msg_parser = Template::chumsky_parser(&msg_part_parser);
         let actual_output = msg_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_parts| Template {
             parts: {

@@ -44,8 +44,10 @@ mod parser {
 
     impl Identifier {
         #[must_use]
-        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
-            Word::chumsky_parser()
+        pub fn chumsky_parser<'src>(
+            word_parser: &impl ChumskyParser<'src, Word>,
+        ) -> impl ChumskyParser<'src, Self> {
+            word_parser
                 .map(|part| part.inner)
                 .separated_by(just('-'))
                 .at_least(1)
@@ -133,7 +135,8 @@ mod tests {
     #[case("dot.", None)]
     #[case("newline\n", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let parser = Identifier::chumsky_parser();
+        let word_parser = Word::chumsky_parser();
+        let parser = Identifier::chumsky_parser(&word_parser);
         let actual_output = parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_words| {
             let words = {

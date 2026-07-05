@@ -99,15 +99,8 @@ mod parser {
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
-    impl Subkey {
-        pub(crate) fn chumsky_parser<'src>(
-            identifier_parser: &impl ChumskyParser<'src, Identifier>,
-        ) -> impl ChumskyParser<'src, Self> {
-            identifier_parser.map(|value| Self { value })
-        }
-    }
-
     impl Key {
+        #[must_use]
         pub(crate) fn chumsky_parser<'src>(
             subkey_parser: &impl ChumskyParser<'src, Subkey>,
         ) -> impl ChumskyParser<'src, Self> {
@@ -120,6 +113,15 @@ mod parser {
                 })
         }
     }
+
+    impl Subkey {
+        #[must_use]
+        pub(crate) fn chumsky_parser<'src>(
+            identifier_parser: &impl ChumskyParser<'src, Identifier>,
+        ) -> impl ChumskyParser<'src, Self> {
+            identifier_parser.map(|value| Self { value })
+        }
+    }
 }
 
 #[cfg(test)]
@@ -129,6 +131,7 @@ mod tests {
 
     use super::*;
     use crate::chumsky_parse::ChumskyParser as _;
+    use crate::identifier::Word;
 
     #[rstest]
     #[case("", None)]
@@ -148,8 +151,9 @@ mod tests {
     #[case("foo1 .bar2", None)]
     #[case("foo1 bar2", None)]
     fn parse_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let identifier_parser = Identifier::chumsky_parser();
-        let subkey_parser = Subkey::chumsky_parser(&identifier_parser);
+        let word_parser = Word::chumsky_parser();
+        let ident_parser = Identifier::chumsky_parser(&word_parser);
+        let subkey_parser = Subkey::chumsky_parser(&ident_parser);
         let key_parser = Key::chumsky_parser(&subkey_parser);
         let actual_output = key_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_segments| {
