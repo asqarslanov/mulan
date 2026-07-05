@@ -139,7 +139,7 @@ impl Definition {
     ///
     /// Then,
     ///
-    /// ```
+    /// ```ignore
     /// // "Lorem"
     /// definition.at(["foo", "a"])
     ///
