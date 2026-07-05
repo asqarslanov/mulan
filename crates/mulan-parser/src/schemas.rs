@@ -52,7 +52,7 @@ fn translations<'src>(
         .locales_except_default()
         .map(|lang| {
             let definition = input.locales.get(&lang).ok_or((/* UndefinedLocale */))?;
-            let node = definition.at(path).ok_or((/* SubkeyNotFound */))?;
+            let node = definition.at(path).map_err(|_| (/* SubkeyNotFound */))?;
             let raw_template = node.try_as_message_ref().ok_or(())?;
             let template = {
                 template_parser

@@ -115,6 +115,22 @@ impl Input {
     }
 }
 
+/// Errors of [`Definition::at`].
+#[derive(Debug, PartialEq, Eq)]
+pub enum DefinitionAtError {
+    /// ...
+    NotFound {
+        /// ...
+        index: usize,
+    },
+
+    /// ...
+    NotANamespace {
+        /// ...
+        index: usize,
+    },
+}
+
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
     fn read(path: Cow<'_, Path>) -> Result<Self, ReadLocaleError> {
@@ -145,28 +161,47 @@ impl Definition {
     /// definition.at(["foo", "a"])
     /// => "Lorem"
     ///
+    /// definition.at(["foo", "a", "x"])
+    /// => DefinitionAtError::NotANamespace
+    ///
     /// definition.at(["foo", "bar"])
     /// => { a: "Dolor", b: "Sit", c: "Amet" }
     ///
     /// definition.at(["foo", "bar", "c"])
     /// => "Amet"
     ///
-    /// definition.at(["foo", "doesntexist"])
-    /// => None
+    /// definition.at(["foo", "doesnt-exist"])
+    /// => DefinitionAtError::NotFound
+    ///
+    /// definition.at(["baz"])
+    /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at<I>(&self, path: I) -> Option<&RawNode>
+    pub fn at<I>(&self, path: I) -> Result<&RawNode, DefinitionAtError>
     where
         I: IntoIterator1,
         I::Item: AsRef<str>,
         I::IntoIter: DoubleEndedIterator,
     {
+        let mut index = 0;
         let mut namespace = &self.root;
         let (subkeys, last_subkey) = path.into_iter1().into_rtail_and_head();
         for subkey in subkeys {
-            let node = namespace.map.get(subkey.as_ref())?;
-            namespace = node.try_as_namespace_ref()?;
+            let node = {
+                namespace
+                    .map
+                    .get(subkey.as_ref())
+                    .ok_or(DefinitionAtError::NotFound { index })?
+            };
+            namespace = {
+                node.try_as_namespace_ref()
+                    .ok_or(DefinitionAtError::NotANamespace { index })?
+            };
+            index += 1
         }
-        namespace.map.get(last_subkey.as_ref())
+        namespace
+            .map
+            .get(last_subkey.as_ref())
+            .ok_or(DefinitionAtError::NotFound { index })
     }
 }
 
@@ -279,7 +314,7 @@ mod tests {
     #[rstest]
     #[case(
         "foo",
-        Some(PseudoNode::Namespace(indoc! {r#"
+        Ok(PseudoNode::Namespace(indoc! {r#"
             a: "Lorem"
             b: "Ipsum"
             bar:
@@ -288,33 +323,37 @@ mod tests {
               c: "Amet"
         "#})),
     )]
-    #[case("foo.a", Some(PseudoNode::Message("Lorem")))]
-    #[case("foo.b", Some(PseudoNode::Message("Ipsum")))]
+    #[case("foo.a", Ok(PseudoNode::Message("Lorem")))]
+    #[case("foo.b", Ok(PseudoNode::Message("Ipsum")))]
     #[case(
         "foo.bar",
-        Some(PseudoNode::Namespace(indoc! {r#"
+        Ok(PseudoNode::Namespace(indoc! {r#"
             a: "Dolor"
             b: "Sit"
             c: "Amet"
         "#})),
     )]
-    #[case("foo.bar.a", Some(PseudoNode::Message("Dolor")))]
-    #[case("foo.bar.b", Some(PseudoNode::Message("Sit")))]
-    #[case("foo.bar.c", Some(PseudoNode::Message("Amet")))]
+    #[case("foo.bar.a", Ok(PseudoNode::Message("Dolor")))]
+    #[case("foo.bar.b", Ok(PseudoNode::Message("Sit")))]
+    #[case("foo.bar.c", Ok(PseudoNode::Message("Amet")))]
     #[case(
         "baz",
-        Some(PseudoNode::Namespace(indoc! {r#"
+        Ok(PseudoNode::Namespace(indoc! {r#"
             a: "Lorem Ipsum"
             b: "Dolor Sit Amet"
         "#})),
     )]
-    #[case("baz.a", Some(PseudoNode::Message("Lorem Ipsum")))]
-    #[case("baz.b", Some(PseudoNode::Message("Dolor Sit Amet")))]
-    #[case("bar", None)]
-    #[case("foo.a.x", None)]
-    #[case("foo.c", None)]
-    #[case("foo.bar.baz", None)]
-    fn definition_at(#[case] input: &str, #[case] expected_output: Option<PseudoNode<'_>>) {
+    #[case("baz.a", Ok(PseudoNode::Message("Lorem Ipsum")))]
+    #[case("baz.b", Ok(PseudoNode::Message("Dolor Sit Amet")))]
+    #[case("bar", Err(DefinitionAtError::NotFound { index: 0 }))]
+    #[case("foo.a.x", Err(DefinitionAtError::NotANamespace { index: 1 }))]
+    #[case("foo.bar.a.x.y", Err(DefinitionAtError::NotANamespace { index: 2 }))]
+    #[case("foo.c", Err(DefinitionAtError::NotFound { index: 1 }))]
+    #[case("foo.bar.baz", Err(DefinitionAtError::NotFound { index: 2 }))]
+    fn definition_at(
+        #[case] input: &str,
+        #[case] expected_output: Result<PseudoNode<'_>, DefinitionAtError>,
+    ) {
         const DEFINITION_RAW: &str = indoc! {r#"
             foo:
               a: "Lorem"
@@ -348,6 +387,12 @@ mod tests {
                 RawNode::Namespace(definition.root)
             }
         });
-        assert_eq!(actual_output, expected_output.as_ref());
+        assert_eq!(
+            actual_output,
+            match expected_output {
+                Ok(ref node) => Ok(node),
+                Err(err) => Err(err),
+            },
+        );
     }
 }
