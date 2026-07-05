@@ -9,7 +9,7 @@ use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
 pub use self::input::Input; // TODO: use it privately
-use self::input::RawNode;
+use self::input::{DefinitionAtError, RawNode};
 use self::output::Output;
 use crate::Template;
 use crate::chumsky_parse::ChumskyParser;
@@ -50,16 +50,23 @@ fn translations<'src>(
 ) -> Result<BTreeMap<Language, Template>, ()> {
     config
         .locales_except_default()
-        .map(|lang| {
-            let definition = input.locales.get(&lang).ok_or((/* UndefinedLocale */))?;
-            let node = definition.at(path).map_err(|_| (/* SubkeyNotFound */))?;
-            let raw_template = node.try_as_message_ref().ok_or(())?;
-            let template = {
-                template_parser
-                    .mulan_parse(raw_template)
-                    .map_err(|_| (/* ... */))?
+        .filter_map(|lang| {
+            let Some(definition) = input.locales.get(&lang) else {
+                return Some(Err(()));
             };
-            Ok((lang, template))
+            let node = match definition.at(path) {
+                Ok(node) => node,
+                Err(DefinitionAtError::NotFound { index: _ }) => return None,
+                Err(DefinitionAtError::NotANamespace { index: _ }) => return Some(Err(())),
+            };
+            let Some(raw_template) = node.try_as_message_ref() else {
+                return Some(Err(()));
+            };
+            let template = match template_parser.mulan_parse(raw_template) {
+                Ok(template) => template,
+                Err(_err) => return Some(Err(())),
+            };
+            Some(Ok((lang, template)))
         })
         .collect()
 }
