@@ -26,6 +26,7 @@ pub struct Word {
     pub(super) inner: CompactString,
 }
 
+/// ...
 mod parser {
     use chumsky::prelude::*;
     use compact_str::CompactString;

@@ -81,6 +81,7 @@ pub struct Translations {
     others: BTreeMap<Language, Template>,
 }
 
+/// ...
 mod parser {
     use chumsky::prelude::*;
     use smallvec::SmallVec;
