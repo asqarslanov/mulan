@@ -36,17 +36,15 @@ pub trait ChumskyParser<'src, Out>:
         let result = self.parse(source).into_result();
         result.map_err(|errors| ChumskyAllErrors {
             source: source.into(),
-            errors: {
-                errors
-                    .into_iter()
-                    .try_into_iter1()
-                    .expect("if parsing failed, there should at least be one error")
-                    .map(|err| ChumskySingleError {
-                        message: err.to_compact_string(),
-                        span: err.span().into_range().into(),
-                    })
-                    .collect1()
-            },
+            errors: errors
+                .into_iter()
+                .try_into_iter1()
+                .expect("if parsing failed, there should at least be one error")
+                .map(|err| ChumskySingleError {
+                    message: err.to_compact_string(),
+                    span: err.span().into_range().into(),
+                })
+                .collect1(),
         })
     }
 }
