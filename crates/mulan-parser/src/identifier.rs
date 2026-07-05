@@ -64,11 +64,11 @@ mod parser {
 
 #[cfg(test)]
 mod tests {
-    use crate::chumsky_parse::ChumskyParser as _;
     use compact_str::CompactString;
     use rstest::rstest;
 
     use super::*;
+    use crate::chumsky_parse::ChumskyParser as _;
 
     #[rstest]
     #[case("e", Some(["e"].as_slice()))]
