@@ -149,6 +149,7 @@ mod tests {
     use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
+    use mitsein::iter1::IteratorExt as _;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -240,8 +241,79 @@ mod tests {
         assert_eq!(actual_output, expected_output);
     }
 
-    #[test]
-    fn definition_at() {
-        todo!();
+    enum PseudoNode<'a> {
+        Message(&'a str),
+        Namespace(&'a str),
+    }
+
+    #[rstest]
+    #[case(
+        "foo",
+        Some(PseudoNode::Namespace(indoc! {r#"
+            a: "Lorem"
+            b: "Ipsum"
+            bar:
+              a: "Dolor"
+              b: "Sit"
+              c: "Amet"
+        "#})),
+    )]
+    #[case("foo.a", Some(PseudoNode::Message("Lorem")))]
+    #[case("foo.b", Some(PseudoNode::Message("Ipsum")))]
+    #[case(
+        "foo.bar",
+        Some(PseudoNode::Namespace(indoc! {r#"
+            a: "Dolor"
+            b: "Sit"
+            c: "Amet"
+        "#})),
+    )]
+    #[case("foo.bar.a", Some(PseudoNode::Message("Dolor")))]
+    #[case("foo.bar.b", Some(PseudoNode::Message("Sit")))]
+    #[case("foo.bar.c", Some(PseudoNode::Message("Amet")))]
+    #[case(
+        "baz",
+        Some(PseudoNode::Namespace(indoc! {r#"
+            a: "Lorem Ipsum"
+            b: "Dolor Sit Amet"
+        "#})),
+    )]
+    #[case("baz.a", Some(PseudoNode::Message("Lorem Ipsum")))]
+    #[case("baz.b", Some(PseudoNode::Message("Dolor Sit Amet")))]
+    #[case("bar", None)]
+    #[case("foo.a.x", None)]
+    #[case("foo.c", None)]
+    #[case("foo.bar.baz", None)]
+    fn definition_at(#[case] input: &str, #[case] expected_output: Option<PseudoNode<'_>>) {
+        const DEFINITION_RAW: &str = indoc! {r#"
+            foo:
+              a: "Lorem"
+              b: "Ipsum"
+              bar:
+                a: "Dolor"
+                b: "Sit"
+                c: "Amet"
+            baz:
+              a: "Lorem Ipsum"
+              b: "Dolor Sit Amet"
+        "#};
+
+        let path = input.split('.').try_into_iter1().unwrap();
+        let definition = {
+            let mut file = NamedTempFile::new().unwrap();
+            write!(file, "{DEFINITION_RAW}").unwrap();
+            Definition::read(file.path().into()).unwrap()
+        };
+        let actual_output = definition.at(path);
+        let expected_output = expected_output.map(|node| match node {
+            PseudoNode::Message(contents) => RawNode::Message(contents.into()),
+            PseudoNode::Namespace(contents) => {
+                let mut file = NamedTempFile::new().unwrap();
+                write!(file, "{contents}").unwrap();
+                let definition = Definition::read(file.path().into()).unwrap();
+                RawNode::Namespace(definition.root)
+            }
+        });
+        assert_eq!(actual_output, expected_output.as_ref());
     }
 }
