@@ -87,11 +87,11 @@ mod parser {
 
 #[cfg(test)]
 mod tests {
-    use chumsky::Parser as _;
     use rstest::rstest;
 
     use self::PseudoTemplatePart::{Txt, Var};
     use super::*;
+    use crate::chumsky_parse::ChumskyParser as _;
 
     enum PseudoTemplatePart {
         Txt(&'static str),
@@ -140,7 +140,7 @@ mod tests {
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let msg_parser = Template::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser();
-        let actual_output = msg_parser.parse(input).into_output();
+        let actual_output = msg_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_parts| Template {
             parts: {
                 raw_parts
@@ -148,7 +148,7 @@ mod tests {
                     .map(|part| match part {
                         Txt(it) => TemplatePart::Text(CompactString::new(it)),
                         Var(it) => TemplatePart::Placeholder(Parameter {
-                            name: ident_parser.parse(it).unwrap(),
+                            name: ident_parser.mulan_parse(it).unwrap(),
                         }),
                     })
                     .collect()

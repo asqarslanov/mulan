@@ -63,9 +63,8 @@ fn translations<'src>(
             };
             let template = {
                 template_parser
-                    .parse(raw_template)
-                    .into_result()
-                    .map_err(|_errors| ())?
+                    .mulan_parse(raw_template)
+                    .map_err(|_| (/* ... */))?
             };
             Ok((lang, template))
         })

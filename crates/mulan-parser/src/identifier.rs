@@ -64,7 +64,7 @@ mod parser {
 
 #[cfg(test)]
 mod tests {
-    use chumsky::Parser as _;
+    use crate::chumsky_parse::ChumskyParser as _;
     use compact_str::CompactString;
     use rstest::rstest;
 
@@ -122,7 +122,7 @@ mod tests {
     #[case("newline\n", None)]
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let parser = Identifier::chumsky_parser();
-        let actual_output = parser.parse(input).into_output();
+        let actual_output = parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_words| {
             let words = {
                 raw_words
