@@ -123,7 +123,35 @@ impl Definition {
         serde_saphyr::from_str(&file_contents).map_err(ReadLocaleError::Format)
     }
 
-    /// ...
+    /// Returns a reference to the node at the given path.
+    ///
+    /// For example, let `definition: Definiton` be
+    ///
+    /// ```yaml
+    /// foo:
+    ///   a: "Lorem"
+    ///   b: "Ipsum"
+    ///   bar:
+    ///     a: "Dolor"
+    ///     b: "Sit"
+    ///     c: "Amet"
+    /// ```
+    ///
+    /// Then,
+    ///
+    /// ```
+    /// // "Lorem"
+    /// definition.at(["foo", "a"])
+    ///
+    /// // { a: "Dolor", b: "Sit", c: "Amet" }
+    /// definition.at(["foo", "bar"])
+    ///
+    /// // "Amet"
+    /// definition.at(["foo", "bar", "c"])
+    ///
+    /// // None
+    /// definition.at(["foo", "doesntexist"])
+    /// ```
     pub fn at<'a>(&self, path: impl IntoIterator1<Item = &'a str>) -> Option<&RawNode> {
         let mut namespace = &self.root;
         let mut keys = path.into_iter().peekable();
