@@ -13,7 +13,7 @@ pub use self::input::Input; // TODO: use it privately
 use self::input::{DefinitionAtError, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
-use crate::{Namespace, Node, Template};
+use crate::{Namespace, Node, Subkey, Template};
 
 mod input;
 pub mod output;
@@ -29,7 +29,9 @@ enum TransformError {
         locale: Language,
 
         /// ...
-        path: SmallVec1<[CompactString; 1]>,
+        path: SmallVec<[CompactString; 1]>,
+
+        errors: ChumskyAllErrors,
     },
 
     /// ...
@@ -43,6 +45,7 @@ enum TransformError {
 /// ...
 fn transform(
     mut input: Input,
+    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
@@ -53,8 +56,9 @@ fn transform(
             .ok_or(TransformError::LocaleNotFound(config.default_locale))?
     };
     let namespace = traverse_namespace(
-        &mut SmallVec::new(),
+        SmallVec::default(),
         default_locale.root,
+        subkey_parser,
         template_parser,
         config,
     )?;
@@ -63,46 +67,64 @@ fn transform(
 
 /// ...
 fn traverse_namespace(
-    key: &mut SmallVec<[CompactString; 1]>,
+    key: SmallVec<[CompactString; 1]>,
     namespace: RawNamespace,
+    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
-    for (subkey, raw_node) in namespace.map {
-        key.push(subkey);
-        let handle_node_result = handle_node(raw_node, key, template_parser, config);
-        key.pop();
-        let node = handle_node_result?;
-    }
-    todo!();
+    let map = {
+        namespace
+            .map
+            .into_iter()
+            .map(|(raw_subkey, raw_node)| {
+                let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
+                    TransformError::InvalidSubkey {
+                        locale: config.default_locale,
+                        path: key.to_owned(),
+                        errors,
+                    }
+                })?;
+                let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey);
+                let handle_node_result =
+                    handle_node(raw_node, key, subkey_parser, template_parser, config);
+                let node = handle_node_result?;
+                Ok((subkey, node))
+            })
+            .collect::<Result<_, _>>()?
+    };
+    Ok(Namespace { map })
 }
 
 /// ...
 fn handle_node(
     node: RawNode,
-    key: &mut SmallVec<[CompactString; 1]>,
+    key: SmallVec1<[CompactString; 1]>,
+    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
-    match node {
+    Ok(match node {
         RawNode::Message(template_raw) => {
-            let a = template_parser
-                .mulan_parse(&template_raw)
-                .map_err(|errors| TransformError::InvalidTemplate {
-                    locale: config.default_locale,
-                    path: {
-                        key.to_owned()
-                            .try_into()
-                            .expect("`subkey` pushed at every iteration")
-                    },
-                    errors,
-                })?;
+            let template = {
+                template_parser
+                    .mulan_parse(&template_raw)
+                    .map_err(|errors| TransformError::InvalidTemplate {
+                        locale: config.default_locale,
+                        path: key.to_owned(),
+                        errors,
+                    })?
+            };
+            todo!();
         }
-        RawNode::Namespace(inner_namespace) => {
-            traverse_namespace(key, inner_namespace, template_parser, config)?;
-        }
-    }
-    todo!();
+        RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
+            key.into(),
+            inner_namespace,
+            subkey_parser,
+            template_parser,
+            config,
+        )?),
+    })
 }
 
 /// ...

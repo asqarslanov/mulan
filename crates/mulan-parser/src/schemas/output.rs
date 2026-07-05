@@ -37,7 +37,7 @@ pub struct Namespace {
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    map: BTreeMap<Subkey, Node>,
+    pub(super) map: BTreeMap<Subkey, Node>,
 }
 
 /// A single segment of a message [`Key`].
