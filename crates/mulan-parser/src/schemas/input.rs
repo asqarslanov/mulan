@@ -140,17 +140,17 @@ impl Definition {
     /// Then,
     ///
     /// ```ignore
-    /// // "Lorem"
     /// definition.at(["foo", "a"])
+    /// => "Lorem"
     ///
-    /// // { a: "Dolor", b: "Sit", c: "Amet" }
     /// definition.at(["foo", "bar"])
+    /// => { a: "Dolor", b: "Sit", c: "Amet" }
     ///
-    /// // "Amet"
     /// definition.at(["foo", "bar", "c"])
+    /// => "Amet"
     ///
-    /// // None
     /// definition.at(["foo", "doesntexist"])
+    /// => None
     /// ```
     pub fn at<'a>(&self, path: impl IntoIterator1<Item = &'a str>) -> Option<&RawNode> {
         let mut namespace = &self.root;
