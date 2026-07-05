@@ -2,7 +2,7 @@
 //!
 //! Defines the transformation logic from [`Input`] to [`Output`].
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use compact_str::CompactString;
 use mitsein::small_vec1::SmallVec1;
@@ -66,6 +66,7 @@ fn translations<'src>(
                 Ok(template) => template,
                 Err(_err) => return Some(Err(())),
             };
+            let params = template.parameters().collect::<BTreeSet<_>>();
             Some(Ok((lang, template)))
         })
         .collect()

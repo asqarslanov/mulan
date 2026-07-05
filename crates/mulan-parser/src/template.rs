@@ -2,6 +2,7 @@
 
 use compact_str::CompactString;
 use smallvec::SmallVec;
+use strum::EnumTryAs;
 
 use crate::identifier::Identifier;
 
@@ -23,8 +24,17 @@ pub struct Template {
     parts: SmallVec<[TemplatePart; 1]>,
 }
 
+impl Template {
+    /// ...
+    pub fn parameters(&self) -> impl Iterator<Item = &Parameter> {
+        self.parts
+            .iter()
+            .filter_map(TemplatePart::try_as_placeholder_ref)
+    }
+}
+
 /// A part of a [`Template`].
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
 pub enum TemplatePart {
     /// Plain text to be used verbatim.
     Text(CompactString),
@@ -34,7 +44,7 @@ pub enum TemplatePart {
 }
 
 /// A variable placeholder in a [`Template`] (`{foo}`).
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Parameter {
     name: Identifier,
 }
