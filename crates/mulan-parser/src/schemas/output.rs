@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
 use crate::identifier::Identifier;
@@ -46,6 +47,13 @@ pub struct Subkey {
     value: Identifier,
 }
 
+/// ...
+#[derive(Debug, PartialEq, Eq)]
+pub struct Key {
+    /// ...
+    segments: SmallVec1<[Subkey; 2]>,
+}
+
 /// A value in a [`Namespace`].
 ///
 /// Can either be a message template's [`Translations`] or another namespace.
@@ -71,4 +79,76 @@ pub struct Translations {
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
     others: BTreeMap<Language, Template>,
+}
+
+mod parser {
+    use chumsky::prelude::*;
+    use smallvec::SmallVec;
+
+    use super::{Key, Subkey};
+    use crate::chumsky_parse::ChumskyParser;
+    use crate::identifier::Identifier;
+
+    impl Subkey {
+        pub(super) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
+            Identifier::chumsky_parser().map(|value| Self { value })
+        }
+    }
+
+    impl Key {
+        pub(super) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
+            Subkey::chumsky_parser()
+                .separated_by(just('.'))
+                .at_least(1)
+                .collect()
+                .map(|segments: SmallVec<_>| Self {
+                    segments: segments.try_into().expect(".at_least(1)"),
+                })
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use mitsein::iter1::IteratorExt as _;
+    use rstest::rstest;
+
+    use crate::chumsky_parse::ChumskyParser as _;
+
+    use super::*;
+
+    #[rstest]
+    #[case("", None)]
+    #[case(" ", None)]
+    #[case(".", None)]
+    #[case(".a", None)]
+    #[case("a.", None)]
+    #[case("a ", None)]
+    #[case(" a", None)]
+    #[case("a", Some(["a"].as_slice()))]
+    #[case("a1", Some(["a1"].as_slice()))]
+    #[case("foo.bar", Some(["foo", "bar"].as_slice()))]
+    #[case("foo1.bar2", Some(["foo1", "bar2"].as_slice()))]
+    #[case("foo1.bar2.baz", Some(["foo1", "bar2", "baz"].as_slice()))]
+    #[case("foo-1.bar-2", None)]
+    #[case("foo1. bar2", None)]
+    #[case("foo1 .bar2", None)]
+    #[case("foo1 bar2", None)]
+    fn parse_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
+        let key_parser = Key::chumsky_parser();
+        let actual_output = key_parser.mulan_parse(input).ok();
+        let expected_output = expected_output.map(|raw_segments| {
+            let subkey_parser = Subkey::chumsky_parser();
+            let segments = {
+                raw_segments
+                    .iter()
+                    .try_into_iter1()
+                    .unwrap()
+                    .map(|x| subkey_parser.mulan_parse(x).unwrap())
+                    .collect1()
+            };
+            Key { segments }
+        });
+        assert_eq!(actual_output, expected_output);
+    }
 }
