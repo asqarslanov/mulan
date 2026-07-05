@@ -43,13 +43,13 @@ mod parser {
     use chumsky::prelude::*;
 
     use super::{Parameter, Template, TemplatePart};
+    use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
     impl Template {
         /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
         #[must_use]
-        pub fn chumsky_parser<'src>()
-        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             TemplatePart::chumsky_parser()
                 .repeated()
                 .collect()
@@ -60,8 +60,7 @@ mod parser {
     impl TemplatePart {
         /// Differentiates between different template part types.
         #[must_use]
-        pub fn chumsky_parser<'src>()
-        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             let text = {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
                     .repeated()
@@ -77,8 +76,7 @@ mod parser {
     impl Parameter {
         /// Extracts `x` from `{x}`.
         #[must_use]
-        pub fn chumsky_parser<'src>()
-        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             Identifier::chumsky_parser()
                 .padded()
                 .delimited_by(just('{'), just('}'))

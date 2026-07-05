@@ -11,7 +11,8 @@ use mulan_config::Language;
 pub use self::input::Input; // TODO: use it privately
 use self::input::RawNode;
 use self::output::Output;
-use crate::{ChumskyParser, Template};
+use crate::Template;
+use crate::chumsky_parse::ChumskyParser;
 
 mod input;
 pub mod output;
@@ -41,10 +42,10 @@ fn transform(mut input: Input, config: &mulan_config::Config) -> Result<Output, 
 }
 
 /// ...
-fn translations(
-    input: &Input,
+fn translations<'src>(
+    input: &'src Input,
     path: &SmallVec1<[CompactString; 2]>,
-    template_parser: &impl ChumskyParser<Template>,
+    template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<BTreeMap<Language, Template>, ()> {
     config

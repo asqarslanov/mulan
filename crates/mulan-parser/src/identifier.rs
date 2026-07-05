@@ -31,11 +31,11 @@ mod parser {
     use compact_str::CompactString;
 
     use super::{Identifier, Word};
+    use crate::chumsky_parse::ChumskyParser;
 
     impl Identifier {
         #[must_use]
-        pub fn chumsky_parser<'src>()
-        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             Word::chumsky_parser()
                 .map(|part| part.inner)
                 .separated_by(just('-'))
@@ -49,8 +49,7 @@ mod parser {
 
     impl Word {
         #[must_use]
-        pub fn chumsky_parser<'src>()
-        -> impl Parser<'src, &'src str, Self, extra::Err<Rich<'src, char>>> {
+        pub fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             let letter = one_of('a'..='z').labelled("small latin letter");
             let consecutive_letters = letter.clone().repeated().at_least(1);
             let consecutive_digits = text::digits(10);
