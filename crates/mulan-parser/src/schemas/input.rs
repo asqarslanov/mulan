@@ -9,6 +9,7 @@ use foldhash::HashMap;
 use mitsein::iter1::IntoIterator1;
 use mulan_config::Language;
 use serde::Deserialize;
+use strum::EnumTryAs;
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
 ///
@@ -82,7 +83,7 @@ pub struct RawNamespace {
 /// A value in a [namespace](RawNamespace) of a locale [`Definition`].
 ///
 /// Can either be a message template or another namespace.
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, EnumTryAs)]
 #[serde(untagged)]
 pub enum RawNode {
     /// Raw text that will later be properly parsed
@@ -160,10 +161,8 @@ impl Definition {
         let mut namespace = &self.root;
         let (keys, last_key) = path.into_iter1().into_rtail_and_head();
         for key in keys {
-            match namespace.map.get(key)? {
-                RawNode::Namespace(inner_namespace) => namespace = inner_namespace,
-                RawNode::Message(_) => return None,
-            }
+            let node = namespace.map.get(key)?;
+            namespace = node.try_as_namespace_ref()?;
         }
         namespace.map.get(last_key)
     }
