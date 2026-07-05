@@ -26,7 +26,8 @@ pub struct Output {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// [`Subkey`]s from different namespaces don't collide and can take the same values.
+/// [`Subkey`]s from different namespaces don't collide and can take
+/// the same values.
 ///
 /// See [`RawNamespace`](crate::schemas::input::RawNamespace)
 /// for visual examples.
@@ -122,9 +123,8 @@ mod tests {
     use mitsein::iter1::IteratorExt as _;
     use rstest::rstest;
 
-    use crate::chumsky_parse::ChumskyParser as _;
-
     use super::*;
+    use crate::chumsky_parse::ChumskyParser as _;
 
     #[rstest]
     #[case("", None)]
