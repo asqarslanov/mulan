@@ -44,6 +44,7 @@ serde-saphyr = "0.0.28"
 serde_with = "3.21.0"
 serdev = "0.3.2"
 smallvec = "1.15.2"
+strum = "0.28.0"
 tempfile = "3.27.0"
 toml = { version = "1.1.2", features = ["fast_hash"] }
 
