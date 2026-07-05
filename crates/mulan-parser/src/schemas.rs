@@ -53,10 +53,7 @@ fn translations<'src>(
         .map(|lang| {
             let definition = input.locales.get(&lang).ok_or((/* UndefinedLocale */))?;
             let node = definition.at(path).ok_or((/* SubkeyNotFound */))?;
-            let raw_template = match node {
-                RawNode::Message(template) => template,
-                RawNode::Namespace(_) => return Err(()), // ...
-            };
+            let raw_template = node.try_as_message_ref().ok_or(())?;
             let template = {
                 template_parser
                     .mulan_parse(raw_template)

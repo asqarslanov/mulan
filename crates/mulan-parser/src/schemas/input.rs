@@ -161,12 +161,12 @@ impl Definition {
         I::IntoIter: DoubleEndedIterator,
     {
         let mut namespace = &self.root;
-        let (keys, last_key) = path.into_iter1().into_rtail_and_head();
-        for key in keys {
-            let node = namespace.map.get(key.as_ref())?;
+        let (subkeys, last_subkey) = path.into_iter1().into_rtail_and_head();
+        for subkey in subkeys {
+            let node = namespace.map.get(subkey.as_ref())?;
             namespace = node.try_as_namespace_ref()?;
         }
-        namespace.map.get(last_key.as_ref())
+        namespace.map.get(last_subkey.as_ref())
     }
 }
 
