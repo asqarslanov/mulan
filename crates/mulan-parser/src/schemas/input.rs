@@ -152,21 +152,20 @@ impl Definition {
     /// definition.at(["foo", "doesntexist"])
     /// => None
     /// ```
-    pub fn at<'a>(&self, path: impl IntoIterator1<Item = &'a str>) -> Option<&RawNode> {
+    pub fn at<'a, P>(&self, path: P) -> Option<&RawNode>
+    where
+        P: IntoIterator1<Item = &'a str>,
+        P::IntoIter: DoubleEndedIterator,
+    {
         let mut namespace = &self.root;
-        let mut keys = path.into_iter().peekable();
-        while let Some(key) = keys.next() {
-            let node = namespace.map.get(key)?;
-            if keys.peek().is_some() {
-                match node {
-                    RawNode::Namespace(inner_namespace) => namespace = inner_namespace,
-                    RawNode::Message(_) => return None,
-                }
-            } else {
-                return Some(node);
+        let (keys, last_key) = path.into_iter1().into_rtail_and_head();
+        for key in keys {
+            match namespace.map.get(key)? {
+                RawNode::Namespace(inner_namespace) => namespace = inner_namespace,
+                RawNode::Message(_) => return None,
             }
         }
-        unreachable!();
+        namespace.map.get(last_key)
     }
 }
 
