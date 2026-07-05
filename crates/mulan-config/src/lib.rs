@@ -61,7 +61,7 @@ impl Config {
         Figment::from(Toml::file("mulan.toml")).extract()
     }
 
-    /// ...
+    /// Returns an iterator over `locales` with `default_locale` filtered out.
     pub fn locales_except_default(&self) -> impl Iterator<Item = Language> {
         self.locales
             .iter()
