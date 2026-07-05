@@ -25,16 +25,23 @@ enum TransformError {
 }
 
 /// ...
-fn transform(mut input: Input, config: &mulan_config::Config) -> Result<Output, TransformError> {
+fn transform(
+    mut input: Input,
+    template_parser: &impl for<'src> ChumskyParser<'src, Template>,
+    config: &mulan_config::Config,
+) -> Result<Output, TransformError> {
     let default_locale = {
         input
             .locales
             .remove(&config.default_locale)
             .ok_or(TransformError::NoDefaultLocale)?
     };
-    for (key, node) in default_locale.root.map {
+    for (subkey, node) in default_locale.root.map {
         match node {
-            RawNode::Message(message_raw) => todo!(),
+            RawNode::Message(template_raw) => {
+                let template = template_parser.mulan_parse(&template_raw);
+                todo!();
+            }
             RawNode::Namespace(namespace_raw) => todo!(),
         }
     }
