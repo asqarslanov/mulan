@@ -52,9 +52,7 @@ fn translations<'src>(
         .locales_except_default()
         .map(|lang| {
             let definition = input.locales.get(&lang).ok_or((/* UndefinedLocale */))?;
-            let node = {
-                definition.at(path).ok_or((/* SubkeyNotFound */))?
-            };
+            let node = definition.at(path).ok_or((/* SubkeyNotFound */))?;
             let raw_template = match node {
                 RawNode::Message(template) => template,
                 RawNode::Namespace(_) => return Err(()), // ...
