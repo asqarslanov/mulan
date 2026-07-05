@@ -24,7 +24,7 @@ pub struct Output {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// Keys from different namespaces don't collide and can take the same values.
+/// [`Subkey`]s from different namespaces don't collide and can take the same values.
 ///
 /// See [`RawNamespace`](crate::schemas::input::RawNamespace)
 /// for visual examples.
@@ -34,15 +34,15 @@ pub struct Namespace {
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    map: BTreeMap<Key, Node>,
+    map: BTreeMap<Subkey, Node>,
 }
 
-/// A path segment of a message.
+/// A single segment of a message [`Key`].
 ///
-/// E.g., the path `frontend.user-settings.account` has [`Key`]s
+/// E.g., the key `frontend.user-settings.account` has [`Subkey`]s
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Key {
+pub struct Subkey {
     value: Identifier,
 }
 

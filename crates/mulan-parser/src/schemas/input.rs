@@ -50,7 +50,7 @@ pub struct Definition {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// Keys from different namespaces don't collide and can take the same values.
+/// Subkeys from different namespaces don't collide and can take the same values.
 ///
 /// ```yaml
 /// ns1:

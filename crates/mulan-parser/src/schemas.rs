@@ -55,7 +55,7 @@ fn translations<'src>(
             let node = {
                 definition
                     .at(path.iter1().map(AsRef::as_ref))
-                    .ok_or((/* KeyNotFound */))?
+                    .ok_or((/* SubkeyNotFound */))?
             };
             let raw_template = match node {
                 RawNode::Message(template) => template,
