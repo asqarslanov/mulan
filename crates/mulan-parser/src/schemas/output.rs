@@ -51,6 +51,7 @@ pub struct Subkey {
 
 impl Subkey {
     /// ...
+    #[must_use]
     pub fn to_kebab_case(&self) -> CompactString {
         self.value.to_kebab_case()
     }

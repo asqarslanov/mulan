@@ -19,6 +19,7 @@ pub struct Identifier {
 
 impl Identifier {
     /// ...
+    #[must_use]
     pub fn to_kebab_case(&self) -> CompactString {
         self.words.iter().map(|word| &word.inner).join_compact("-")
     }
