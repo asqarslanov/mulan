@@ -153,18 +153,19 @@ impl Definition {
     /// definition.at(["foo", "doesntexist"])
     /// => None
     /// ```
-    pub fn at<'a, I>(&self, path: I) -> Option<&RawNode>
+    pub fn at<'a, I, S>(&self, path: I) -> Option<&RawNode>
     where
-        I: IntoIterator1<Item = &'a str>,
+        I: IntoIterator1<Item = S>,
         I::IntoIter: DoubleEndedIterator,
+        S: AsRef<str>,
     {
         let mut namespace = &self.root;
         let (keys, last_key) = path.into_iter1().into_rtail_and_head();
         for key in keys {
-            let node = namespace.map.get(key)?;
+            let node = namespace.map.get(key.as_ref())?;
             namespace = node.try_as_namespace_ref()?;
         }
-        namespace.map.get(last_key)
+        namespace.map.get(last_key.as_ref())
     }
 }
 
@@ -175,11 +176,12 @@ mod tests {
     use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
-    use mitsein::iter1::IteratorExt as _;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
     use super::*;
+    use crate::chumsky_parse::ChumskyParser as _;
+    use crate::{Key, Subkey};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]
@@ -324,13 +326,14 @@ mod tests {
               b: "Dolor Sit Amet"
         "#};
 
-        let path = input.split('.').try_into_iter1().unwrap();
+        let key_parser = Key::chumsky_parser();
+        let key = key_parser.mulan_parse(input).unwrap();
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
             Definition::read(file.path().into()).unwrap()
         };
-        let actual_output = definition.at(path);
+        let actual_output = definition.at(key.segments.iter1().map(Subkey::to_kebab_case));
         let expected_output = expected_output.map(|node| match node {
             PseudoNode::Message(contents) => RawNode::Message(contents.into()),
             PseudoNode::Namespace(contents) => {

@@ -1,6 +1,6 @@
 //! See [`Identifier`].
 
-use compact_str::CompactString;
+use compact_str::{CompactString, CompactStringExt as _};
 use smallvec::SmallVec;
 
 /// A generic name that can be converted to an
@@ -15,6 +15,13 @@ use smallvec::SmallVec;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Identifier {
     words: SmallVec<[Word; 2]>,
+}
+
+impl Identifier {
+    /// ...
+    pub fn to_kebab_case(&self) -> CompactString {
+        self.words.iter().map(|word| &word.inner).join_compact("-")
+    }
 }
 
 /// A part of an [`Identifier`].

@@ -53,9 +53,7 @@ fn translations<'src>(
         .map(|lang| {
             let definition = input.locales.get(&lang).ok_or((/* UndefinedLocale */))?;
             let node = {
-                definition
-                    .at(path.iter1().map(AsRef::as_ref))
-                    .ok_or((/* SubkeyNotFound */))?
+                definition.at(path).ok_or((/* SubkeyNotFound */))?
             };
             let raw_template = match node {
                 RawNode::Message(template) => template,

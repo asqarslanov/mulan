@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use compact_str::CompactString;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
@@ -47,11 +48,18 @@ pub struct Subkey {
     value: Identifier,
 }
 
+impl Subkey {
+    /// ...
+    pub fn to_kebab_case(&self) -> CompactString {
+        self.value.to_kebab_case()
+    }
+}
+
 /// ...
 #[derive(Debug, PartialEq, Eq)]
 pub struct Key {
     /// ...
-    segments: SmallVec1<[Subkey; 2]>,
+    pub(crate) segments: SmallVec1<[Subkey; 2]>,
 }
 
 /// A value in a [`Namespace`].
@@ -97,7 +105,7 @@ mod parser {
     }
 
     impl Key {
-        pub(super) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
+        pub(crate) fn chumsky_parser<'src>() -> impl ChumskyParser<'src, Self> {
             Subkey::chumsky_parser()
                 .separated_by(just('.'))
                 .at_least(1)
