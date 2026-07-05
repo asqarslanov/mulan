@@ -28,9 +28,11 @@ pub struct ChumskySingleError {
 }
 
 /// ...
-pub trait ChumskyParser<'src, T>: Parser<'src, &'src str, T, extra::Err<Rich<'src, char>>> {
+pub trait ChumskyParser<'src, Out>:
+    Parser<'src, &'src str, Out, extra::Err<Rich<'src, char>>>
+{
     /// ...
-    fn mulan_parse(&self, source: &'src str) -> Result<T, ChumskyAllErrors> {
+    fn mulan_parse(&self, source: &'src str) -> Result<Out, ChumskyAllErrors> {
         let result = self.parse(source).into_result();
         result.map_err(|errors| ChumskyAllErrors {
             source: source.into(),
@@ -49,7 +51,7 @@ pub trait ChumskyParser<'src, T>: Parser<'src, &'src str, T, extra::Err<Rich<'sr
     }
 }
 
-impl<'src, S, T> ChumskyParser<'src, S> for T where
-    T: Parser<'src, &'src str, S, extra::Err<Rich<'src, char>>>
+impl<'src, Out, T: Parser<'src, &'src str, Out, extra::Err<Rich<'src, char>>>>
+    ChumskyParser<'src, Out> for T
 {
 }
