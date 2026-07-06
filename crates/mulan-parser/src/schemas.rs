@@ -5,17 +5,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use compact_str::CompactString;
-use mitsein::slice1::Slice1;
 use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
-use smallvec::{SmallVec, ToSmallVec};
+use smallvec::{SmallVec, ToSmallVec as _};
 
 pub use self::input::Input; // TODO: use it privately
 use self::input::{DefinitionAtError, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
-use crate::{Namespace, Node, Subkey, Template};
+use crate::{Namespace, Node, Subkey, Template, Translations};
 
 mod input;
 pub mod output;
@@ -119,27 +118,25 @@ fn traverse_namespace(
 
 /// ...
 fn handle_node(
-    node: RawNode,
+    raw_node: RawNode,
     key: SmallVec1<[CompactString; 1]>,
     input: &Input,
     subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
-    Ok(match node {
-        RawNode::Message(template_raw) => {
+    let node = match raw_node {
+        RawNode::Message(raw_template) => {
             let template = {
                 template_parser
-                    .mulan_parse(&template_raw)
+                    .mulan_parse(&raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.default_locale,
                         key: key.to_owned(),
                         errors,
                     })?
             };
-
-            translations(input, key, template_parser, config);
-            todo!();
+            Node::Message(translations(input, key, template, template_parser, config)?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             key.into(),
@@ -149,51 +146,56 @@ fn handle_node(
             template_parser,
             config,
         )?),
-    })
+    };
+    Ok(node)
 }
 
 /// ...
 fn translations<'src>(
     input: &'src Input,
     key: SmallVec1<[CompactString; 1]>,
+    default: Template,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<BTreeMap<Language, Template>, TransformError> {
-    config
-        .locales_except_default()
-        .filter_map(|locale| {
-            let Some(definition) = input.locales.get(&locale) else {
-                return Some(Err(TransformError::LocaleNotFound(locale)));
-            };
-            let node = match definition.at(&key) {
-                Ok(node) => node,
-                Err(DefinitionAtError::NotFound { index: _ }) => return None,
-                Err(DefinitionAtError::NotANamespace { index }) => {
-                    return Some(Err(TransformError::NotANamespace {
-                        locale,
-                        key: key.to_vec1(),
-                        index,
-                    }));
-                }
-            };
-            let Some(raw_template) = node.try_as_message_ref() else {
-                return Some(Err(TransformError::NotAMessage {
-                    locale,
-                    key: key.clone(),
-                }));
-            };
-            let template = match template_parser.mulan_parse(raw_template) {
-                Ok(template) => template,
-                Err(errors) => {
-                    return Some(Err(TransformError::InvalidTemplate {
+) -> Result<Translations, TransformError> {
+    let others = {
+        config
+            .locales_except_default()
+            .filter_map(|locale| {
+                let Some(definition) = input.locales.get(&locale) else {
+                    return Some(Err(TransformError::LocaleNotFound(locale)));
+                };
+                let node = match definition.at(&key) {
+                    Ok(node) => node,
+                    Err(DefinitionAtError::NotFound { index: _ }) => return None,
+                    Err(DefinitionAtError::NotANamespace { index }) => {
+                        return Some(Err(TransformError::NotANamespace {
+                            locale,
+                            key: key.to_vec1(),
+                            index,
+                        }));
+                    }
+                };
+                let Some(raw_template) = node.try_as_message_ref() else {
+                    return Some(Err(TransformError::NotAMessage {
                         locale,
                         key: key.clone(),
-                        errors,
                     }));
-                }
-            };
-            let params = template.parameters().collect::<BTreeSet<_>>();
-            Some(Ok((locale, template)))
-        })
-        .collect()
+                };
+                let template = match template_parser.mulan_parse(raw_template) {
+                    Ok(template) => template,
+                    Err(errors) => {
+                        return Some(Err(TransformError::InvalidTemplate {
+                            locale,
+                            key: key.clone(),
+                            errors,
+                        }));
+                    }
+                };
+                let params = template.parameters().collect::<BTreeSet<_>>();
+                Some(Ok((locale, template)))
+            })
+            .collect::<Result<_, _>>()?
+    };
+    Ok(Translations { default, others })
 }

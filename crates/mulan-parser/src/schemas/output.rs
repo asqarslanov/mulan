@@ -83,12 +83,12 @@ pub enum Node {
 #[derive(Debug)]
 pub struct Translations {
     /// The message written in the default locale.
-    default: Template,
+    pub(super) default: Template,
 
     /// Other translations of the message.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    others: BTreeMap<Language, Template>,
+    pub(super) others: BTreeMap<Language, Template>,
 }
 
 /// ...
