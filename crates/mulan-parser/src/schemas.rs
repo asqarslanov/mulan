@@ -2,6 +2,8 @@
 //!
 //! Defines the transformation logic from [`Input`] to [`Output`].
 
+use std::collections::BTreeMap;
+
 use compact_str::CompactString;
 use foldhash::HashSet;
 use mitsein::btree_set1::BTreeSet1;
@@ -101,32 +103,27 @@ fn traverse_namespace<'src>(
     template_parser: impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
-    let map = {
-        namespace
-            .map
-            .iter()
-            .map(|(raw_subkey, raw_node)| {
-                let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
-                    TransformError::InvalidSubkey {
-                        locale: config.default_locale,
-                        path: key.to_owned(),
-                        errors,
-                    }
-                })?;
-                let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey.clone());
-                let handle_node_result = handle_node(
-                    raw_node,
-                    key,
-                    input,
-                    &subkey_parser,
-                    &template_parser,
-                    config,
-                );
-                let node = handle_node_result?;
-                Ok((subkey, node))
-            })
-            .collect::<Result<_, _>>()?
-    };
+    let mut map = BTreeMap::new();
+    for (raw_subkey, raw_node) in &namespace.map {
+        let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
+            TransformError::InvalidSubkey {
+                locale: config.default_locale,
+                path: key.to_owned(),
+                errors,
+            }
+        })?;
+        let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey.clone());
+        let handle_node_result = handle_node(
+            raw_node,
+            key,
+            input,
+            &subkey_parser,
+            &template_parser,
+            config,
+        );
+        let node = handle_node_result?;
+        map.insert(subkey, node);
+    }
     Ok(Namespace { map })
 }
 
@@ -173,52 +170,48 @@ fn translations<'src>(
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
     let default_params: HashSet<_> = default.parameters().collect();
-    let others = {
-        config
-            .locales_except_default()
-            .filter_map(|locale| {
-                let Some(definition) = input.locales.get(&locale) else {
-                    return Some(Err(TransformError::LocaleNotFound(locale)));
-                };
-                let node = match definition.at(&key) {
-                    Ok(node) => node,
-                    Err(DefinitionAtError::NotFound { index: _ }) => return None,
-                    Err(DefinitionAtError::NotANamespace { index }) => {
-                        return Some(Err(TransformError::NotANamespace {
-                            locale,
-                            key: key.to_vec1(),
-                            index,
-                        }));
-                    }
-                };
-                let Some(raw_template) = node.try_as_message_ref() else {
-                    return Some(Err(TransformError::NotAMessage {
-                        locale,
-                        key: key.clone(),
-                    }));
-                };
-                let template = match template_parser.mulan_parse(raw_template) {
-                    Ok(template) => template,
-                    Err(errors) => {
-                        return Some(Err(TransformError::InvalidTemplate {
-                            locale,
-                            key: key.clone(),
-                            errors,
-                        }));
-                    }
-                };
-                let params = template.parameters().collect::<HashSet<_>>();
-                let unknown_params = params.difference(&default_params).cloned();
-                if let Ok(unknown_params) = unknown_params.try_into_iter1() {
-                    return Some(Err(TransformError::UnknownParameters {
-                        locale,
-                        key: key.clone(),
-                        parameters: unknown_params.cloned().collect1(),
-                    }));
-                }
-                Some(Ok((locale, template)))
-            })
-            .collect::<Result<_, _>>()?
-    };
+    let mut others = BTreeMap::new();
+    for locale in config.locales_except_default() {
+        let Some(definition) = input.locales.get(&locale) else {
+            return Err(TransformError::LocaleNotFound(locale));
+        };
+        let node = match definition.at(&key) {
+            Ok(node) => node,
+            Err(DefinitionAtError::NotFound { index: _ }) => continue,
+            Err(DefinitionAtError::NotANamespace { index }) => {
+                return Err(TransformError::NotANamespace {
+                    locale,
+                    key: key.to_vec1(),
+                    index,
+                });
+            }
+        };
+        let Some(raw_template) = node.try_as_message_ref() else {
+            return Err(TransformError::NotAMessage {
+                locale,
+                key: key.clone(),
+            });
+        };
+        let template = match template_parser.mulan_parse(raw_template) {
+            Ok(template) => template,
+            Err(errors) => {
+                return Err(TransformError::InvalidTemplate {
+                    locale,
+                    key: key.clone(),
+                    errors,
+                });
+            }
+        };
+        let params = template.parameters().collect::<HashSet<_>>();
+        let unknown_params = params.difference(&default_params).cloned();
+        if let Ok(unknown_params) = unknown_params.try_into_iter1() {
+            return Err(TransformError::UnknownParameters {
+                locale,
+                key: key.clone(),
+                parameters: unknown_params.cloned().collect1(),
+            });
+        }
+        others.insert(locale, template);
+    }
     Ok(Translations { default, others })
 }
