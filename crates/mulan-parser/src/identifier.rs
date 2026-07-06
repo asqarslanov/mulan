@@ -12,7 +12,7 @@ use mitsein::small_vec1::SmallVec1;
 ///
 /// This type serves as the underlying representation of
 /// [`Parameter`](crate::template::Parameter) or [`Subkey`](crate::Subkey).
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Identifier {
     words: SmallVec1<[Word; 2]>,
 }
@@ -29,7 +29,7 @@ impl Identifier {
 ///
 /// For example, the identifier `student-bs23-id006` consists of three
 /// [`Word`]s: `student`, `bs23`, and `id006`.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Word {
     pub(super) inner: CompactString,
 }

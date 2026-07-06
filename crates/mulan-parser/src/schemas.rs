@@ -2,19 +2,20 @@
 //!
 //! Defines the transformation logic from [`Input`] to [`Output`].
 
-use std::collections::{BTreeMap, BTreeSet};
-
 use compact_str::CompactString;
+use foldhash::HashSet;
+use mitsein::btree_set1::BTreeSet1;
+use mitsein::iter1::IteratorExt as _;
 use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
-use smallvec::{SmallVec, ToSmallVec as _};
+use smallvec::SmallVec;
 
 pub use self::input::Input; // TODO: use it privately
 use self::input::{DefinitionAtError, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
-use crate::{Namespace, Node, Subkey, Template, Translations};
+use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
 
 mod input;
 pub mod output;
@@ -57,6 +58,13 @@ enum TransformError {
     NotAMessage {
         locale: Language,
         key: SmallVec1<[CompactString; 1]>,
+    },
+
+    /// ...
+    UnknownParameters {
+        locale: Language,
+        key: SmallVec1<[CompactString; 1]>,
+        parameters: BTreeSet1<Parameter>,
     },
 }
 
@@ -158,6 +166,7 @@ fn translations<'src>(
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
+    let default_params: HashSet<_> = default.parameters().collect();
     let others = {
         config
             .locales_except_default()
@@ -192,7 +201,15 @@ fn translations<'src>(
                         }));
                     }
                 };
-                let params = template.parameters().collect::<BTreeSet<_>>();
+                let params = template.parameters().collect::<HashSet<_>>();
+                let unknown_params = params.difference(&default_params).cloned();
+                if let Ok(unknown_params) = unknown_params.try_into_iter1() {
+                    return Some(Err(TransformError::UnknownParameters {
+                        locale,
+                        key: key.clone(),
+                        parameters: unknown_params.cloned().collect1(),
+                    }));
+                }
                 Some(Ok((locale, template)))
             })
             .collect::<Result<_, _>>()?

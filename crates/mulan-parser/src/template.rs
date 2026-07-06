@@ -44,7 +44,7 @@ pub enum TemplatePart {
 }
 
 /// A variable placeholder in a [`Template`] (`{foo}`).
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Parameter {
     name: Identifier,
 }
