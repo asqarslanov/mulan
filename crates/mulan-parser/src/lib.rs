@@ -7,7 +7,6 @@ pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translatio
 pub use self::template::{Parameter, Template, TemplatePart};
 
 mod chumsky_parse;
-pub mod errors;
 mod identifier;
 mod schemas;
 mod template;
