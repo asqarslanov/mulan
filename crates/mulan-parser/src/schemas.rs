@@ -73,8 +73,8 @@ pub enum TransformError {
 /// ...
 pub fn transform<'src>(
     input: &'src Input,
-    subkey_parser: impl ChumskyParser<'src, Subkey>,
-    template_parser: impl ChumskyParser<'src, Template>,
+    subkey_parser: &impl ChumskyParser<'src, Subkey>,
+    template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let default_locale = {
@@ -99,8 +99,8 @@ fn traverse_namespace<'src>(
     key: SmallVec<[CompactString; 1]>,
     namespace: &'src RawNamespace,
     input: &'src Input,
-    subkey_parser: impl ChumskyParser<'src, Subkey>,
-    template_parser: impl ChumskyParser<'src, Template>,
+    subkey_parser: &impl ChumskyParser<'src, Subkey>,
+    template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
@@ -113,14 +113,8 @@ fn traverse_namespace<'src>(
             }
         })?;
         let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey.clone());
-        let handle_node_result = handle_node(
-            raw_node,
-            key,
-            input,
-            &subkey_parser,
-            &template_parser,
-            config,
-        );
+        let handle_node_result =
+            handle_node(raw_node, key, input, subkey_parser, template_parser, config);
         let node = handle_node_result?;
         map.insert(subkey, node);
     }
@@ -132,8 +126,8 @@ fn handle_node<'src>(
     raw_node: &'src RawNode,
     key: SmallVec1<[CompactString; 1]>,
     input: &'src Input,
-    subkey_parser: impl ChumskyParser<'src, Subkey>,
-    template_parser: impl ChumskyParser<'src, Template>,
+    subkey_parser: &impl ChumskyParser<'src, Subkey>,
+    template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
     let node = match raw_node {
@@ -166,7 +160,7 @@ fn translations<'src>(
     input: &'src Input,
     key: SmallVec1<[CompactString; 1]>,
     default: Template,
-    template_parser: impl ChumskyParser<'src, Template>,
+    template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
     let default_params: HashSet<_> = default.parameters().collect();

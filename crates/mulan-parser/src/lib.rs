@@ -20,5 +20,5 @@ pub fn read_and_parse(
     let param_parser = Parameter::chumsky_parser(&ident_parser);
     let template_part_parser = TemplatePart::chumsky_parser(&param_parser);
     let template_parser = Template::chumsky_parser(&template_part_parser);
-    self::schemas::transform(&input, subkey_parser, template_parser, config)
+    self::schemas::transform(&input, &subkey_parser, &template_parser, config)
 }
