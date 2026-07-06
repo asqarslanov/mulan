@@ -7,6 +7,7 @@ mod identifier;
 mod schemas;
 mod template;
 
+/// ...
 pub fn read_and_parse(
     config: &mulan_config::Config,
 ) -> Result<Output, self::schemas::TransformError> {
