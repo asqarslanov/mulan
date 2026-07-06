@@ -5,6 +5,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use compact_str::CompactString;
+use mitsein::slice1::Slice1;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 use smallvec::SmallVec;
@@ -58,6 +59,7 @@ fn transform(
     let namespace = traverse_namespace(
         SmallVec::default(),
         default_locale.root,
+        &input,
         subkey_parser,
         template_parser,
         config,
@@ -69,6 +71,7 @@ fn transform(
 fn traverse_namespace(
     key: SmallVec<[CompactString; 1]>,
     namespace: RawNamespace,
+    input: &Input,
     subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
@@ -87,7 +90,7 @@ fn traverse_namespace(
                 })?;
                 let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey);
                 let handle_node_result =
-                    handle_node(raw_node, key, subkey_parser, template_parser, config);
+                    handle_node(raw_node, key, input, subkey_parser, template_parser, config);
                 let node = handle_node_result?;
                 Ok((subkey, node))
             })
@@ -100,6 +103,7 @@ fn traverse_namespace(
 fn handle_node(
     node: RawNode,
     key: SmallVec1<[CompactString; 1]>,
+    input: &Input,
     subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
@@ -115,11 +119,14 @@ fn handle_node(
                         errors,
                     })?
             };
+
+            translations(input, &key, template_parser, config);
             todo!();
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             key.into(),
             inner_namespace,
+            input,
             subkey_parser,
             template_parser,
             config,
@@ -130,7 +137,7 @@ fn handle_node(
 /// ...
 fn translations<'src>(
     input: &'src Input,
-    path: &SmallVec1<[CompactString; 2]>,
+    path: &Slice1<CompactString>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<BTreeMap<Language, Template>, ()> {
