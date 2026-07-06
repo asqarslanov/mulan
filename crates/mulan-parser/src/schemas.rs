@@ -7,8 +7,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use compact_str::CompactString;
 use mitsein::slice1::Slice1;
 use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 use mulan_config::Language;
-use smallvec::SmallVec;
+use smallvec::{SmallVec, ToSmallVec};
 
 pub use self::input::Input; // TODO: use it privately
 use self::input::{DefinitionAtError, RawNamespace, RawNode};
@@ -38,8 +39,25 @@ enum TransformError {
     /// ...
     InvalidTemplate {
         locale: Language,
-        path: SmallVec1<[CompactString; 1]>,
+        key: SmallVec1<[CompactString; 1]>,
         errors: ChumskyAllErrors,
+    },
+
+    /// ...
+    NotANamespace {
+        locale: Language,
+
+        /// ...
+        key: Vec1<CompactString>,
+
+        /// ...
+        index: usize,
+    },
+
+    /// ...
+    NotAMessage {
+        locale: Language,
+        key: SmallVec1<[CompactString; 1]>,
     },
 }
 
@@ -115,12 +133,12 @@ fn handle_node(
                     .mulan_parse(&template_raw)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.default_locale,
-                        path: key.to_owned(),
+                        key: key.to_owned(),
                         errors,
                     })?
             };
 
-            translations(input, &key, template_parser, config);
+            translations(input, key, template_parser, config);
             todo!();
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
@@ -137,30 +155,45 @@ fn handle_node(
 /// ...
 fn translations<'src>(
     input: &'src Input,
-    path: &Slice1<CompactString>,
+    key: SmallVec1<[CompactString; 1]>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<BTreeMap<Language, Template>, ()> {
+) -> Result<BTreeMap<Language, Template>, TransformError> {
     config
         .locales_except_default()
-        .filter_map(|lang| {
-            let Some(definition) = input.locales.get(&lang) else {
-                return Some(Err(()));
+        .filter_map(|locale| {
+            let Some(definition) = input.locales.get(&locale) else {
+                return Some(Err(TransformError::LocaleNotFound(locale)));
             };
-            let node = match definition.at(path) {
+            let node = match definition.at(&key) {
                 Ok(node) => node,
                 Err(DefinitionAtError::NotFound { index: _ }) => return None,
-                Err(DefinitionAtError::NotANamespace { index: _ }) => return Some(Err(())),
+                Err(DefinitionAtError::NotANamespace { index }) => {
+                    return Some(Err(TransformError::NotANamespace {
+                        locale,
+                        key: key.to_vec1(),
+                        index,
+                    }));
+                }
             };
             let Some(raw_template) = node.try_as_message_ref() else {
-                return Some(Err(()));
+                return Some(Err(TransformError::NotAMessage {
+                    locale,
+                    key: key.clone(),
+                }));
             };
             let template = match template_parser.mulan_parse(raw_template) {
                 Ok(template) => template,
-                Err(_err) => return Some(Err(())),
+                Err(errors) => {
+                    return Some(Err(TransformError::InvalidTemplate {
+                        locale,
+                        key: key.clone(),
+                        errors,
+                    }));
+                }
             };
             let params = template.parameters().collect::<BTreeSet<_>>();
-            Some(Ok((lang, template)))
+            Some(Ok((locale, template)))
         })
         .collect()
 }
