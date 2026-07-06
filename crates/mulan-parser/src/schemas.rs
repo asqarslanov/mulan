@@ -22,7 +22,7 @@ pub mod output;
 
 /// Errors of [`transform`].
 #[derive(Debug)]
-enum TransformError {
+pub enum TransformError {
     /// ...
     LocaleNotFound(Language),
 
@@ -69,7 +69,7 @@ enum TransformError {
 }
 
 /// ...
-fn transform(
+pub fn transform(
     mut input: Input,
     subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
     template_parser: &impl for<'src> ChumskyParser<'src, Template>,
@@ -81,7 +81,7 @@ fn transform(
             .remove(&config.default_locale)
             .ok_or(TransformError::LocaleNotFound(config.default_locale))?
     };
-    let namespace = traverse_namespace(
+    let root = traverse_namespace(
         SmallVec::default(),
         default_locale.root,
         &input,
@@ -89,7 +89,7 @@ fn transform(
         template_parser,
         config,
     )?;
-    Ok(Output { root: todo!() })
+    Ok(Output { root })
 }
 
 /// ...
