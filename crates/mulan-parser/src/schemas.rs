@@ -13,7 +13,7 @@ use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use smallvec::SmallVec;
 
-use self::input::{DefinitionAtError, Input, RawNamespace, RawNode};
+use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
 use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
@@ -72,16 +72,11 @@ pub enum TransformError {
 /// ...
 pub fn transform<'src>(
     input: &'src Input,
+    default_locale: &'src Definition,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
-    let default_locale = {
-        input
-            .locales
-            .get(&config.default_locale)
-            .ok_or(TransformError::LocaleNotFound(config.default_locale))?
-    };
     let root = traverse_namespace(
         SmallVec::default(),
         &default_locale.root,
