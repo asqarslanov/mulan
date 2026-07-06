@@ -13,13 +13,12 @@ use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use smallvec::SmallVec;
 
-pub use self::input::Input; // TODO: use it privately
-use self::input::{DefinitionAtError, RawNamespace, RawNode};
+use self::input::{DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
 use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
 
-mod input;
+pub mod input;
 pub mod output;
 
 /// Errors of [`transform`].
