@@ -118,9 +118,9 @@ mod parser {
     impl Subkey {
         #[must_use]
         pub(crate) fn chumsky_parser<'src>(
-            identifier_parser: &impl ChumskyParser<'src, Identifier>,
+            ident_parser: &impl ChumskyParser<'src, Identifier>,
         ) -> impl ChumskyParser<'src, Self> {
-            identifier_parser.map(|value| Self { value })
+            ident_parser.map(|value| Self { value })
         }
     }
 }
