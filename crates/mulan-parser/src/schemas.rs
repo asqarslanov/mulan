@@ -69,21 +69,21 @@ pub enum TransformError {
 }
 
 /// ...
-pub fn transform(
-    mut input: Input,
-    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
-    template_parser: &impl for<'src> ChumskyParser<'src, Template>,
+pub fn transform<'src>(
+    input: &'src Input,
+    subkey_parser: impl ChumskyParser<'src, Subkey>,
+    template_parser: impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let default_locale = {
         input
             .locales
-            .remove(&config.default_locale)
+            .get(&config.default_locale)
             .ok_or(TransformError::LocaleNotFound(config.default_locale))?
     };
     let root = traverse_namespace(
         SmallVec::default(),
-        default_locale.root,
+        &default_locale.root,
         &input,
         subkey_parser,
         template_parser,
@@ -93,18 +93,18 @@ pub fn transform(
 }
 
 /// ...
-fn traverse_namespace(
+fn traverse_namespace<'src>(
     key: SmallVec<[CompactString; 1]>,
-    namespace: RawNamespace,
-    input: &Input,
-    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
-    template_parser: &impl for<'src> ChumskyParser<'src, Template>,
+    namespace: &'src RawNamespace,
+    input: &'src Input,
+    subkey_parser: impl ChumskyParser<'src, Subkey>,
+    template_parser: impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let map = {
         namespace
             .map
-            .into_iter()
+            .iter()
             .map(|(raw_subkey, raw_node)| {
                 let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
                     TransformError::InvalidSubkey {
@@ -113,9 +113,15 @@ fn traverse_namespace(
                         errors,
                     }
                 })?;
-                let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey);
-                let handle_node_result =
-                    handle_node(raw_node, key, input, subkey_parser, template_parser, config);
+                let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey.clone());
+                let handle_node_result = handle_node(
+                    raw_node,
+                    key,
+                    input,
+                    &subkey_parser,
+                    &template_parser,
+                    config,
+                );
                 let node = handle_node_result?;
                 Ok((subkey, node))
             })
@@ -125,12 +131,12 @@ fn traverse_namespace(
 }
 
 /// ...
-fn handle_node(
-    raw_node: RawNode,
+fn handle_node<'src>(
+    raw_node: &'src RawNode,
     key: SmallVec1<[CompactString; 1]>,
-    input: &Input,
-    subkey_parser: &impl for<'src> ChumskyParser<'src, Subkey>,
-    template_parser: &impl for<'src> ChumskyParser<'src, Template>,
+    input: &'src Input,
+    subkey_parser: impl ChumskyParser<'src, Subkey>,
+    template_parser: impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
     let node = match raw_node {
@@ -163,7 +169,7 @@ fn translations<'src>(
     input: &'src Input,
     key: SmallVec1<[CompactString; 1]>,
     default: Template,
-    template_parser: &impl ChumskyParser<'src, Template>,
+    template_parser: impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
     let default_params: HashSet<_> = default.parameters().collect();
