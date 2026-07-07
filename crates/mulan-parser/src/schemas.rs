@@ -79,7 +79,7 @@ pub fn transform<'src>(
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let root = traverse_namespace(
-        SmallVec::default(),
+        &[],
         &default_locale.root,
         &input,
         subkey_parser,
@@ -91,7 +91,7 @@ pub fn transform<'src>(
 
 /// ...
 fn traverse_namespace<'src>(
-    key: SmallVec<[CompactString; 1]>,
+    key: &[CompactString],
     namespace: &'src RawNamespace,
     input: &'src Input,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
@@ -103,13 +103,22 @@ fn traverse_namespace<'src>(
         let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.default_locale,
-                path: key.to_owned(),
+                path: key.into(),
                 errors,
             }
         })?;
-        let key = SmallVec1::from_rtail_and_head(key.clone(), raw_subkey.clone());
-        let handle_node_result =
-            handle_node(raw_node, key, input, subkey_parser, template_parser, config);
+        let key = SmallVec1::<[CompactString; 1]>::from_rtail_and_head(
+            key.iter().cloned(),
+            raw_subkey.clone(),
+        );
+        let handle_node_result = handle_node(
+            raw_node,
+            &key,
+            input,
+            subkey_parser,
+            template_parser,
+            config,
+        );
         let node = handle_node_result?;
         map.insert(subkey, node);
     }
@@ -119,7 +128,7 @@ fn traverse_namespace<'src>(
 /// ...
 fn handle_node<'src>(
     raw_node: &'src RawNode,
-    key: SmallVec1<[CompactString; 1]>,
+    key: &Slice1<CompactString>,
     input: &'src Input,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
@@ -132,20 +141,14 @@ fn handle_node<'src>(
                     .mulan_parse(&raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.default_locale,
-                        key: key.to_owned(),
+                        key: key.into(),
                         errors,
                     })?
             };
-            Node::Message(translations(
-                input,
-                &key,
-                template,
-                template_parser,
-                config,
-            )?)
+            Node::Message(translations(input, key, template, template_parser, config)?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
-            key.into(),
+            key.as_slice(),
             inner_namespace,
             input,
             subkey_parser,
