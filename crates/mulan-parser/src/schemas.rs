@@ -8,6 +8,7 @@ use compact_str::CompactString;
 use foldhash::HashSet;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
+use mitsein::slice1::Slice1;
 use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
@@ -135,7 +136,13 @@ fn handle_node<'src>(
                         errors,
                     })?
             };
-            Node::Message(translations(input, key, template, template_parser, config)?)
+            Node::Message(translations(
+                input,
+                &key,
+                template,
+                template_parser,
+                config,
+            )?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             key.into(),
@@ -152,7 +159,7 @@ fn handle_node<'src>(
 /// ...
 fn translations<'src>(
     input: &'src Input,
-    key: SmallVec1<[CompactString; 1]>,
+    key: &Slice1<CompactString>,
     default: Template,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
@@ -163,13 +170,13 @@ fn translations<'src>(
         let Some(definition) = input.locales.get(&locale) else {
             return Err(TransformError::LocaleNotFound(locale));
         };
-        let node = match definition.at(&key) {
+        let node = match definition.at(key) {
             Ok(node) => node,
             Err(DefinitionAtError::NotFound { index: _ }) => continue,
             Err(DefinitionAtError::NotANamespace { index }) => {
                 return Err(TransformError::NotANamespace {
                     locale,
-                    key: key.to_vec1(),
+                    key: key.into(),
                     index,
                 });
             }
@@ -177,7 +184,7 @@ fn translations<'src>(
         let Some(raw_template) = node.try_as_message_ref() else {
             return Err(TransformError::NotAMessage {
                 locale,
-                key: key.clone(),
+                key: key.into(),
             });
         };
         let template = match template_parser.mulan_parse(raw_template) {
@@ -185,7 +192,7 @@ fn translations<'src>(
             Err(errors) => {
                 return Err(TransformError::InvalidTemplate {
                     locale,
-                    key: key.clone(),
+                    key: key.into(),
                     errors,
                 });
             }
@@ -195,7 +202,7 @@ fn translations<'src>(
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters {
                 locale,
-                key: key.clone(),
+                key: key.into(),
                 parameters: unknown_params.cloned().collect1(),
             });
         }
