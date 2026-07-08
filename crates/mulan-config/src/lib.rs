@@ -27,7 +27,7 @@ mod language;
 pub struct Config {
     /// ...
     #[serde(skip)]
-    pub source: Option<PathBuf>,
+    pub source: PathBuf,
 
     /// All languages you want to translate your app into.
     ///
@@ -94,7 +94,7 @@ impl Config {
                 .map_err(crate::Error::Figment)
         };
         if let Ok(config) = &mut config {
-            config.source = Some(source.to_owned());
+            config.source = source.to_owned();
         }
         config
     }
@@ -135,7 +135,7 @@ mod tests {
             default-locale = "en-US"
         "#},
         Some(Config {
-            source: None,
+            source: PathBuf::default(),
             locales: [Language::EnUs].iter().copied().collect(),
             default_locale: Language::EnUs,
         }),
@@ -153,7 +153,7 @@ mod tests {
             locales = ["ru-RU", "en-US"]
         "#},
         Some(Config {
-            source: None,
+            source: PathBuf::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             default_locale: Language::RuRu,
         }),
@@ -198,7 +198,7 @@ mod tests {
             jail.create_file("mulan.toml", input)?;
             let mut actual_output = Config::locate_and_read().ok();
             if let Some(config) = &mut actual_output {
-                config.source = None;
+                config.source = PathBuf::default();
             }
             if actual_output != expected_output {
                 return Err(formatdoc! {"
