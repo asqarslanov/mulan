@@ -1,6 +1,7 @@
 //! See [`Config`].
 
 use std::collections::BTreeSet;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::{env, io};
 
@@ -27,7 +28,7 @@ mod language;
 #[serde(rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
 pub struct Config {
-    /// ...
+    /// Information about the execution context obtained at runtime.
     #[serde(skip)]
     pub meta: crate::Meta,
 
@@ -49,17 +50,15 @@ pub struct Config {
     pub default_locale: Language,
 }
 
-/// ...
+/// See [`Config::meta`].
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Meta {
-    /// ...
+    /// See [`std::env::current_dir`].
     pub current_dir: PathBuf,
 
-    /// ...
+    /// The path of the project root directory Mulan is operating on,
+    /// relative to [`Self::current_dir`].
     pub root_dir: RelativePathBuf,
-
-    /// ...
-    pub config_path: RelativePathBuf,
 }
 
 /// Errors of [`Config::locate_and_read`].
@@ -87,7 +86,7 @@ impl crate::Config {
     pub fn locate_and_read() -> Result<Self, crate::Error> {
         let current_dir = env::current_dir().map_err(crate::Error::CurrentDir)?;
         let figment_result = Figment::from(Toml::file("mulan.toml"));
-        let (root_dir, config_path) = {
+        let (root_dir, _config_file) = {
             figment_result
                 .metadata()
                 .filter_map(|metadata| {
@@ -102,17 +101,17 @@ impl crate::Config {
                     if source_absolute.is_relative() {
                         return None;
                     }
-                    let root_dir_absolute = {
+                    let (root_dir_absolute, config_file) = {
                         source_absolute
                             .parent()
+                            .zip(source_absolute.file_name().and_then(OsStr::to_str))
                             .expect("config source should point to a file")
                     };
                     let root_dir_raw = pathdiff::diff_paths(root_dir_absolute, &current_dir)
                         .expect("current_dir can be subtracted from config source");
                     let root_dir = RelativePathBuf::from_path(root_dir_raw)
                         .expect("pathdiff::diff_paths returns a relative path");
-                    let config_path = RelativePathBuf::from("mulan.toml");
-                    Some((root_dir, config_path))
+                    Some((root_dir, config_file))
                 })
                 .exactly_one()
                 .map_err(|locations| {
@@ -121,7 +120,7 @@ impl crate::Config {
                         .map_or(crate::Error::SourceNotFound, |sources_raw| {
                             let sources = {
                                 sources_raw
-                                    .map(|(root_dir, config_path)| root_dir.join(config_path))
+                                    .map(|(root_dir, config_file)| root_dir.join(&config_file))
                                     .collect1()
                             };
                             crate::Error::AmbiguousSource(sources)
@@ -137,7 +136,6 @@ impl crate::Config {
             config.meta = crate::Meta {
                 current_dir,
                 root_dir,
-                config_path,
             };
         }
         config
