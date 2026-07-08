@@ -110,6 +110,7 @@ impl Input {
     pub fn read(config: &mulan_config::Config) -> Result<Self, ReadLocaleError> {
         let locales_dir = {
             config
+                .meta
                 .source
                 .parent()
                 .expect("config source should point to a file")
@@ -120,8 +121,9 @@ impl Input {
                 .locales
                 .iter()
                 .map(|&locale| {
-                    let path = locales_dir.join(locale.tag()).with_added_extension("yaml");
-                    let definition = Definition::read(path.into())?;
+                    let path = locales_dir.join(locale.tag()).with_extension("yaml");
+                    let definition =
+                        Definition::read(path.to_path(&config.meta.current_dir).into())?;
                     Ok((locale, definition))
                 })
                 .collect::<Result<_, _>>()?

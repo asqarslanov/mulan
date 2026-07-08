@@ -2,12 +2,14 @@
 
 use std::collections::BTreeSet;
 use std::path::PathBuf;
+use std::{env, io};
 
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
+use relative_path::RelativePathBuf;
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -27,7 +29,7 @@ mod language;
 pub struct Config {
     /// ...
     #[serde(skip)]
-    pub source: PathBuf,
+    pub meta: crate::Meta,
 
     /// All languages you want to translate your app into.
     ///
@@ -47,6 +49,16 @@ pub struct Config {
     pub default_locale: Language,
 }
 
+/// ...
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct Meta {
+    /// ...
+    pub current_dir: PathBuf,
+
+    /// ...
+    pub source: RelativePathBuf,
+}
+
 /// Errors of [`Config::locate_and_read`].
 #[derive(Debug)]
 pub enum Error {
@@ -57,7 +69,10 @@ pub enum Error {
     SourceNotFound,
 
     /// ...
-    AmbiguousSource(BTreeSet1<PathBuf>),
+    AmbiguousSource(BTreeSet1<RelativePathBuf>),
+
+    /// ...
+    CurrentDir(io::Error),
 }
 
 impl Config {
@@ -67,24 +82,36 @@ impl Config {
     /// Uses [`mod@figment2`] under the hood.
     #[allow(clippy::result_large_err)]
     pub fn locate_and_read() -> Result<Self, crate::Error> {
+        let current_dir = env::current_dir().map_err(crate::Error::CurrentDir)?;
         let figment_result = Figment::from(Toml::file("mulan.toml"));
         let source = {
             figment_result
                 .metadata()
-                .map(|metadata| {
-                    metadata
-                        .source
-                        .as_ref()
-                        .expect("all sources are predetermined")
-                        .file_path()
-                        .expect("config is only read from a file")
+                .filter_map(|metadata| {
+                    let source_absolute = {
+                        metadata
+                            .source
+                            .as_ref()
+                            .expect("all sources are predetermined")
+                            .file_path()
+                            .expect("config is only read from a file")
+                    };
+                    if source_absolute == "mulan.toml" {
+                        return None;
+                    }
+                    let source_relative = pathdiff::diff_paths(source_absolute, &current_dir)
+                        .expect("current_dir can be subtracted from config source");
+                    Some(
+                        RelativePathBuf::from_path(source_relative)
+                            .expect("pathdiff::diff_paths returns a relative path"),
+                    )
                 })
                 .exactly_one()
                 .map_err(|locations| {
                     locations
                         .try_into_iter1()
                         .map_or(crate::Error::SourceNotFound, |sources| {
-                            crate::Error::AmbiguousSource(sources.map(ToOwned::to_owned).collect1())
+                            crate::Error::AmbiguousSource(sources.collect1())
                         })
                 })?
         };
@@ -94,7 +121,10 @@ impl Config {
                 .map_err(crate::Error::Figment)
         };
         if let Ok(config) = &mut config {
-            config.source = source.to_owned();
+            config.meta = crate::Meta {
+                current_dir,
+                source: source.to_owned(),
+            };
         }
         config
     }
@@ -134,8 +164,8 @@ mod tests {
             locales = ["en-US"]
             default-locale = "en-US"
         "#},
-        Some(Config {
-            source: PathBuf::default(),
+        Some(crate::Config {
+            meta: crate::Meta::default(),
             locales: [Language::EnUs].iter().copied().collect(),
             default_locale: Language::EnUs,
         }),
@@ -152,8 +182,8 @@ mod tests {
             default-locale = "ru-RU"
             locales = ["ru-RU", "en-US"]
         "#},
-        Some(Config {
-            source: PathBuf::default(),
+        Some(crate::Config {
+            meta: crate::Meta::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             default_locale: Language::RuRu,
         }),
@@ -198,7 +228,7 @@ mod tests {
             jail.create_file("mulan.toml", input)?;
             let mut actual_output = Config::locate_and_read().ok();
             if let Some(config) = &mut actual_output {
-                config.source = PathBuf::default();
+                config.meta = crate::Meta::default();
             }
             if actual_output != expected_output {
                 return Err(formatdoc! {"
