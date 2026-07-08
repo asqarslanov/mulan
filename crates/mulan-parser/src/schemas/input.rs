@@ -107,10 +107,19 @@ pub enum ReadLocaleError {
 
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn read() -> Result<Self, ReadLocaleError> {
-        let en_us_path = Path::new("locales/en-US.yaml");
-        let en_us_definition = Definition::read(en_us_path.into())?;
-        let locales = iter::once((Language::EnUs, en_us_definition)).collect();
+    pub fn read(config: &mulan_config::Config) -> Result<Self, ReadLocaleError> {
+        let locales_dir = Path::new("locales/");
+        let locales = {
+            config
+                .locales
+                .iter()
+                .map(|&locale| {
+                    let path = locales_dir.join(locale.tag()).with_added_extension("yaml");
+                    let definition = Definition::read(path.into())?;
+                    Ok((locale, definition))
+                })
+                .collect::<Result<_, _>>()?
+        };
         Ok(Self { locales })
     }
 }

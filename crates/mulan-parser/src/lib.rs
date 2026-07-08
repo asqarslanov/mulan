@@ -13,7 +13,7 @@ mod template;
 
 /// ...
 pub fn read_and_parse(config: &mulan_config::Config) -> Result<Output, TransformError> {
-    let mut input = Input::read().unwrap();
+    let mut input = Input::read(config).unwrap();
     let default_locale = {
         input
             .locales
