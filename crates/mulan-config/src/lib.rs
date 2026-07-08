@@ -120,7 +120,7 @@ impl crate::Config {
                         .map_or(crate::Error::SourceNotFound, |sources_raw| {
                             let sources = {
                                 sources_raw
-                                    .map(|(root_dir, config_file)| root_dir.join(&config_file))
+                                    .map(|(root_dir, config_file)| root_dir.join(config_file))
                                     .collect1()
                             };
                             crate::Error::AmbiguousSource(sources)
@@ -129,7 +129,7 @@ impl crate::Config {
         };
         let mut config = {
             figment_result
-                .extract::<crate::Config>()
+                .extract::<Self>()
                 .map_err(crate::Error::Figment)
         };
         if let Ok(config) = &mut config {

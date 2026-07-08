@@ -202,7 +202,7 @@ impl Definition {
                 node.try_as_namespace_ref()
                     .ok_or(DefinitionAtError::NotANamespace { index })?
             };
-            index += 1
+            index += 1;
         }
         namespace
             .map

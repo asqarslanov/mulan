@@ -81,7 +81,7 @@ pub fn transform<'src>(
     let root = traverse_namespace(
         &[],
         &default_locale.root,
-        &input,
+        input,
         subkey_parser,
         template_parser,
         config,
@@ -100,7 +100,7 @@ fn traverse_namespace<'src>(
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
     for (raw_subkey, raw_node) in &namespace.map {
-        let subkey = subkey_parser.mulan_parse(&raw_subkey).map_err(|errors| {
+        let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.default_locale,
                 path: key.into(),
@@ -138,7 +138,7 @@ fn handle_node<'src>(
         RawNode::Message(raw_template) => {
             let template = {
                 template_parser
-                    .mulan_parse(&raw_template)
+                    .mulan_parse(raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.default_locale,
                         key: key.into(),
@@ -201,7 +201,7 @@ fn translations<'src>(
             }
         };
         let params = template.parameters().collect::<HashSet<_>>();
-        let unknown_params = params.difference(&default_params).cloned();
+        let unknown_params = params.difference(&default_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters {
                 locale,
