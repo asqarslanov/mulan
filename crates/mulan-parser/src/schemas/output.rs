@@ -91,7 +91,7 @@ pub struct Translations {
     pub(super) others: BTreeMap<Language, Template>,
 }
 
-/// ...
+/// Defines parsers with [`mod@chumsky`].
 mod parser {
     use chumsky::prelude::*;
     use smallvec::SmallVec;

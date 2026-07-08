@@ -49,7 +49,7 @@ pub struct Parameter {
     name: Identifier,
 }
 
-/// ...
+/// Defines parsers with [`mod@chumsky`].
 mod parser {
     use chumsky::prelude::*;
 

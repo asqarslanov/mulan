@@ -34,7 +34,7 @@ pub struct Word {
     pub(super) inner: CompactString,
 }
 
-/// ...
+/// Defines parsers with [`mod@chumsky`].
 mod parser {
     use chumsky::prelude::*;
     use mitsein::iter1::IteratorExt as _;
