@@ -39,6 +39,7 @@ miette = "7.6.0"
 mitsein = "0.9.0"
 mulan-config = { path = "crates/mulan-config/" }
 mulan-parser = { path = "crates/mulan-parser/" }
+relative-path = "2.0.1"
 rstest = "0.26.1"
 serde = "1.0.228"
 serde-saphyr = "0.0.28"
