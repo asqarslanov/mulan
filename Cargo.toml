@@ -34,6 +34,7 @@ compact_str = "0.9.1"
 figment2 = "0.11.5"
 foldhash = "0.2.0"
 indoc = "2.0.7"
+itertools = "0.15.0"
 miette = "7.6.0"
 mitsein = "0.9.0"
 mulan-config = { path = "crates/mulan-config/" }

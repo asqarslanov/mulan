@@ -12,6 +12,7 @@ publish.workspace = true
 
 [dependencies]
 figment2 = { workspace = true, features = ["test", "toml"] }
+itertools = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 serdev = { workspace = true }
