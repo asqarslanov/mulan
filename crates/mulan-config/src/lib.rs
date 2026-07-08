@@ -1,4 +1,4 @@
-//! See [`Config`].
+//! See [`Config`] and [`Config::locate_and_read`].
 
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
@@ -64,16 +64,16 @@ pub struct Meta {
 /// Errors of [`Config::locate_and_read`].
 #[derive(Debug)]
 pub enum Error {
-    /// ...
+    /// An error of the underlying library that handles parsing the config.
     Figment(figment2::Error),
 
-    /// ...
+    /// Unable to locate a config file anywhere.
     SourceNotFound,
 
-    /// ...
+    /// Multiple config files found (only one is permitted).
     AmbiguousSource(BTreeSet1<RelativePathBuf>),
 
-    /// ...
+    /// Failed to call [`std::env::current_dir`].
     CurrentDir(io::Error),
 }
 
