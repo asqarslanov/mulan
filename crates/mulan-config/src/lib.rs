@@ -9,7 +9,7 @@ use figment2::providers::{Format as _, Toml};
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
-use relative_path::{RelativePath, RelativePathBuf};
+use relative_path::RelativePathBuf;
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -56,16 +56,10 @@ pub struct Meta {
     pub current_dir: PathBuf,
 
     /// ...
-    pub source: RelativePathBuf,
-}
+    pub root_dir: RelativePathBuf,
 
-impl crate::Meta {
     /// ...
-    pub fn root_dir(&self) -> &RelativePath {
-        self.source
-            .parent()
-            .expect("config source should point to a file")
-    }
+    pub config_path: RelativePathBuf,
 }
 
 /// Errors of [`Config::locate_and_read`].
@@ -93,7 +87,7 @@ impl crate::Config {
     pub fn locate_and_read() -> Result<Self, crate::Error> {
         let current_dir = env::current_dir().map_err(crate::Error::CurrentDir)?;
         let figment_result = Figment::from(Toml::file("mulan.toml"));
-        let source = {
+        let (root_dir, config_path) = {
             figment_result
                 .metadata()
                 .filter_map(|metadata| {
@@ -105,22 +99,32 @@ impl crate::Config {
                             .file_path()
                             .expect("config is only read from a file")
                     };
-                    if source_absolute == "mulan.toml" {
+                    if source_absolute.is_relative() {
                         return None;
                     }
-                    let source_relative = pathdiff::diff_paths(source_absolute, &current_dir)
+                    let root_dir_absolute = {
+                        source_absolute
+                            .parent()
+                            .expect("config source should point to a file")
+                    };
+                    let root_dir_raw = pathdiff::diff_paths(root_dir_absolute, &current_dir)
                         .expect("current_dir can be subtracted from config source");
-                    Some(
-                        RelativePathBuf::from_path(source_relative)
-                            .expect("pathdiff::diff_paths returns a relative path"),
-                    )
+                    let root_dir = RelativePathBuf::from_path(root_dir_raw)
+                        .expect("pathdiff::diff_paths returns a relative path");
+                    let config_path = RelativePathBuf::from("mulan.toml");
+                    Some((root_dir, config_path))
                 })
                 .exactly_one()
                 .map_err(|locations| {
                     locations
                         .try_into_iter1()
-                        .map_or(crate::Error::SourceNotFound, |sources| {
-                            crate::Error::AmbiguousSource(sources.collect1())
+                        .map_or(crate::Error::SourceNotFound, |sources_raw| {
+                            let sources = {
+                                sources_raw
+                                    .map(|(root_dir, config_path)| root_dir.join(config_path))
+                                    .collect1()
+                            };
+                            crate::Error::AmbiguousSource(sources)
                         })
                 })?
         };
@@ -132,7 +136,8 @@ impl crate::Config {
         if let Ok(config) = &mut config {
             config.meta = crate::Meta {
                 current_dir,
-                source: source.to_owned(),
+                root_dir,
+                config_path,
             };
         }
         config
