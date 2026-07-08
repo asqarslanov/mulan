@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
-use std::{fs, io, iter};
+use std::{fs, io};
 
 use compact_str::CompactString;
 use foldhash::HashMap;
@@ -217,6 +217,7 @@ impl Definition {
 #[cfg(test)]
 mod tests {
     use std::io::Write as _;
+    use std::iter;
 
     use compact_str::CompactString;
     use foldhash::HashMap;
