@@ -785,6 +785,7 @@ dependencies = [
  "figment2",
  "indoc",
  "itertools 0.15.0",
+ "mitsein",
  "rstest",
  "serde",
  "serde_with",
