@@ -1,11 +1,13 @@
 //! See [`Config`].
 
 use std::collections::BTreeSet;
-use std::io;
 use std::path::PathBuf;
 
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
+use itertools::Itertools as _;
+use mitsein::btree_set1::BTreeSet1;
+use mitsein::iter1::IteratorExt as _;
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -23,6 +25,10 @@ mod language;
 #[serde(rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
 pub struct Config {
+    /// ...
+    #[serde(skip)]
+    pub source: Option<PathBuf>,
+
     /// All languages you want to translate your app into.
     ///
     /// A list of non-duplicate
@@ -43,12 +49,15 @@ pub struct Config {
 
 /// Errors of [`Config::locate_and_read`].
 #[derive(Debug)]
-pub enum ReadConfigError {
-    /// Failed to read the file.
-    Io { path: PathBuf, error: io::Error },
+pub enum Error {
+    /// ...
+    Figment(figment2::Error),
 
-    /// Failed to parse the TOML file according to the schema.
-    Format(toml::de::Error),
+    /// ...
+    SourceNotFound,
+
+    /// ...
+    AmbiguousSource(BTreeSet1<PathBuf>),
 }
 
 impl Config {
@@ -57,8 +66,37 @@ impl Config {
     ///
     /// Uses [`mod@figment2`] under the hood.
     #[allow(clippy::result_large_err)]
-    pub fn locate_and_read() -> figment2::Result<Self> {
-        Figment::from(Toml::file("mulan.toml")).extract()
+    pub fn locate_and_read() -> Result<Self, crate::Error> {
+        let figment_result = Figment::from(Toml::file("mulan.toml"));
+        let source = {
+            figment_result
+                .metadata()
+                .map(|metadata| {
+                    metadata
+                        .source
+                        .as_ref()
+                        .expect("all sources are predetermined")
+                        .file_path()
+                        .expect("config is only read from a file")
+                })
+                .exactly_one()
+                .map_err(|locations| {
+                    locations
+                        .try_into_iter1()
+                        .map_or(crate::Error::SourceNotFound, |sources| {
+                            crate::Error::AmbiguousSource(sources.map(ToOwned::to_owned).collect1())
+                        })
+                })?
+        };
+        let mut config = {
+            figment_result
+                .extract::<crate::Config>()
+                .map_err(crate::Error::Figment)
+        };
+        if let Ok(config) = &mut config {
+            config.source = Some(source.to_owned());
+        }
+        config
     }
 
     /// Returns an iterator over [`Self::locales`]
@@ -97,6 +135,7 @@ mod tests {
             default-locale = "en-US"
         "#},
         Some(Config {
+            source: None,
             locales: [Language::EnUs].iter().copied().collect(),
             default_locale: Language::EnUs,
         }),
@@ -114,6 +153,7 @@ mod tests {
             locales = ["ru-RU", "en-US"]
         "#},
         Some(Config {
+            source: None,
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             default_locale: Language::RuRu,
         }),
@@ -156,7 +196,10 @@ mod tests {
     fn read(#[case] input: &str, #[case] expected_output: Option<Config>) {
         figment2::Jail::expect_with(|jail| {
             jail.create_file("mulan.toml", input)?;
-            let actual_output = Config::locate_and_read().ok();
+            let mut actual_output = Config::locate_and_read().ok();
+            if let Some(config) = &mut actual_output {
+                config.source = None;
+            }
             if actual_output != expected_output {
                 return Err(formatdoc! {"
                     assertion `left == right` failed
