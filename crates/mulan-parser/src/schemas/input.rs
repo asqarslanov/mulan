@@ -108,7 +108,13 @@ pub enum ReadLocaleError {
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
     pub fn read(config: &mulan_config::Config) -> Result<Self, ReadLocaleError> {
-        let locales_dir = Path::new("locales/");
+        let locales_dir = {
+            config
+                .source
+                .parent()
+                .expect("config source should point to a file")
+                .join("locales/")
+        };
         let locales = {
             config
                 .locales
