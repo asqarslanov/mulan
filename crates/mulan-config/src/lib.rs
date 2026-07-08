@@ -9,7 +9,7 @@ use figment2::providers::{Format as _, Toml};
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
-use relative_path::RelativePathBuf;
+use relative_path::{RelativePath, RelativePathBuf};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -59,6 +59,15 @@ pub struct Meta {
     pub source: RelativePathBuf,
 }
 
+impl crate::Meta {
+    /// ...
+    pub fn root_dir(&self) -> &RelativePath {
+        self.source
+            .parent()
+            .expect("config source should point to a file")
+    }
+}
+
 /// Errors of [`Config::locate_and_read`].
 #[derive(Debug)]
 pub enum Error {
@@ -75,7 +84,7 @@ pub enum Error {
     CurrentDir(io::Error),
 }
 
-impl Config {
+impl crate::Config {
     /// Tries to find the most appropriate config file in the filesystem
     /// and read + validate it.
     ///
@@ -223,10 +232,10 @@ mod tests {
         "#},
         None,
     )]
-    fn read(#[case] input: &str, #[case] expected_output: Option<Config>) {
+    fn read(#[case] input: &str, #[case] expected_output: Option<crate::Config>) {
         figment2::Jail::expect_with(|jail| {
             jail.create_file("mulan.toml", input)?;
-            let mut actual_output = Config::locate_and_read().ok();
+            let mut actual_output = crate::Config::locate_and_read().ok();
             if let Some(config) = &mut actual_output {
                 config.meta = crate::Meta::default();
             }
