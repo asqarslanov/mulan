@@ -6,7 +6,8 @@ use std::{fs, io};
 
 use compact_str::CompactString;
 use foldhash::HashMap;
-use mitsein::iter1::IntoIterator1;
+use mitsein::iter1::IntoIterator1 as _;
+use mitsein::slice1::Slice1;
 use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
@@ -186,12 +187,7 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at<I>(&self, path: I) -> Result<&RawNode, DefinitionAtError>
-    where
-        I: IntoIterator1,
-        I::Item: AsRef<str>,
-        I::IntoIter: DoubleEndedIterator,
-    {
+    pub fn at(&self, path: &Slice1<CompactString>) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
         let (subkeys, last_subkey) = path.into_iter1().into_rtail_and_head();
@@ -199,7 +195,7 @@ impl Definition {
             let node = {
                 namespace
                     .map
-                    .get(subkey.as_ref())
+                    .get(subkey)
                     .ok_or(DefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -210,7 +206,7 @@ impl Definition {
         }
         namespace
             .map
-            .get(last_subkey.as_ref())
+            .get(last_subkey)
             .ok_or(DefinitionAtError::NotFound { index })
     }
 }
@@ -223,6 +219,7 @@ mod tests {
     use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
+    use mitsein::small_vec1::SmallVec1;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -388,7 +385,13 @@ mod tests {
             write!(file, "{DEFINITION_RAW}").unwrap();
             Definition::read(file.path().into()).unwrap()
         };
-        let actual_output = definition.at(key.segments.iter1().map(Subkey::to_kebab_case));
+        let key = {
+            key.segments
+                .iter1()
+                .map(Subkey::to_kebab_case)
+                .collect1::<SmallVec1<[_; 1]>>()
+        };
+        let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
             PseudoNode::Message(contents) => RawNode::Message(contents.into()),
             PseudoNode::Namespace(contents) => {
