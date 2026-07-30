@@ -51,6 +51,8 @@ impl ConfigMeta {
                             .expect("config is only read from a file")
                     };
                     if source_absolute.is_relative() {
+                        // When no source is found, returns the filename we're looking for
+                        // (e.g., the string `"mulan.toml"`).
                         return None;
                     }
                     let (root_dir_absolute, config_file) = {

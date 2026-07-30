@@ -56,6 +56,7 @@ impl crate::Config {
         let meta = ConfigMeta::compute(&figment).map_err(ConfigError::Meta)?;
         let mut config = figment.extract::<Self>().map_err(ConfigError::Figment);
         if let Ok(config) = &mut config {
+            // Its value was `serde(skip)`ped (only available at runtime).
             config.meta = meta;
         }
         config
