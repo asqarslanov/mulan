@@ -64,7 +64,7 @@ impl Subkey {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Key {
     /// ...
-    pub(crate) segments: SmallVec1<[Subkey; 2]>,
+    pub(crate) segments: SmallVec1<[Subkey; 1]>,
 }
 
 /// A value in a [`Namespace`].
