@@ -88,7 +88,7 @@ pub enum ConfigError {
     /// An error of the underlying library that handles parsing the config.
     Figment(figment2::Error),
 
-    /// ...
+    /// An error while obtaining runtime context.
     Meta(MetaError),
 }
 

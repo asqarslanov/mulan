@@ -35,6 +35,7 @@ pub enum MetaError {
 }
 
 impl ConfigMeta {
+    /// Obtain runtime context needed for the config.
     pub(super) fn compute(figment: &Figment) -> Result<Self, MetaError> {
         let current_dir = env::current_dir().map_err(MetaError::CurrentDir)?;
         let (root_dir, _config_file) = {
