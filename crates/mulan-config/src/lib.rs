@@ -30,7 +30,7 @@ mod language;
 pub struct Config {
     /// Information about the execution context obtained at runtime.
     #[serde(skip)]
-    pub meta: crate::Meta,
+    pub meta: ConfigMeta,
 
     /// All languages you want to translate your app into.
     ///
@@ -50,9 +50,56 @@ pub struct Config {
     pub default_locale: Language,
 }
 
+impl crate::Config {
+    /// Tries to find the most appropriate config file in the filesystem
+    /// and read + validate it.
+    ///
+    /// Uses [`mod@figment2`] under the hood.
+    #[allow(clippy::result_large_err)]
+    pub fn locate_and_read() -> Result<Self, ConfigError> {
+        let figment = Figment::from(Toml::file("mulan.toml"));
+        let meta = ConfigMeta::new(&figment).map_err(ConfigError::Meta)?;
+        let mut config = figment.extract::<Self>().map_err(ConfigError::Figment);
+        if let Ok(config) = &mut config {
+            config.meta = meta;
+        }
+        config
+    }
+
+    /// Returns an iterator over [`Self::locales`]
+    /// with [`Self::default_locale`] filtered out.
+    pub fn locales_except_default(&self) -> impl Iterator<Item = Language> {
+        self.locales
+            .iter()
+            .copied()
+            .filter(|&locale| locale != self.default_locale)
+    }
+
+    /// Used at deserialization with [`mod@serdev`].
+    fn validate(&self) -> Result<(), String> {
+        if !self.locales.contains(&self.default_locale) {
+            return Err(format!(
+                "`locales` should contain default locale (\"{}\")",
+                self.default_locale.tag(),
+            ));
+        }
+        Ok(())
+    }
+}
+
+/// Errors of [`Config::locate_and_read`].
+#[derive(Debug)]
+pub enum ConfigError {
+    /// An error of the underlying library that handles parsing the config.
+    Figment(figment2::Error),
+
+    /// ...
+    Meta(MetaError),
+}
+
 /// See [`Config::meta`].
 #[derive(Debug, Default, PartialEq, Eq)]
-pub struct Meta {
+pub struct ConfigMeta {
     /// See [`std::env::current_dir`].
     pub current_dir: PathBuf,
 
@@ -61,33 +108,24 @@ pub struct Meta {
     pub root_dir: RelativePathBuf,
 }
 
-/// Errors of [`Config::locate_and_read`].
+/// ...
 #[derive(Debug)]
-pub enum Error {
-    /// An error of the underlying library that handles parsing the config.
-    Figment(figment2::Error),
+pub enum MetaError {
+    /// Failed to call [`std::env::current_dir`].
+    CurrentDir(io::Error),
 
     /// Unable to locate a config file anywhere.
     SourceNotFound,
 
     /// Multiple config files found (only one is permitted).
     AmbiguousSource(BTreeSet1<RelativePathBuf>),
-
-    /// Failed to call [`std::env::current_dir`].
-    CurrentDir(io::Error),
 }
 
-impl crate::Config {
-    /// Tries to find the most appropriate config file in the filesystem
-    /// and read + validate it.
-    ///
-    /// Uses [`mod@figment2`] under the hood.
-    #[allow(clippy::result_large_err)]
-    pub fn locate_and_read() -> Result<Self, crate::Error> {
-        let current_dir = env::current_dir().map_err(crate::Error::CurrentDir)?;
-        let figment_result = Figment::from(Toml::file("mulan.toml"));
+impl ConfigMeta {
+    fn new(figment: &Figment) -> Result<Self, MetaError> {
+        let current_dir = env::current_dir().map_err(MetaError::CurrentDir)?;
         let (root_dir, _config_file) = {
-            figment_result
+            figment
                 .metadata()
                 .filter_map(|metadata| {
                     let source_absolute = {
@@ -117,48 +155,20 @@ impl crate::Config {
                 .map_err(|locations| {
                     locations
                         .try_into_iter1()
-                        .map_or(crate::Error::SourceNotFound, |sources_raw| {
+                        .map_or(MetaError::SourceNotFound, |sources_raw| {
                             let sources = {
                                 sources_raw
                                     .map(|(root_dir, config_file)| root_dir.join(config_file))
                                     .collect1()
                             };
-                            crate::Error::AmbiguousSource(sources)
+                            MetaError::AmbiguousSource(sources)
                         })
                 })?
         };
-        let mut config = {
-            figment_result
-                .extract::<Self>()
-                .map_err(crate::Error::Figment)
-        };
-        if let Ok(config) = &mut config {
-            config.meta = crate::Meta {
-                current_dir,
-                root_dir,
-            };
-        }
-        config
-    }
-
-    /// Returns an iterator over [`Self::locales`]
-    /// with [`Self::default_locale`] filtered out.
-    pub fn locales_except_default(&self) -> impl Iterator<Item = Language> {
-        self.locales
-            .iter()
-            .copied()
-            .filter(|&locale| locale != self.default_locale)
-    }
-
-    /// Used at deserialization with [`mod@serdev`].
-    fn validate(&self) -> Result<(), String> {
-        if !self.locales.contains(&self.default_locale) {
-            return Err(format!(
-                "`locales` should contain default locale (\"{}\")",
-                self.default_locale.tag(),
-            ));
-        }
-        Ok(())
+        Ok(Self {
+            current_dir,
+            root_dir,
+        })
     }
 }
 
@@ -177,7 +187,7 @@ mod tests {
             default-locale = "en-US"
         "#},
         Some(crate::Config {
-            meta: crate::Meta::default(),
+            meta: ConfigMeta::default(),
             locales: [Language::EnUs].iter().copied().collect(),
             default_locale: Language::EnUs,
         }),
@@ -195,7 +205,7 @@ mod tests {
             locales = ["ru-RU", "en-US"]
         "#},
         Some(crate::Config {
-            meta: crate::Meta::default(),
+            meta: ConfigMeta::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             default_locale: Language::RuRu,
         }),
@@ -240,7 +250,7 @@ mod tests {
             jail.create_file("mulan.toml", input)?;
             let mut actual_output = crate::Config::locate_and_read().ok();
             if let Some(config) = &mut actual_output {
-                config.meta = crate::Meta::default();
+                config.meta = ConfigMeta::default();
             }
             if actual_output != expected_output {
                 return Err(formatdoc! {"
