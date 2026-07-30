@@ -21,7 +21,8 @@ mod identifier;
 mod schemas;
 mod template;
 
-/// ...
+/// Does all the heavy-lifting (locating locales, parsing, transforming).
+/// The result of this function can be used to generate bindings.
 pub fn execute(config: &mulan_config::Config) -> Result<Output, TransformError> {
     let mut input = Input::read(config).unwrap();
     let default_locale = {
