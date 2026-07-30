@@ -135,7 +135,8 @@ pub enum DefinitionAtError {
         index: usize,
     },
 
-    /// Tried to access a subkey pointing to a message as a namespace.
+    /// Tried to access a subkey as a namespace, but it turned out
+    /// to point at a message.
     NotANamespace {
         /// The index (0-based) of the misinterpreted subkey.
         index: usize,
