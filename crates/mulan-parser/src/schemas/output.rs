@@ -50,7 +50,7 @@ pub struct Subkey {
 }
 
 impl Subkey {
-    /// ...
+    /// Converts this subkey to a kebab-case string (e.g., `user1-settings`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString {
         self.value.to_kebab_case()

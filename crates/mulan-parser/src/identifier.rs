@@ -18,7 +18,7 @@ pub struct Identifier {
 }
 
 impl Identifier {
-    /// ...
+    /// Converts this identifier to a kebab-case string (e.g., `lorem02-ipsum67`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString {
         self.words.iter().map(|word| &word.inner).join_compact("-")
