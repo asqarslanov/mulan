@@ -16,8 +16,10 @@ use figment2::providers::{Format as _, Toml};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
-pub use self::meta::{ConfigMeta, MetaError};
+pub use self::meta::ConfigMeta;
+use crate::errors::ConfigError;
 
+pub mod errors;
 mod language;
 mod meta;
 
@@ -90,16 +92,6 @@ impl crate::Config {
         }
         Ok(())
     }
-}
-
-/// Errors of [`Config::locate_and_read`].
-#[derive(Debug)]
-pub enum ConfigError {
-    /// An error of the underlying library that handles parsing the config.
-    Figment(figment2::Error),
-
-    /// An error while obtaining runtime context.
-    Meta(MetaError),
 }
 
 #[cfg(test)]

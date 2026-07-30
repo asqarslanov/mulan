@@ -1,14 +1,15 @@
 //! See [`ConfigMeta`].
 
+use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
-use std::{env, io};
 
 use figment2::Figment;
 use itertools::Itertools as _;
-use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
 use relative_path::RelativePathBuf;
+
+use crate::errors::MetaError;
 
 /// See [`crate::Config::meta`]. Build with [`ConfigMeta::compute`].
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -19,19 +20,6 @@ pub struct ConfigMeta {
     /// The path of the project root directory Mulan is operating on,
     /// relative to [`Self::current_dir`].
     pub root_dir: RelativePathBuf,
-}
-
-/// Errors of [`ConfigMeta::compute`].
-#[derive(Debug)]
-pub enum MetaError {
-    /// Failed to call [`std::env::current_dir`].
-    CurrentDir(io::Error),
-
-    /// Unable to locate a config file anywhere.
-    SourceNotFound,
-
-    /// Multiple config files found (only one is permitted).
-    AmbiguousSource(BTreeSet1<RelativePathBuf>),
 }
 
 impl ConfigMeta {
