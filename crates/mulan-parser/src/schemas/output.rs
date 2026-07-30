@@ -63,7 +63,6 @@ impl Subkey {
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Key {
-    /// ...
     pub(crate) segments: SmallVec1<[Subkey; 1]>,
 }
 
