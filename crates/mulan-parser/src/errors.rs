@@ -1,5 +1,7 @@
 //! Error types.
 
+use std::range::Range;
+
 use compact_str::CompactString;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
@@ -8,7 +10,6 @@ use mulan_config::Language;
 use smallvec::SmallVec;
 
 use crate::Parameter;
-use crate::chumsky_parse::ChumskyAllErrors;
 
 /// Errors of [`transform`].
 #[derive(Debug)]
@@ -56,4 +57,24 @@ pub enum TransformError {
         key: SmallVec1<[CompactString; 1]>,
         parameters: BTreeSet1<Parameter>,
     },
+}
+
+/// ...
+#[derive(Debug)]
+pub struct ChumskyAllErrors {
+    /// ...
+    pub source: CompactString,
+
+    /// ...
+    pub errors: SmallVec1<[ChumskySingleError; 1]>,
+}
+
+/// ...
+#[derive(Debug)]
+pub struct ChumskySingleError {
+    /// ...
+    pub message: CompactString,
+
+    /// ...
+    pub span: Range<usize>,
 }

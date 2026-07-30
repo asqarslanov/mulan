@@ -1,31 +1,10 @@
 //! ...
 
-use std::range::Range;
-
 use chumsky::prelude::*;
-use compact_str::{CompactString, ToCompactString as _};
+use compact_str::ToCompactString as _;
 use mitsein::iter1::IteratorExt as _;
-use mitsein::small_vec1::SmallVec1;
 
-/// ...
-#[derive(Debug)]
-pub struct ChumskyAllErrors {
-    /// ...
-    pub source: CompactString,
-
-    /// ...
-    pub errors: SmallVec1<[ChumskySingleError; 1]>,
-}
-
-/// ...
-#[derive(Debug)]
-pub struct ChumskySingleError {
-    /// ...
-    pub message: CompactString,
-
-    /// ...
-    pub span: Range<usize>,
-}
+use crate::errors::{ChumskyAllErrors, ChumskySingleError};
 
 /// ...
 pub trait ChumskyParser<'src, Out>:
