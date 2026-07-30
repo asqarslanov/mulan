@@ -129,15 +129,15 @@ impl Input {
 /// Errors of [`Definition::at`].
 #[derive(Debug, PartialEq, Eq)]
 pub enum DefinitionAtError {
-    /// ...
+    /// The path doesn't exist.
     NotFound {
-        /// ...
+        /// The index (0-based) of the first subkey we couldn't enter/find.
         index: usize,
     },
 
-    /// ...
+    /// Tried to access a subkey pointing to a message as a namespace.
     NotANamespace {
-        /// ...
+        /// The index (0-based) of the misinterpreted subkey.
         index: usize,
     },
 }
