@@ -1,8 +1,8 @@
 //! Defines the [`Input`] struct and the logic to read it from the filesystem.
 
 use std::borrow::Cow;
-use std::path::{Path, PathBuf};
-use std::{fs, io};
+use std::fs;
+use std::path::Path;
 
 use compact_str::CompactString;
 use foldhash::HashMap;
@@ -11,6 +11,8 @@ use mitsein::slice1::Slice1;
 use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
+
+use crate::errors::ReadLocaleError;
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
 ///
@@ -94,16 +96,6 @@ pub enum RawNode {
 
     /// A nested namespace.
     Namespace(RawNamespace),
-}
-
-/// Errors of [`Input::read`].
-#[derive(Debug)]
-pub enum ReadLocaleError {
-    /// Failed to read a file.
-    Io { path: PathBuf, error: io::Error },
-
-    /// Failed to parse a YAML file according to the schema.
-    Format(serde_saphyr::Error),
 }
 
 impl Input {

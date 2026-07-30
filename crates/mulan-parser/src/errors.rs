@@ -1,5 +1,7 @@
 //! Error types.
 
+use std::io;
+use std::path::PathBuf;
 use std::range::Range;
 
 use compact_str::CompactString;
@@ -10,6 +12,16 @@ use mulan_config::Language;
 use smallvec::SmallVec;
 
 use crate::Parameter;
+
+/// ...
+#[derive(Debug)]
+pub enum ReadLocaleError {
+    /// Failed to read a file.
+    Io { path: PathBuf, error: io::Error },
+
+    /// Failed to parse a YAML file according to the schema.
+    Format(serde_saphyr::Error),
+}
 
 /// ...
 #[derive(Debug)]
