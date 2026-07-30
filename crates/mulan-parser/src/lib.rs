@@ -5,6 +5,8 @@
 //! This crate is responsible for locating and scanning user locale files,
 //! parsing and validating them, and transforming this data to a more type-safe
 //! form.
+//!
+//! See [`crate::execute`].
 
 use self::identifier::{Identifier, Word};
 use self::schemas::TransformError;
@@ -18,7 +20,7 @@ mod schemas;
 mod template;
 
 /// ...
-pub fn read_and_parse(config: &mulan_config::Config) -> Result<Output, TransformError> {
+pub fn execute(config: &mulan_config::Config) -> Result<Output, TransformError> {
     let mut input = Input::read(config).unwrap();
     let default_locale = {
         input
