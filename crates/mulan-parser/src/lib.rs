@@ -11,12 +11,13 @@
 //! See [`crate::execute`].
 
 use self::identifier::{Identifier, Word};
-use self::schemas::TransformError;
 use self::schemas::input::Input;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
+use crate::errors::TransformError;
 
 mod chumsky_parse;
+pub mod errors;
 mod identifier;
 mod schemas;
 mod template;

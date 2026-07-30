@@ -6,69 +6,18 @@ use std::collections::BTreeMap;
 
 use compact_str::CompactString;
 use foldhash::HashSet;
-use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::slice1::Slice1;
 use mitsein::small_vec1::SmallVec1;
-use mitsein::vec1::Vec1;
-use mulan_config::Language;
-use smallvec::SmallVec;
 
 use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
-use crate::chumsky_parse::{ChumskyAllErrors, ChumskyParser};
-use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
+use crate::chumsky_parse::ChumskyParser;
+use crate::errors::TransformError;
+use crate::{Namespace, Node, Subkey, Template, Translations};
 
 pub mod input;
 pub mod output;
-
-/// Errors of [`transform`].
-#[derive(Debug)]
-pub enum TransformError {
-    /// ...
-    LocaleNotFound(Language),
-
-    /// ...
-    InvalidSubkey {
-        locale: Language,
-
-        /// ...
-        path: SmallVec<[CompactString; 1]>,
-
-        errors: ChumskyAllErrors,
-    },
-
-    /// ...
-    InvalidTemplate {
-        locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
-        errors: ChumskyAllErrors,
-    },
-
-    /// ...
-    NotANamespace {
-        locale: Language,
-
-        /// ...
-        key: Vec1<CompactString>,
-
-        /// ...
-        index: usize,
-    },
-
-    /// ...
-    NotAMessage {
-        locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
-    },
-
-    /// ...
-    UnknownParameters {
-        locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
-        parameters: BTreeSet1<Parameter>,
-    },
-}
 
 /// ...
 pub fn transform<'src>(
