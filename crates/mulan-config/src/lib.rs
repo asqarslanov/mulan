@@ -1,3 +1,12 @@
+//! # Mulan Config
+//!
+//! This crate defines the user config structure so that the user
+//! can choose specific behaviors of various parts of the system
+//! (e.g., locale parsing or binding generation).
+//!
+//! This crate is responsible for locating the user config, parsing and
+//! validating its contents, and obtaining runtime-specific metadata.
+//!
 //! See [`Config`] and [`Config::locate_and_read`].
 
 use std::collections::BTreeSet;
