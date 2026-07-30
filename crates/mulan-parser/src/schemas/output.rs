@@ -42,7 +42,7 @@ pub struct Namespace {
 
 /// A single segment of a message [`Key`].
 ///
-/// E.g., the key `frontend.user-settings.account` has [`Subkey`]s
+/// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Subkey {
@@ -57,7 +57,10 @@ impl Subkey {
     }
 }
 
-/// ...
+/// A full path to a [`Node`] composed of one or more [`Subkey`]s.
+///
+/// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
+/// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Key {
     /// ...
