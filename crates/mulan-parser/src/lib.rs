@@ -1,3 +1,5 @@
+//! # Mulan Parser
+//!
 //! This crate builds an intermediate representation of a user's project's
 //! locales. This representation can later conveniently be used to generate
 //! bindings to user-selected target platforms.
