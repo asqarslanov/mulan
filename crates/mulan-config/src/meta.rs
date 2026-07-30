@@ -1,4 +1,4 @@
-//! ...
+//! See [`ConfigMeta`].
 
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -10,7 +10,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::iter1::IteratorExt as _;
 use relative_path::RelativePathBuf;
 
-/// See [`Config::meta`].
+/// See [`crate::Config::meta`]. Build with [`ConfigMeta::compute`].
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct ConfigMeta {
     /// See [`std::env::current_dir`].
@@ -21,7 +21,7 @@ pub struct ConfigMeta {
     pub root_dir: RelativePathBuf,
 }
 
-/// ...
+/// Errors of [`ConfigMeta::compute`].
 #[derive(Debug)]
 pub enum MetaError {
     /// Failed to call [`std::env::current_dir`].
@@ -35,7 +35,7 @@ pub enum MetaError {
 }
 
 impl ConfigMeta {
-    pub(super) fn new(figment: &Figment) -> Result<Self, MetaError> {
+    pub(super) fn compute(figment: &Figment) -> Result<Self, MetaError> {
         let current_dir = env::current_dir().map_err(MetaError::CurrentDir)?;
         let (root_dir, _config_file) = {
             figment

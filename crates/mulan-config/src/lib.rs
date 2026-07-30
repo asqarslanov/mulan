@@ -53,7 +53,7 @@ impl crate::Config {
     #[allow(clippy::result_large_err)]
     pub fn locate_and_read() -> Result<Self, ConfigError> {
         let figment = Figment::from(Toml::file("mulan.toml"));
-        let meta = ConfigMeta::new(&figment).map_err(ConfigError::Meta)?;
+        let meta = ConfigMeta::compute(&figment).map_err(ConfigError::Meta)?;
         let mut config = figment.extract::<Self>().map_err(ConfigError::Figment);
         if let Ok(config) = &mut config {
             config.meta = meta;
