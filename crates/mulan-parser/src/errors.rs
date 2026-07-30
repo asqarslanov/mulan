@@ -11,7 +11,7 @@ use smallvec::SmallVec;
 
 use crate::Parameter;
 
-/// Errors of [`transform`].
+/// ...
 #[derive(Debug)]
 pub enum TransformError {
     /// ...
