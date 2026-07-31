@@ -42,7 +42,7 @@ pub enum TransformError {
     InvalidSubkey {
         locale: Language,
 
-        /// ...
+        /// [`None`] if no parent exists (i.e., the root namespace's node).
         parent_key: Option<Vec1<CompactString>>,
 
         errors: ChumskyAllErrors,
