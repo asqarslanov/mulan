@@ -19,7 +19,7 @@ use crate::{Namespace, Node, Subkey, Template, Translations};
 pub mod input;
 pub mod output;
 
-/// ...
+/// Tries to transform an [`Input`] to a validated [`Output`].
 pub fn transform<'src>(
     input: &'src Input,
     main_locale: &'src Definition,
