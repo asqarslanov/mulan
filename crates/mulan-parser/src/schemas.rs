@@ -1,6 +1,7 @@
 //! The parent module of [`mod@input`] and [`mod@output`].
 //!
-//! Defines the transformation logic from [`Input`] to [`Output`].
+//! Defines the transformation logic from [`Input`] to [`Output`]
+//! (see the [`transform`] function).
 
 use std::collections::BTreeMap;
 
