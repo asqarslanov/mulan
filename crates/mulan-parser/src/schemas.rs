@@ -144,7 +144,7 @@ fn translations<'input>(
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 fn traverse_namespace<'input>(
-    key: &[&str],
+    namespace_key: &[&str],
     namespace: &'input RawNamespace,
     input: &'input Input,
     subkey_parser: &impl ChumskyParser<'input, Subkey>,
@@ -156,11 +156,11 @@ fn traverse_namespace<'input>(
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.main_locale,
-                parent_key: key.iter().map(CompactString::new).collect(),
+                parent_key: namespace_key.iter().map(CompactString::new).collect(),
                 errors,
             }
         })?;
-        let key = Vec1::from_rtail_and_head(key.iter().copied(), raw_subkey);
+        let key = Vec1::from_rtail_and_head(namespace_key.iter().copied(), raw_subkey);
         let handle_node_result = handle_node(
             raw_node,
             &key,
