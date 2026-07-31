@@ -140,7 +140,7 @@ impl RawKey {
 pub enum DefinitionAtError {
     /// The path doesn't exist.
     NotFound {
-        /// The index (0-based) of the first subkey we couldn't enter/find.
+        /// The index (0-based) of the first subkey we couldn't find.
         index: usize,
     },
 
