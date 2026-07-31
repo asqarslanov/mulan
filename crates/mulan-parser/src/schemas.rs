@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 
 use compact_str::CompactString;
 use foldhash::HashSet;
+use mitsein::NonEmpty;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::slice1::Slice1;
 use mitsein::vec1::Vec1;
@@ -29,7 +30,7 @@ pub fn transform<'input>(
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let root = traverse_namespace(
-        &[],
+        None,
         &main_locale.root,
         input,
         subkey_parser,
@@ -64,7 +65,7 @@ fn handle_node<'input>(
             Node::Message(translations(input, key, template, template_parser, config)?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
-            key,
+            Some(key),
             inner_namespace,
             input,
             subkey_parser,
@@ -144,7 +145,7 @@ fn translations<'input>(
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 fn traverse_namespace<'input>(
-    namespace_key: &[&str],
+    namespace_key: Option<&Slice1<&str>>,
     namespace: &'input RawNamespace,
     input: &'input Input,
     subkey_parser: &impl ChumskyParser<'input, Subkey>,
@@ -156,20 +157,20 @@ fn traverse_namespace<'input>(
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.main_locale,
-                parent_key: namespace_key.iter().map(CompactString::new).collect(),
+                parent_key: namespace_key.map(|key| key.iter1().map(CompactString::new).collect1()),
                 errors,
             }
         })?;
-        let key = Vec1::from_rtail_and_head(namespace_key.iter().copied(), raw_subkey);
-        let handle_node_result = handle_node(
+        let rtail = namespace_key.map(NonEmpty::as_slice).unwrap_or_default();
+        let key = Vec1::from_rtail_and_head(rtail.iter().copied(), raw_subkey);
+        let node = handle_node(
             raw_node,
             &key,
             input,
             subkey_parser,
             template_parser,
             config,
-        );
-        let node = handle_node_result?;
+        )?;
         map.insert(subkey, node);
     }
     Ok(Namespace { map })
