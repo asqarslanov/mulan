@@ -131,7 +131,7 @@ impl RawKey {
     ///
     /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
     #[must_use]
-    pub fn to_compact_string(&self) -> CompactString1 {
+    pub fn to_compact_string1(&self) -> CompactString1 {
         (&self.segments).join_compact1(".")
     }
 }
