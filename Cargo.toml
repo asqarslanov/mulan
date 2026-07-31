@@ -36,7 +36,10 @@ foldhash = "0.2.0"
 indoc = "2.0.7"
 itertools = "0.15.0"
 miette = "7.6.0"
-mitsein = "0.9.0"
+mitsein = {
+  git = "https://github.com/asqarslanov/mitsein.git",
+  branch = "compact-str",
+}
 mulan-config = { path = "crates/mulan-config/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 pathdiff = "0.2.3"
