@@ -15,6 +15,13 @@ use crate::Parameter;
 
 /// ...
 #[derive(Debug)]
+pub enum ComposeError {
+    Read(ReadLocaleError),
+    Transform(TransformError),
+}
+
+/// ...
+#[derive(Debug)]
 pub enum ReadLocaleError {
     /// Failed to read a file.
     Io { path: PathBuf, error: io::Error },
@@ -25,7 +32,7 @@ pub enum ReadLocaleError {
 
 /// ...
 #[derive(Debug)]
-pub enum ComposeError {
+pub enum TransformError {
     /// ...
     LocaleNotFound(Language),
 

@@ -14,7 +14,7 @@ use self::identifier::{Identifier, Word};
 use self::schemas::input::Input;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
-use crate::errors::ComposeError;
+use crate::errors::{ComposeError, TransformError};
 
 mod chumsky_parse;
 pub mod errors;
@@ -25,12 +25,14 @@ mod template;
 /// Does all the heavy-lifting (locating locales, parsing, transforming).
 /// The result of this function can be used to generate bindings.
 pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
-    let mut input = Input::read(config).unwrap();
+    let mut input = Input::read(config).map_err(ComposeError::Read)?;
     let main_locale = {
         input
             .locales
             .remove(&config.main_locale)
-            .ok_or(ComposeError::LocaleNotFound(config.main_locale))?
+            .ok_or(ComposeError::Transform(TransformError::LocaleNotFound(
+                config.main_locale,
+            )))?
     };
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
@@ -45,4 +47,5 @@ pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
         &template_parser,
         config,
     )
+    .map_err(ComposeError::Transform)
 }
