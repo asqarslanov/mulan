@@ -74,7 +74,9 @@ fn traverse_namespace<'src>(
     Ok(Namespace { map })
 }
 
-/// ...
+/// A brancher that, given a [`RawNode`] from the main locale,
+/// either processes it as a message ([`translations`])
+/// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'src>(
     raw_node: &'src RawNode,
     key: &Slice1<&str>,
