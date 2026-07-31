@@ -212,7 +212,7 @@ mod tests {
     use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
-    use mitsein::small_vec1::SmallVec1;
+    use mitsein::vec1::Vec1;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -382,7 +382,7 @@ mod tests {
             key.segments
                 .iter1()
                 .map(Subkey::to_kebab_case)
-                .collect1::<SmallVec1<[_; 1]>>()
+                .collect1::<Vec1<_>>()
         };
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
