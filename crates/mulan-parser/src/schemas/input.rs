@@ -4,10 +4,11 @@ use std::borrow::Cow;
 use std::fs;
 use std::path::Path;
 
-use compact_str::CompactString;
+use compact_str::{CompactString, CompactStringExt as _};
 use foldhash::HashMap;
 use mitsein::iter1::IntoIterator1 as _;
 use mitsein::slice1::Slice1;
+use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
@@ -115,6 +116,23 @@ impl Input {
                 .collect::<Result<_, _>>()?
         };
         Ok(Self { locales })
+    }
+}
+
+/// Represents a path to a node. A "dumber" counterpart to [`crate::Key`].
+#[derive(Debug)]
+pub struct RawKey {
+    /// For simplicity, segments are stored as plain strings
+    /// rather than wrapped in newtypes with invariants.
+    segments: Vec1<CompactString>,
+}
+
+impl RawKey {
+    /// Returns a dot-separated string representation.
+    ///
+    /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
+    pub fn to_compact_string(&self) -> CompactString {
+        (&self.segments).join_compact(".")
     }
 }
 
