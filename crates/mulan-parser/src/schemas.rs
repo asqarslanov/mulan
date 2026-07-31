@@ -21,11 +21,11 @@ pub mod input;
 pub mod output;
 
 /// Tries to transform an [`Input`] to a validated [`Output`].
-pub fn transform<'src>(
-    input: &'src Input,
-    main_locale: &'src Definition,
-    subkey_parser: &impl ChumskyParser<'src, Subkey>,
-    template_parser: &impl ChumskyParser<'src, Template>,
+pub fn transform<'input>(
+    input: &'input Input,
+    main_locale: &'input Definition,
+    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let root = traverse_namespace(
@@ -42,12 +42,12 @@ pub fn transform<'src>(
 /// A brancher that, given a [`RawNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
-fn handle_node<'src>(
-    raw_node: &'src RawNode,
+fn handle_node<'input>(
+    raw_node: &'input RawNode,
     key: &Slice1<&str>,
-    input: &'src Input,
-    subkey_parser: &impl ChumskyParser<'src, Subkey>,
-    template_parser: &impl ChumskyParser<'src, Template>,
+    input: &'input Input,
+    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
     let node = match raw_node {
@@ -76,11 +76,11 @@ fn handle_node<'src>(
 }
 
 /// ...
-fn translations<'src>(
-    input: &'src Input,
+fn translations<'input>(
+    input: &'input Input,
     key: &Slice1<&str>,
     main: Template,
-    template_parser: &impl ChumskyParser<'src, Template>,
+    template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
     let main_params: HashSet<_> = main.parameters().collect();
@@ -137,12 +137,12 @@ fn translations<'src>(
 /// Recursively goes over a [`RawNamespace`] of the main locale,
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
-fn traverse_namespace<'src>(
+fn traverse_namespace<'input>(
     key: &[&str],
-    namespace: &'src RawNamespace,
-    input: &'src Input,
-    subkey_parser: &impl ChumskyParser<'src, Subkey>,
-    template_parser: &impl ChumskyParser<'src, Template>,
+    namespace: &'input RawNamespace,
+    input: &'input Input,
+    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
