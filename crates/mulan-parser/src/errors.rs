@@ -15,10 +15,10 @@ use crate::Parameter;
 /// Errors of [`crate::compose`].
 #[derive(Debug)]
 pub enum ComposeError {
-    /// ...
+    /// Failed to build a [`crate::schemas::input::Input`].
     Read(ReadInputError),
 
-    /// ...
+    /// Failed to build a [`crate::Output`].
     Transform(TransformError),
 }
 
