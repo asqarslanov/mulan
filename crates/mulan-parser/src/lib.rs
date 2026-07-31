@@ -8,13 +8,13 @@
 //! parsing and validating them, and transforming this data to a more type-safe
 //! form.
 //!
-//! See [`crate::execute`].
+//! See the [`compose`] function.
 
 use self::identifier::{Identifier, Word};
 use self::schemas::input::Input;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
-use crate::errors::TransformError;
+use crate::errors::ComposeError;
 
 mod chumsky_parse;
 pub mod errors;
@@ -24,13 +24,13 @@ mod template;
 
 /// Does all the heavy-lifting (locating locales, parsing, transforming).
 /// The result of this function can be used to generate bindings.
-pub fn execute(config: &mulan_config::Config) -> Result<Output, TransformError> {
+pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     let mut input = Input::read(config).unwrap();
     let main_locale = {
         input
             .locales
             .remove(&config.main_locale)
-            .ok_or(TransformError::LocaleNotFound(config.main_locale))?
+            .ok_or(ComposeError::LocaleNotFound(config.main_locale))?
     };
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);

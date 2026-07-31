@@ -13,7 +13,7 @@ use mitsein::small_vec1::SmallVec1;
 use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::ChumskyParser;
-use crate::errors::TransformError;
+use crate::errors::ComposeError;
 use crate::{Namespace, Node, Subkey, Template, Translations};
 
 pub mod input;
@@ -26,7 +26,7 @@ pub fn transform<'src>(
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<Output, TransformError> {
+) -> Result<Output, ComposeError> {
     let root = traverse_namespace(
         &[],
         &main_locale.root,
@@ -46,11 +46,11 @@ fn traverse_namespace<'src>(
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<Namespace, TransformError> {
+) -> Result<Namespace, ComposeError> {
     let mut map = BTreeMap::new();
     for (raw_subkey, raw_node) in &namespace.map {
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
-            TransformError::InvalidSubkey {
+            ComposeError::InvalidSubkey {
                 locale: config.main_locale,
                 path: key.into(),
                 errors,
@@ -82,13 +82,13 @@ fn handle_node<'src>(
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<Node, TransformError> {
+) -> Result<Node, ComposeError> {
     let node = match raw_node {
         RawNode::Message(raw_template) => {
             let template = {
                 template_parser
                     .mulan_parse(raw_template)
-                    .map_err(|errors| TransformError::InvalidTemplate {
+                    .map_err(|errors| ComposeError::InvalidTemplate {
                         locale: config.main_locale,
                         key: key.into(),
                         errors,
@@ -115,12 +115,12 @@ fn translations<'src>(
     main: Template,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
-) -> Result<Translations, TransformError> {
+) -> Result<Translations, ComposeError> {
     let main_params: HashSet<_> = main.parameters().collect();
     let mut others = BTreeMap::new();
     for locale in config.locales_except_main() {
         let Some(definition) = input.locales.get(&locale) else {
-            return Err(TransformError::LocaleNotFound(locale));
+            return Err(ComposeError::LocaleNotFound(locale));
         };
         let node = match definition.at(key) {
             Ok(node) => node,
@@ -130,7 +130,7 @@ fn translations<'src>(
                 continue;
             }
             Err(DefinitionAtError::NotANamespace { index }) => {
-                return Err(TransformError::NotANamespace {
+                return Err(ComposeError::NotANamespace {
                     locale,
                     key: key.into(),
                     index,
@@ -138,7 +138,7 @@ fn translations<'src>(
             }
         };
         let Some(raw_template) = node.try_as_message_ref() else {
-            return Err(TransformError::NotAMessage {
+            return Err(ComposeError::NotAMessage {
                 locale,
                 key: key.into(),
             });
@@ -146,7 +146,7 @@ fn translations<'src>(
         let template = match template_parser.mulan_parse(raw_template) {
             Ok(template) => template,
             Err(errors) => {
-                return Err(TransformError::InvalidTemplate {
+                return Err(ComposeError::InvalidTemplate {
                     locale,
                     key: key.into(),
                     errors,
@@ -156,7 +156,7 @@ fn translations<'src>(
         let params = template.parameters().collect::<HashSet<_>>();
         let unknown_params = params.difference(&main_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
-            return Err(TransformError::UnknownParameters {
+            return Err(ComposeError::UnknownParameters {
                 locale,
                 key: key.into(),
                 parameters: unknown_params.cloned().collect1(),

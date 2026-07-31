@@ -25,7 +25,7 @@ pub enum ReadLocaleError {
 
 /// ...
 #[derive(Debug)]
-pub enum TransformError {
+pub enum ComposeError {
     /// ...
     LocaleNotFound(Language),
 
