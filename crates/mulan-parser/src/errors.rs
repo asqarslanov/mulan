@@ -54,15 +54,13 @@ pub enum TransformError {
         errors: ChumskyAllErrors,
     },
 
-    /// ...
+    /// A key corresponding to a namespace in the main locale
+    /// points to a message in another locale.
     NotANamespace {
         locale: Language,
 
-        /// ...
+        /// The misinterpreted key that should point to a namespace.
         key: RawKey,
-
-        /// ...
-        index: usize,
     },
 
     /// A key corresponding to a message in the main locale
