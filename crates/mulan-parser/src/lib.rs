@@ -26,11 +26,11 @@ mod template;
 /// The result of this function can be used to generate bindings.
 pub fn execute(config: &mulan_config::Config) -> Result<Output, TransformError> {
     let mut input = Input::read(config).unwrap();
-    let default_locale = {
+    let main_locale = {
         input
             .locales
-            .remove(&config.default_locale)
-            .ok_or(TransformError::LocaleNotFound(config.default_locale))?
+            .remove(&config.main_locale)
+            .ok_or(TransformError::LocaleNotFound(config.main_locale))?
     };
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
@@ -40,7 +40,7 @@ pub fn execute(config: &mulan_config::Config) -> Result<Output, TransformError> 
     let template_parser = Template::chumsky_parser(&template_part_parser);
     self::schemas::transform(
         &input,
-        &default_locale,
+        &main_locale,
         &subkey_parser,
         &template_parser,
         config,

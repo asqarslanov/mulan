@@ -22,14 +22,14 @@ pub mod output;
 /// ...
 pub fn transform<'src>(
     input: &'src Input,
-    default_locale: &'src Definition,
+    main_locale: &'src Definition,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
     let root = traverse_namespace(
         &[],
-        &default_locale.root,
+        &main_locale.root,
         input,
         subkey_parser,
         template_parser,
@@ -51,7 +51,7 @@ fn traverse_namespace<'src>(
     for (raw_subkey, raw_node) in &namespace.map {
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
-                locale: config.default_locale,
+                locale: config.main_locale,
                 path: key.into(),
                 errors,
             }
@@ -89,7 +89,7 @@ fn handle_node<'src>(
                 template_parser
                     .mulan_parse(raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
-                        locale: config.default_locale,
+                        locale: config.main_locale,
                         key: key.into(),
                         errors,
                     })?
@@ -112,13 +112,13 @@ fn handle_node<'src>(
 fn translations<'src>(
     input: &'src Input,
     key: &Slice1<CompactString>,
-    default: Template,
+    main: Template,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
-    let default_params: HashSet<_> = default.parameters().collect();
+    let main_params: HashSet<_> = main.parameters().collect();
     let mut others = BTreeMap::new();
-    for locale in config.locales_except_default() {
+    for locale in config.locales_except_main() {
         let Some(definition) = input.locales.get(&locale) else {
             return Err(TransformError::LocaleNotFound(locale));
         };
@@ -154,7 +154,7 @@ fn translations<'src>(
             }
         };
         let params = template.parameters().collect::<HashSet<_>>();
-        let unknown_params = params.difference(&default_params).copied();
+        let unknown_params = params.difference(&main_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters {
                 locale,
@@ -164,5 +164,5 @@ fn translations<'src>(
         }
         others.insert(locale, template);
     }
-    Ok(Translations { default, others })
+    Ok(Translations { main, others })
 }

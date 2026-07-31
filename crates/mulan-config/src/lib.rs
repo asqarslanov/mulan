@@ -43,17 +43,17 @@ pub struct Config {
     /// A list of non-duplicate
     /// [BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
     ///
-    /// Must include `default-locale`.
+    /// Must include `main-locale`.
     #[serde_as(as = "SetPreventDuplicates<_>")]
     pub locales: BTreeSet<Language>,
 
-    /// The main locale of your application.
+    /// The primary locale of your application.
     ///
     /// All other locales have to conform to its schema.
     ///
     /// Acts as a fallback locale if a translation does not exist
     /// in another locale.
-    pub default_locale: Language,
+    pub main_locale: Language,
 }
 
 impl crate::Config {
@@ -74,20 +74,20 @@ impl crate::Config {
     }
 
     /// Returns an iterator over [`Self::locales`]
-    /// with [`Self::default_locale`] filtered out.
-    pub fn locales_except_default(&self) -> impl Iterator<Item = Language> {
+    /// with [`Self::main_locale`] filtered out.
+    pub fn locales_except_main(&self) -> impl Iterator<Item = Language> {
         self.locales
             .iter()
             .copied()
-            .filter(|&locale| locale != self.default_locale)
+            .filter(|&locale| locale != self.main_locale)
     }
 
     /// Used at deserialization with [`mod@serdev`].
     fn validate(&self) -> Result<(), String> {
-        if !self.locales.contains(&self.default_locale) {
+        if !self.locales.contains(&self.main_locale) {
             return Err(format!(
-                "`locales` should contain default locale (\"{}\")",
-                self.default_locale.tag(),
+                "`locales` should contain main locale (\"{}\")",
+                self.main_locale.tag(),
             ));
         }
         Ok(())
@@ -106,42 +106,42 @@ mod tests {
     #[case(
         indoc! {r#"
             locales = ["en-US"]
-            default-locale = "en-US"
+            main-locale = "en-US"
         "#},
         Some(crate::Config {
             meta: ConfigMeta::default(),
             locales: [Language::EnUs].iter().copied().collect(),
-            default_locale: Language::EnUs,
+            main_locale: Language::EnUs,
         }),
     )]
     #[case(
         indoc! {r#"
             locales = []
-            default-locale = "fr-CA"
+            main-locale = "fr-CA"
         "#},
         None,
     )]
     #[case(
         indoc! {r#"
-            default-locale = "ru-RU"
+            main-locale = "ru-RU"
             locales = ["ru-RU", "en-US"]
         "#},
         Some(crate::Config {
             meta: ConfigMeta::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
-            default_locale: Language::RuRu,
+            main_locale: Language::RuRu,
         }),
     )]
     #[case(
         indoc! {r#"
-            default-locale = "ru-RU"
+            main-locale = "ru-RU"
             locales = ["ru-RU", "en-US", "ru-RU"]
         "#},
         None,
     )]
     #[case(
         indoc! {r#"
-            default-locale = "ru-RU"
+            main-locale = "ru-RU"
             locales = ["fr-CA", "en-US"]
         "#},
         None,
@@ -149,21 +149,21 @@ mod tests {
     #[case(
         indoc! {r#"
             locales = ["xx-XX"]
-            default-locale = "xx-XX"
+            main-locale = "xx-XX"
         "#},
         None,
     )]
     #[case(
         indoc! {r#"
             locales = ["ru-RU", "xx-XX"]
-            default-locale = "ru-RU"
+            main-locale = "ru-RU"
         "#},
         None,
     )]
     #[case(
         indoc! {r#"
             locales = ["ru-RU", "en-us"]
-            default-locale = "ru-RU"
+            main-locale = "ru-RU"
         "#},
         None,
     )]

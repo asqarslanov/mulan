@@ -11,7 +11,7 @@ use crate::template::Template;
 
 /// All messages from all user locales, strictly-typed, validated, and
 /// organized. The final parsing result used to generate locale bindings.
-/// Its structure is based on the default locale.
+/// Its structure is based on the main locale.
 ///
 /// Use [`.iter()`](Self::iter) to traverse through [`Node`]s.
 /// Message nodes store all translations alongside each other.
@@ -20,7 +20,7 @@ use crate::template::Template;
 pub struct Output {
     /// [`Output`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
-    /// It is always present, even if the default locale definition is empty.
+    /// It is always present, even if the main locale definition is empty.
     pub(super) root: Namespace,
 }
 
@@ -81,11 +81,11 @@ pub enum Node {
 /// All user-defined translations of a single message.
 ///
 /// Data is stored alphabetically to ensure deterministic output.
-/// The default translation is always present.
+/// The main translation is always present.
 #[derive(Debug)]
 pub struct Translations {
-    /// The message written in the default locale.
-    pub(super) default: Template,
+    /// The message written in the main locale.
+    pub(super) main: Template,
 
     /// Other translations of the message.
     ///
