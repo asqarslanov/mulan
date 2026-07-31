@@ -180,7 +180,7 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &Slice1<CompactString>) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &Slice1<impl AsRef<str>>) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
         let (subkeys, last_subkey) = path.into_iter1().into_rtail_and_head();
@@ -188,7 +188,7 @@ impl Definition {
             let node = {
                 namespace
                     .map
-                    .get(subkey)
+                    .get(subkey.as_ref())
                     .ok_or(DefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -199,7 +199,7 @@ impl Definition {
         }
         namespace
             .map
-            .get(last_subkey)
+            .get(last_subkey.as_ref())
             .ok_or(DefinitionAtError::NotFound { index })
     }
 }

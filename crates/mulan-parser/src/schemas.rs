@@ -43,7 +43,7 @@ pub fn transform<'src>(
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 fn traverse_namespace<'src>(
-    key: &[CompactString],
+    key: &[&str],
     namespace: &'src RawNamespace,
     input: &'src Input,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
@@ -55,12 +55,11 @@ fn traverse_namespace<'src>(
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.main_locale,
-                path: key.into(),
+                path: key.iter().map(CompactString::new).collect(),
                 errors,
             }
         })?;
-        let key =
-            Vec1::<CompactString>::from_rtail_and_head(key.iter().cloned(), raw_subkey.clone());
+        let key = Vec1::<&str>::from_rtail_and_head(key.iter().copied(), raw_subkey);
         let handle_node_result = handle_node(
             raw_node,
             &key,
@@ -78,7 +77,7 @@ fn traverse_namespace<'src>(
 /// ...
 fn handle_node<'src>(
     raw_node: &'src RawNode,
-    key: &Slice1<CompactString>,
+    key: &Slice1<&str>,
     input: &'src Input,
     subkey_parser: &impl ChumskyParser<'src, Subkey>,
     template_parser: &impl ChumskyParser<'src, Template>,
@@ -91,7 +90,7 @@ fn handle_node<'src>(
                     .mulan_parse(raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.main_locale,
-                        key: key.into(),
+                        key: key.iter1().map(CompactString::new).collect1(),
                         errors,
                     })?
             };
@@ -112,7 +111,7 @@ fn handle_node<'src>(
 /// ...
 fn translations<'src>(
     input: &'src Input,
-    key: &Slice1<CompactString>,
+    key: &Slice1<&str>,
     main: Template,
     template_parser: &impl ChumskyParser<'src, Template>,
     config: &mulan_config::Config,
@@ -133,7 +132,7 @@ fn translations<'src>(
             Err(DefinitionAtError::NotANamespace { index }) => {
                 return Err(TransformError::NotANamespace {
                     locale,
-                    key: key.into(),
+                    key: key.iter1().map(CompactString::new).collect1(),
                     index,
                 });
             }
@@ -141,7 +140,7 @@ fn translations<'src>(
         let Some(raw_template) = node.try_as_message_ref() else {
             return Err(TransformError::NotAMessage {
                 locale,
-                key: key.into(),
+                key: key.iter1().map(CompactString::new).collect1(),
             });
         };
         let template = match template_parser.mulan_parse(raw_template) {
@@ -149,7 +148,7 @@ fn translations<'src>(
             Err(errors) => {
                 return Err(TransformError::InvalidTemplate {
                     locale,
-                    key: key.into(),
+                    key: key.iter1().map(CompactString::new).collect1(),
                     errors,
                 });
             }
@@ -159,7 +158,7 @@ fn translations<'src>(
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters {
                 locale,
-                key: key.into(),
+                key: key.iter1().map(CompactString::new).collect1(),
                 parameters: unknown_params.cloned().collect1(),
             });
         }
