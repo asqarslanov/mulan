@@ -180,15 +180,15 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &Slice1<impl AsRef<str>>) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &Slice1<&str>) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
-        let (subkeys, last_subkey) = path.into_iter1().into_rtail_and_head();
-        for subkey in subkeys {
+        let (subkeys, &last_subkey) = path.into_iter1().into_rtail_and_head();
+        for &subkey in subkeys {
             let node = {
                 namespace
                     .map
-                    .get(subkey.as_ref())
+                    .get(subkey)
                     .ok_or(DefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -199,7 +199,7 @@ impl Definition {
         }
         namespace
             .map
-            .get(last_subkey.as_ref())
+            .get(last_subkey)
             .ok_or(DefinitionAtError::NotFound { index })
     }
 }
@@ -384,7 +384,7 @@ mod tests {
                 .map(Subkey::to_kebab_case)
                 .collect1::<Vec1<_>>()
         };
-        let actual_output = definition.at(&key);
+        let actual_output = definition.at(&key.iter1().map(AsRef::as_ref).collect1::<Vec1<_>>());
         let expected_output = expected_output.map(|node| match node {
             PseudoNode::Message(contents) => RawNode::Message(contents.into()),
             PseudoNode::Namespace(contents) => {
