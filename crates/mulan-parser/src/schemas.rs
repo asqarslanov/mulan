@@ -59,7 +59,7 @@ fn traverse_namespace<'src>(
                 errors,
             }
         })?;
-        let key = Vec1::<&str>::from_rtail_and_head(key.iter().copied(), raw_subkey);
+        let key = Vec1::from_rtail_and_head(key.iter().copied(), raw_subkey);
         let handle_node_result = handle_node(
             raw_node,
             &key,
@@ -97,7 +97,7 @@ fn handle_node<'src>(
             Node::Message(translations(input, key, template, template_parser, config)?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
-            key.as_slice(),
+            key,
             inner_namespace,
             input,
             subkey_parser,
