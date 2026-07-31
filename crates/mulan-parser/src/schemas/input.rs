@@ -120,7 +120,7 @@ impl Input {
 
 /// Errors of [`Definition::at`].
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) enum DefinitionAtError {
+pub enum DefinitionAtError {
     /// The path doesn't exist.
     NotFound {
         /// The index (0-based) of the first subkey we couldn't enter/find.
