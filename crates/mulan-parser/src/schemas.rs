@@ -39,41 +39,6 @@ pub fn transform<'src>(
     Ok(Output { root })
 }
 
-/// Recursively goes over a [`RawNamespace`] of the main locale,
-/// collects corresponding nodes from other locales, and combines
-/// everything into a proper [`Namespace`].
-fn traverse_namespace<'src>(
-    key: &[&str],
-    namespace: &'src RawNamespace,
-    input: &'src Input,
-    subkey_parser: &impl ChumskyParser<'src, Subkey>,
-    template_parser: &impl ChumskyParser<'src, Template>,
-    config: &mulan_config::Config,
-) -> Result<Namespace, TransformError> {
-    let mut map = BTreeMap::new();
-    for (raw_subkey, raw_node) in &namespace.map {
-        let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
-            TransformError::InvalidSubkey {
-                locale: config.main_locale,
-                path: key.iter().map(CompactString::new).collect(),
-                errors,
-            }
-        })?;
-        let key = Vec1::from_rtail_and_head(key.iter().copied(), raw_subkey);
-        let handle_node_result = handle_node(
-            raw_node,
-            &key,
-            input,
-            subkey_parser,
-            template_parser,
-            config,
-        );
-        let node = handle_node_result?;
-        map.insert(subkey, node);
-    }
-    Ok(Namespace { map })
-}
-
 /// A brancher that, given a [`RawNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
@@ -167,4 +132,39 @@ fn translations<'src>(
         others.insert(locale, template);
     }
     Ok(Translations { main, others })
+}
+
+/// Recursively goes over a [`RawNamespace`] of the main locale,
+/// collects corresponding nodes from other locales, and combines
+/// everything into a proper [`Namespace`].
+fn traverse_namespace<'src>(
+    key: &[&str],
+    namespace: &'src RawNamespace,
+    input: &'src Input,
+    subkey_parser: &impl ChumskyParser<'src, Subkey>,
+    template_parser: &impl ChumskyParser<'src, Template>,
+    config: &mulan_config::Config,
+) -> Result<Namespace, TransformError> {
+    let mut map = BTreeMap::new();
+    for (raw_subkey, raw_node) in &namespace.map {
+        let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
+            TransformError::InvalidSubkey {
+                locale: config.main_locale,
+                path: key.iter().map(CompactString::new).collect(),
+                errors,
+            }
+        })?;
+        let key = Vec1::from_rtail_and_head(key.iter().copied(), raw_subkey);
+        let handle_node_result = handle_node(
+            raw_node,
+            &key,
+            input,
+            subkey_parser,
+            template_parser,
+            config,
+        );
+        let node = handle_node_result?;
+        map.insert(subkey, node);
+    }
+    Ok(Namespace { map })
 }
