@@ -75,7 +75,8 @@ fn handle_node<'input>(
     Ok(node)
 }
 
-/// ...
+/// Given a [`Template`] from the main locale, collects its counterparts from
+/// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
     input: &'input Input,
     key: &Slice1<&str>,
