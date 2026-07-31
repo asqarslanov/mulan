@@ -164,7 +164,7 @@ mod tests {
                     .iter()
                     .try_into_iter1()
                     .unwrap()
-                    .map(|x| subkey_parser.mulan_parse(x).unwrap())
+                    .map(|subkey| subkey_parser.mulan_parse(subkey).unwrap())
                     .collect1()
             };
             Key { segments }
