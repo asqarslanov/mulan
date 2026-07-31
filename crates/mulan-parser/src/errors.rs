@@ -65,7 +65,8 @@ pub enum TransformError {
         index: usize,
     },
 
-    /// ...
+    /// A key corresponding to a message in the main locale
+    /// points to a namespace in another locale.
     NotAMessage { locale: Language, key: RawKey },
 
     /// A translation of a message has parameters not specified
