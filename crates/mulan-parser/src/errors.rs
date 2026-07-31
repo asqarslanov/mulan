@@ -72,7 +72,8 @@ pub enum TransformError {
         key: Vec1<CompactString>,
     },
 
-    /// A translation of a message has parameters not specified in the main translation of this message.
+    /// A translation of a message has parameters not specified
+    /// in the main translation of this message.
     UnknownParameters {
         locale: Language,
         key: Vec1<CompactString>,
@@ -80,7 +81,7 @@ pub enum TransformError {
     },
 }
 
-/// ...
+/// The error type of [`crate::chumsky_parse::ChumskyParser::mulan_parse`].
 #[derive(Debug)]
 pub struct ChumskyAllErrors {
     /// ...
