@@ -39,7 +39,9 @@ pub fn transform<'src>(
     Ok(Output { root })
 }
 
-/// ...
+/// Recursively goes over a [`RawNamespace`] of the main locale,
+/// collects corresponding nodes from other locales, and combines
+/// everything into a proper [`Namespace`].
 fn traverse_namespace<'src>(
     key: &[CompactString],
     namespace: &'src RawNamespace,
