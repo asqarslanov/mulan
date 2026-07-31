@@ -89,7 +89,7 @@ fn translations<'input>(
         let Some(definition) = input.locales.get(&locale) else {
             return Err(TransformError::LocaleNotFound(locale));
         };
-        let node = match definition.at(key) {
+        let raw_node = match definition.at(key) {
             Ok(node) => node,
             Err(DefinitionAtError::NotFound { index: _ }) => {
                 // If a locale doesn't have a message that exists in the main locale,
@@ -104,7 +104,7 @@ fn translations<'input>(
                 });
             }
         };
-        let Some(raw_template) = node.try_as_message_ref() else {
+        let Some(raw_template) = raw_node.try_as_message_ref() else {
             return Err(TransformError::NotAMessage {
                 locale,
                 key: key.iter1().map(CompactString::new).collect1(),
