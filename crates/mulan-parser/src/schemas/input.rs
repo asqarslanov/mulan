@@ -129,6 +129,7 @@ impl RawKey {
     /// Returns a dot-separated string representation.
     ///
     /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
+    #[must_use]
     pub fn to_compact_string(&self) -> CompactString {
         (&self.segments).join_compact(".")
     }
@@ -199,7 +200,7 @@ impl Definition {
     pub fn at(&self, path: &RawKey) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
-        let (subkeys, last_subkey) = (&path.segments).iter1().into_rtail_and_head();
+        let (subkeys, last_subkey) = path.segments.iter1().into_rtail_and_head();
         for subkey in subkeys {
             let node = {
                 namespace
