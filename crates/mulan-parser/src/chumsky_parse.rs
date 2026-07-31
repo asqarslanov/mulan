@@ -1,4 +1,6 @@
-//! ...
+//! Simplifies the interaction with [`mod@chumsky`].
+//!
+//! See [`ChumskyParser`].
 
 use chumsky::prelude::*;
 use compact_str::ToCompactString as _;
@@ -6,11 +8,16 @@ use mitsein::iter1::IteratorExt as _;
 
 use crate::errors::{ChumskyAllErrors, ChumskySingleError};
 
-/// ...
+/// A trait alias to a Chumsky parser with rich error reporting.
+///
+/// Provides [`ChumskyParser::mulan_parse`] that conviniently wraps parse
+/// results.
 pub trait ChumskyParser<'src, Out>:
     Parser<'src, &'src str, Out, extra::Err<Rich<'src, char>>>
 {
-    /// ...
+    /// A replacement for `.parse(_)` that converts its [`chumsky::ParseResult`]
+    /// to a [`std::result::Result`] with a custom [`ChumskyAllErrors`] error
+    /// type.
     fn mulan_parse(&self, source: &'src str) -> Result<Out, ChumskyAllErrors> {
         self.parse(source)
             .into_result()
