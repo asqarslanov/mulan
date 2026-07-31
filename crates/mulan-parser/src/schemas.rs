@@ -79,12 +79,12 @@ fn handle_node<'input>(
 fn translations<'input>(
     input: &'input Input,
     key: &Slice1<&str>,
-    main: Template,
+    main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
-    let main_params: HashSet<_> = main.parameters().collect();
-    let mut others = BTreeMap::new();
+    let main_params: HashSet<_> = main_translation.parameters().collect();
+    let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
         let Some(definition) = input.locales.get(&locale) else {
             return Err(TransformError::LocaleNotFound(locale));
@@ -129,9 +129,12 @@ fn translations<'input>(
                 parameters: unknown_params.cloned().collect1(),
             });
         }
-        others.insert(locale, template);
+        other_translations.insert(locale, template);
     }
-    Ok(Translations { main, others })
+    Ok(Translations {
+        main: main_translation,
+        others: other_translations,
+    })
 }
 
 /// Recursively goes over a [`RawNamespace`] of the main locale,
