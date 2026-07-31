@@ -1,6 +1,6 @@
 //! See [`Identifier`].
 
-use compact_str::{CompactString, CompactStringExt as _};
+use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
 
 /// A generic name that can be converted to an
@@ -21,8 +21,11 @@ impl Identifier {
     /// Converts this identifier to a kebab-case string
     /// (e.g., `lorem02-ipsum67`).
     #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString {
-        self.words.iter().map(|word| &word.inner).join_compact("-")
+    pub fn to_kebab_case(&self) -> CompactString1 {
+        self.words
+            .iter1()
+            .map(|word| &word.inner)
+            .join_compact1("-")
     }
 }
 
@@ -32,7 +35,7 @@ impl Identifier {
 /// [`Word`]s: `student`, `bs23`, and `id006`.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Word {
-    pub(super) inner: CompactString,
+    pub(super) inner: CompactString1,
 }
 
 /// Defines parsers with [`mod@chumsky`].
@@ -73,7 +76,9 @@ mod parser {
             let consecutive_digits = text::digits(10);
             let letter_digit_mix = choice((consecutive_letters, consecutive_digits)).repeated();
             let word = letter.then(letter_digit_mix);
-            word.to_slice().map(|it: &str| Self { inner: it.into() })
+            word.to_slice().map(|it: &str| Self {
+                inner: it.try_into().expect(".at_least(1)"),
+            })
         }
     }
 }
@@ -146,7 +151,9 @@ mod tests {
                     .iter()
                     .try_into_iter1()
                     .unwrap()
-                    .map(|&it| Word { inner: it.into() })
+                    .map(|&it| Word {
+                        inner: it.try_into().unwrap(),
+                    })
                     .collect1()
             };
             Identifier { words }

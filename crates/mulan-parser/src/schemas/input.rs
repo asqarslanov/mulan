@@ -4,8 +4,9 @@ use std::borrow::Cow;
 use std::fs;
 use std::path::Path;
 
-use compact_str::{CompactString, CompactStringExt as _};
+use compact_str::CompactString;
 use foldhash::HashMap;
+use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use serde::Deserialize;
@@ -80,7 +81,7 @@ pub struct RawNamespace {
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
     #[serde(flatten)]
-    pub(super) map: HashMap<CompactString, RawNode>,
+    pub(super) map: HashMap<CompactString1, RawNode>,
 }
 
 /// A value in a [namespace](RawNamespace) of a locale [`Definition`].
@@ -122,7 +123,7 @@ impl Input {
 pub struct RawKey {
     /// For simplicity, segments are stored as plain strings
     /// rather than wrapped in newtypes with invariants.
-    pub(super) segments: Vec1<CompactString>,
+    pub(super) segments: Vec1<CompactString1>,
 }
 
 impl RawKey {
@@ -130,8 +131,8 @@ impl RawKey {
     ///
     /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
     #[must_use]
-    pub fn to_compact_string(&self) -> CompactString {
-        (&self.segments).join_compact(".")
+    pub fn to_compact_string1(&self) -> CompactString1 {
+        (&self.segments).join_compact1(".")
     }
 }
 
@@ -226,9 +227,9 @@ mod tests {
     use std::io::Write as _;
     use std::iter;
 
-    use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
+    use mitsein::str1;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -245,8 +246,8 @@ mod tests {
             bar: "Hi"
         "#},
         Some([
-            ("foo".into(), RawNode::Message("Hello".into())),
-            ("bar".into(), RawNode::Message("Hi".into())),
+            (str1!("foo").into(), RawNode::Message("Hello".into())),
+            (str1!("bar").into(), RawNode::Message("Hi".into())),
         ]),
     )]
     #[case(
@@ -279,18 +280,18 @@ mod tests {
         "#},
         Some([
             (
-                "foo".into(),
+                str1!("foo").into(),
                 RawNode::Namespace(RawNamespace {
                     map: HashMap::from_iter([
-                        ("a".into(), RawNode::Message("Lorem".into())),
-                        ("b".into(), RawNode::Message("Ipsum".into())),
+                        (str1!("a").into(), RawNode::Message("Lorem".into())),
+                        (str1!("b").into(), RawNode::Message("Ipsum".into())),
                         (
-                            "bar".into(),
+                            str1!("bar").into(),
                             RawNode::Namespace(RawNamespace {
                                 map: HashMap::from_iter([
-                                    ("a".into(), RawNode::Message("Dolor".into())),
-                                    ("b".into(), RawNode::Message("Sit".into())),
-                                    ("c".into(), RawNode::Message("Amet".into())),
+                                    (str1!("a").into(), RawNode::Message("Dolor".into())),
+                                    (str1!("b").into(), RawNode::Message("Sit".into())),
+                                    (str1!("c").into(), RawNode::Message("Amet".into())),
                                 ]),
                             }),
                         ),
@@ -298,11 +299,11 @@ mod tests {
                 }),
             ),
             (
-                "baz".into(),
+                str1!("baz").into(),
                 RawNode::Namespace(RawNamespace {
                     map: HashMap::from_iter([
-                        ("a".into(), RawNode::Message("Lorem Ipsum".into())),
-                        ("b".into(), RawNode::Message("Dolor Sit Amet".into())),
+                        (str1!("a").into(), RawNode::Message("Lorem Ipsum".into())),
+                        (str1!("b").into(), RawNode::Message("Dolor Sit Amet".into())),
                     ]),
                 }),
             ),
@@ -310,7 +311,7 @@ mod tests {
     )]
     fn read_definition(
         #[case] input: &str,
-        #[case] expected_output: Option<impl IntoIterator<Item = (CompactString, RawNode)>>,
+        #[case] expected_output: Option<impl IntoIterator<Item = (CompactString1, RawNode)>>,
     ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
