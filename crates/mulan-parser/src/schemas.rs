@@ -145,7 +145,7 @@ fn translations<'input>(
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 ///
-/// If traversing the root namespace, set `namespace_key` to `None`.
+/// If traversing the root namespace, set `namespace_key` to [`None`].
 fn traverse_namespace<'input>(
     namespace_key: Option<&Slice1<&str>>,
     namespace: &'input RawNamespace,
