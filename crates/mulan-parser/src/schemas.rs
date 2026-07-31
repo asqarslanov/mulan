@@ -15,7 +15,7 @@ use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::TransformError;
-use crate::{Namespace, Node, Subkey, Template, Translations};
+use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
 
 pub mod input;
 pub mod output;
@@ -83,7 +83,7 @@ fn translations<'input>(
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
-    let main_params: HashSet<_> = main_translation.parameters().collect();
+    let main_params: HashSet<&Parameter> = main_translation.parameters().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
         let Some(definition) = input.locales.get(&locale) else {
