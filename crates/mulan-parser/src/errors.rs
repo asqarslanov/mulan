@@ -38,17 +38,17 @@ pub enum TransformError {
     /// The [`Input`] does not have a locale specified in the config.
     LocaleNotFound(Language),
 
-    /// ...
+    /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
     InvalidSubkey {
         locale: Language,
 
-        /// ...
+        /// The parent key.
         path: Vec<CompactString>,
 
         errors: ChumskyAllErrors,
     },
 
-    /// A message template was not parsed succesfully (wrong syntax).
+    /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
     InvalidTemplate {
         locale: Language,
         key: Vec1<CompactString>,
