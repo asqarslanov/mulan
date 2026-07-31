@@ -9,7 +9,7 @@ use compact_str::CompactString;
 use foldhash::HashSet;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::slice1::Slice1;
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 
 use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
 use self::output::Output;
@@ -57,10 +57,8 @@ fn traverse_namespace<'src>(
                 errors,
             }
         })?;
-        let key = SmallVec1::<[CompactString; 1]>::from_rtail_and_head(
-            key.iter().cloned(),
-            raw_subkey.clone(),
-        );
+        let key =
+            Vec1::<CompactString>::from_rtail_and_head(key.iter().cloned(), raw_subkey.clone());
         let handle_node_result = handle_node(
             raw_node,
             &key,

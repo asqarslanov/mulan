@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use compact_str::CompactString;
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
 use crate::identifier::Identifier;
@@ -63,7 +63,7 @@ impl Subkey {
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Key {
-    pub(crate) segments: SmallVec1<[Subkey; 1]>,
+    pub(crate) segments: Vec1<Subkey>,
 }
 
 /// A value in a [`Namespace`].
@@ -96,7 +96,6 @@ pub struct Translations {
 /// Defines parsers with [`mod@chumsky`].
 mod parser {
     use chumsky::prelude::*;
-    use smallvec::SmallVec;
 
     use super::{Key, Subkey};
     use crate::chumsky_parse::ChumskyParser;
@@ -111,7 +110,7 @@ mod parser {
                 .separated_by(just('.'))
                 .at_least(1)
                 .collect()
-                .map(|segments: SmallVec<_>| Self {
+                .map(|segments: Vec<_>| Self {
                     segments: segments.try_into().expect(".at_least(1)"),
                 })
         }
