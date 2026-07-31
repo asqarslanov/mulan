@@ -5,18 +5,15 @@
 
 use std::collections::BTreeMap;
 
-use compact_str::CompactString;
 use foldhash::HashSet;
-use mitsein::NonEmpty;
 use mitsein::iter1::IteratorExt as _;
-use mitsein::slice1::Slice1;
 use mitsein::vec1::Vec1;
 
-use self::input::{Definition, DefinitionAtError, Input, RawNamespace, RawNode};
-use self::output::Output;
+use self::input::{Definition, DefinitionAtError, Input, RawKey, RawNamespace, RawNode};
+use self::output::{Namespace, Node, Output, Subkey, Translations};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::TransformError;
-use crate::{Namespace, Node, Parameter, Subkey, Template, Translations};
+use crate::{Parameter, Template};
 
 pub mod input;
 pub mod output;
@@ -45,7 +42,7 @@ pub fn transform<'input>(
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
     raw_node: &'input RawNode,
-    key: &Slice1<&str>,
+    key: &RawKey,
     input: &'input Input,
     subkey_parser: &impl ChumskyParser<'input, Subkey>,
     template_parser: &impl ChumskyParser<'input, Template>,
@@ -58,7 +55,7 @@ fn handle_node<'input>(
                     .mulan_parse(raw_template)
                     .map_err(|errors| TransformError::InvalidTemplate {
                         locale: config.main_locale,
-                        key: key.iter1().map(CompactString::new).collect1(),
+                        key: key.clone(),
                         errors,
                     })?
             };
@@ -80,7 +77,7 @@ fn handle_node<'input>(
 /// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
     input: &'input Input,
-    key: &Slice1<&str>,
+    key: &RawKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
@@ -102,7 +99,7 @@ fn translations<'input>(
                 DefinitionAtError::NotANamespace { index } => {
                     return Err(TransformError::NotANamespace {
                         locale,
-                        key: key.iter1().map(CompactString::new).collect1(),
+                        key: key.clone(),
                         index,
                     });
                 }
@@ -111,7 +108,7 @@ fn translations<'input>(
         let Some(raw_template) = raw_node.try_as_message_ref() else {
             return Err(TransformError::NotAMessage {
                 locale,
-                key: key.iter1().map(CompactString::new).collect1(),
+                key: key.clone(),
             });
         };
         let template = match template_parser.mulan_parse(raw_template) {
@@ -119,7 +116,7 @@ fn translations<'input>(
             Err(errors) => {
                 return Err(TransformError::InvalidTemplate {
                     locale,
-                    key: key.iter1().map(CompactString::new).collect1(),
+                    key: key.clone(),
                     errors,
                 });
             }
@@ -129,7 +126,7 @@ fn translations<'input>(
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters {
                 locale,
-                key: key.iter1().map(CompactString::new).collect1(),
+                key: key.clone(),
                 parameters: unknown_params.cloned().collect1(),
             });
         }
@@ -147,7 +144,7 @@ fn translations<'input>(
 ///
 /// If traversing the root namespace, set `namespace_key` to [`None`].
 fn traverse_namespace<'input>(
-    namespace_key: Option<&Slice1<&str>>,
+    namespace_key: Option<&RawKey>,
     namespace: &'input RawNamespace,
     input: &'input Input,
     subkey_parser: &impl ChumskyParser<'input, Subkey>,
@@ -159,12 +156,18 @@ fn traverse_namespace<'input>(
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.main_locale,
-                parent_key: namespace_key.map(|key| key.iter1().map(CompactString::new).collect1()),
+                parent_key: namespace_key.cloned(),
                 errors,
             }
         })?;
-        let rtail = namespace_key.map(NonEmpty::as_slice).unwrap_or_default();
-        let key = Vec1::from_rtail_and_head(rtail.iter().copied(), raw_subkey);
+        let rtail = {
+            namespace_key
+                .map(|key| key.segments.to_vec())
+                .unwrap_or_default()
+        };
+        let key = RawKey {
+            segments: Vec1::from_rtail_and_head(rtail, raw_subkey.clone()),
+        };
         let node = handle_node(
             raw_node,
             &key,

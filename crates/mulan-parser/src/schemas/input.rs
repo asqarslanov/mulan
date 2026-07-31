@@ -6,8 +6,6 @@ use std::path::Path;
 
 use compact_str::{CompactString, CompactStringExt as _};
 use foldhash::HashMap;
-use mitsein::iter1::IntoIterator1 as _;
-use mitsein::slice1::Slice1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use serde::Deserialize;
@@ -120,11 +118,11 @@ impl Input {
 }
 
 /// Represents a path to a node. A "dumber" counterpart to [`crate::Key`].
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RawKey {
     /// For simplicity, segments are stored as plain strings
     /// rather than wrapped in newtypes with invariants.
-    segments: Vec1<CompactString>,
+    pub(super) segments: Vec1<CompactString>,
 }
 
 impl RawKey {
@@ -198,15 +196,15 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &Slice1<&str>) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &RawKey) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
-        let (subkeys, &last_subkey) = path.into_iter1().into_rtail_and_head();
-        for &subkey in subkeys {
+        let (subkeys, last_subkey) = (&path.segments).iter1().into_rtail_and_head();
+        for subkey in subkeys {
             let node = {
                 namespace
                     .map
-                    .get(subkey)
+                    .get(subkey.as_str())
                     .ok_or(DefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -217,7 +215,7 @@ impl Definition {
         }
         namespace
             .map
-            .get(last_subkey)
+            .get(last_subkey.as_str())
             .ok_or(DefinitionAtError::NotFound { index })
     }
 }
@@ -230,7 +228,6 @@ mod tests {
     use compact_str::CompactString;
     use foldhash::HashMap;
     use indoc::indoc;
-    use mitsein::vec1::Vec1;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -396,13 +393,10 @@ mod tests {
             write!(file, "{DEFINITION_RAW}").unwrap();
             Definition::read(file.path().into()).unwrap()
         };
-        let key = {
-            key.segments
-                .iter1()
-                .map(Subkey::to_kebab_case)
-                .collect1::<Vec1<_>>()
+        let key = RawKey {
+            segments: key.segments.iter1().map(Subkey::to_kebab_case).collect1(),
         };
-        let actual_output = definition.at(&key.iter1().map(AsRef::as_ref).collect1::<Vec1<_>>());
+        let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
             PseudoNode::Message(contents) => RawNode::Message(contents.into()),
             PseudoNode::Namespace(contents) => {

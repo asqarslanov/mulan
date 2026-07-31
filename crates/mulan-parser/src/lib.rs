@@ -12,6 +12,7 @@
 
 use self::identifier::{Identifier, Word};
 use self::schemas::input::Input;
+pub use self::schemas::input::RawKey;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
 use crate::errors::{ComposeError, TransformError};

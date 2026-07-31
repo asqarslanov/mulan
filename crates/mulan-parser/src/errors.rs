@@ -7,10 +7,9 @@ use std::range::Range;
 use compact_str::CompactString;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
-use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::Parameter;
+use crate::{Parameter, RawKey};
 
 /// Errors of [`crate::compose`].
 #[derive(Debug)]
@@ -43,7 +42,7 @@ pub enum TransformError {
         locale: Language,
 
         /// [`None`] if no parent exists (i.e., the root namespace's node).
-        parent_key: Option<Vec1<CompactString>>,
+        parent_key: Option<RawKey>,
 
         errors: ChumskyAllErrors,
     },
@@ -51,7 +50,7 @@ pub enum TransformError {
     /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
     InvalidTemplate {
         locale: Language,
-        key: Vec1<CompactString>,
+        key: RawKey,
         errors: ChumskyAllErrors,
     },
 
@@ -60,23 +59,20 @@ pub enum TransformError {
         locale: Language,
 
         /// ...
-        key: Vec1<CompactString>,
+        key: RawKey,
 
         /// ...
         index: usize,
     },
 
     /// ...
-    NotAMessage {
-        locale: Language,
-        key: Vec1<CompactString>,
-    },
+    NotAMessage { locale: Language, key: RawKey },
 
     /// A translation of a message has parameters not specified
     /// in the main translation of this message.
     UnknownParameters {
         locale: Language,
-        key: Vec1<CompactString>,
+        key: RawKey,
         parameters: BTreeSet1<Parameter>,
     },
 }
