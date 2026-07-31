@@ -156,7 +156,7 @@ fn traverse_namespace<'input>(
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey {
                 locale: config.main_locale,
-                path: key.iter().map(CompactString::new).collect(),
+                parent_key: key.iter().map(CompactString::new).collect(),
                 errors,
             }
         })?;

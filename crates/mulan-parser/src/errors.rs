@@ -41,10 +41,7 @@ pub enum TransformError {
     /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
     InvalidSubkey {
         locale: Language,
-
-        /// The parent key.
-        path: Vec<CompactString>,
-
+        parent_key: Vec<CompactString>,
         errors: ChumskyAllErrors,
     },
 
