@@ -35,7 +35,7 @@ pub enum ReadInputError {
 /// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
-    /// ...
+    /// The [`Input`] does not have a locale specified in the config.
     LocaleNotFound(Language),
 
     /// ...
@@ -72,7 +72,7 @@ pub enum TransformError {
         key: Vec1<CompactString>,
     },
 
-    /// ...
+    /// A translation of a message has parameters not specified in the main translation of this message.
     UnknownParameters {
         locale: Language,
         key: Vec1<CompactString>,
