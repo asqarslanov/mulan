@@ -48,7 +48,7 @@ pub enum TransformError {
         errors: ChumskyAllErrors,
     },
 
-    /// ...
+    /// A message template was not parsed succesfully (wrong syntax).
     InvalidTemplate {
         locale: Language,
         key: Vec1<CompactString>,
