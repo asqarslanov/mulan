@@ -13,16 +13,19 @@ use smallvec::SmallVec;
 
 use crate::Parameter;
 
-/// ...
+/// Errors of [`crate::compose`].
 #[derive(Debug)]
 pub enum ComposeError {
-    Read(ReadLocaleError),
+    /// ...
+    Read(ReadInputError),
+
+    /// ...
     Transform(TransformError),
 }
 
-/// ...
+/// Errors of [`crate::schemas::input::Input::read`].
 #[derive(Debug)]
-pub enum ReadLocaleError {
+pub enum ReadInputError {
     /// Failed to read a file.
     Io { path: PathBuf, error: io::Error },
 
@@ -30,7 +33,7 @@ pub enum ReadLocaleError {
     Format(serde_saphyr::Error),
 }
 
-/// ...
+/// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
     /// ...

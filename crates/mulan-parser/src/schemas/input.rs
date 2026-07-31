@@ -12,7 +12,7 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
-use crate::errors::ReadLocaleError;
+use crate::errors::ReadInputError;
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
 ///
@@ -100,7 +100,7 @@ pub enum RawNode {
 
 impl Input {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn read(config: &mulan_config::Config) -> Result<Self, ReadLocaleError> {
+    pub fn read(config: &mulan_config::Config) -> Result<Self, ReadInputError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
@@ -137,12 +137,12 @@ pub(crate) enum DefinitionAtError {
 
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: Cow<'_, Path>) -> Result<Self, ReadLocaleError> {
-        let file_contents = fs::read_to_string(&path).map_err(|error| ReadLocaleError::Io {
+    fn read(path: Cow<'_, Path>) -> Result<Self, ReadInputError> {
+        let file_contents = fs::read_to_string(&path).map_err(|error| ReadInputError::Io {
             error,
             path: path.into_owned(),
         })?;
-        serde_saphyr::from_str(&file_contents).map_err(ReadLocaleError::Format)
+        serde_saphyr::from_str(&file_contents).map_err(ReadInputError::Format)
     }
 
     /// Returns a reference to the node at the given path.
