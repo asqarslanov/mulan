@@ -166,7 +166,10 @@ fn traverse_namespace<'input>(
                 .unwrap_or_default()
         };
         let key = RawKey {
-            segments: Vec1::from_rtail_and_head(rtail, raw_subkey.clone()),
+            segments: Vec1::from_rtail_and_head(
+                rtail,
+                raw_subkey.clone(), // after obtaining `subkey`, we're sure `raw_subkey` is valid
+            ),
         };
         let node = handle_node(
             raw_node,
