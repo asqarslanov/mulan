@@ -9,7 +9,6 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
-use smallvec::SmallVec;
 
 use crate::Parameter;
 
@@ -44,7 +43,7 @@ pub enum TransformError {
         locale: Language,
 
         /// ...
-        path: SmallVec<[CompactString; 1]>,
+        path: Vec<CompactString>,
 
         errors: ChumskyAllErrors,
     },
@@ -52,7 +51,7 @@ pub enum TransformError {
     /// ...
     InvalidTemplate {
         locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
+        key: Vec1<CompactString>,
         errors: ChumskyAllErrors,
     },
 
@@ -70,13 +69,13 @@ pub enum TransformError {
     /// ...
     NotAMessage {
         locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
+        key: Vec1<CompactString>,
     },
 
     /// ...
     UnknownParameters {
         locale: Language,
-        key: SmallVec1<[CompactString; 1]>,
+        key: Vec1<CompactString>,
         parameters: BTreeSet1<Parameter>,
     },
 }
