@@ -91,18 +91,20 @@ fn translations<'input>(
         };
         let raw_node = match definition.at(key) {
             Ok(node) => node,
-            Err(DefinitionAtError::NotFound { index: _ }) => {
-                // If a locale doesn't have a message that exists in the main locale,
-                // we just skip this message. The main locale will later act as a fallback.
-                continue;
-            }
-            Err(DefinitionAtError::NotANamespace { index }) => {
-                return Err(TransformError::NotANamespace {
-                    locale,
-                    key: key.iter1().map(CompactString::new).collect1(),
-                    index,
-                });
-            }
+            Err(e) => match e {
+                DefinitionAtError::NotFound { index: _ } => {
+                    // If a locale doesn't have a message that exists in the main locale,
+                    // we just skip this message. The main locale will later act as a fallback.
+                    continue;
+                }
+                DefinitionAtError::NotANamespace { index } => {
+                    return Err(TransformError::NotANamespace {
+                        locale,
+                        key: key.iter1().map(CompactString::new).collect1(),
+                        index,
+                    });
+                }
+            },
         };
         let Some(raw_template) = raw_node.try_as_message_ref() else {
             return Err(TransformError::NotAMessage {
