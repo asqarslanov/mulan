@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use compact_str::CompactString;
+use mitsein::compact_string1::CompactString1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
@@ -52,7 +52,7 @@ pub struct Subkey {
 impl Subkey {
     /// Converts this subkey to a kebab-case string (e.g., `user1-settings`).
     #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString {
+    pub fn to_kebab_case(&self) -> CompactString1 {
         self.value.to_kebab_case()
     }
 }
