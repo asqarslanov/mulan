@@ -124,7 +124,11 @@ fn translations<'src>(
         };
         let node = match definition.at(key) {
             Ok(node) => node,
-            Err(DefinitionAtError::NotFound { index: _ }) => continue,
+            Err(DefinitionAtError::NotFound { index: _ }) => {
+                // If a locale doesn't have a message that exists in the main locale,
+                // we just skip this message. The main locale will later act as a fallback.
+                continue;
+            }
             Err(DefinitionAtError::NotANamespace { index }) => {
                 return Err(TransformError::NotANamespace {
                     locale,
