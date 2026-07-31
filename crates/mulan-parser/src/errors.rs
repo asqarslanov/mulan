@@ -84,19 +84,18 @@ pub enum TransformError {
 /// The error type of [`crate::chumsky_parse::ChumskyParser::mulan_parse`].
 #[derive(Debug)]
 pub struct ChumskyAllErrors {
-    /// ...
+    /// The original string we were trying to parse.
     pub source: CompactString,
 
-    /// ...
     pub errors: SmallVec1<[ChumskySingleError; 1]>,
 }
 
-/// ...
+/// A single error in [`ChumskyAllErrors`].
 #[derive(Debug)]
 pub struct ChumskySingleError {
-    /// ...
+    /// A description of the error.
     pub message: CompactString,
 
-    /// ...
+    /// The problematic byte indices in the `source` string.
     pub span: Range<usize>,
 }
