@@ -97,11 +97,10 @@ fn translations<'input>(
                     continue;
                 }
                 DefinitionAtError::NotANamespace { index } => {
-                    return Err(TransformError::NotANamespace {
-                        locale,
-                        key: key.clone(),
-                        index,
-                    });
+                    let segments = Vec1::try_from(&key.segments[..=index])
+                        .expect("`..=n` slices are always non-empty");
+                    let key = RawKey { segments };
+                    return Err(TransformError::NotANamespace { locale, key });
                 }
             },
         };
