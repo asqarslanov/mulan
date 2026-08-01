@@ -5,9 +5,9 @@ use std::range::Range;
 use compact_str::CompactString;
 use mitsein::small_vec1::SmallVec1;
 
-/// ...
+/// See [`ToReport::to_report`].
 pub trait ToReport {
-    /// ...
+    /// Converts a strongly typed error to a human-readable [`miette::Report`].
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report;
 }
 
@@ -28,7 +28,7 @@ trait ReportData {
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 }
 
-/// ...
+/// See [`ReportData::source_code_data`].
 #[derive(Debug)]
 struct SourceCodeData {
     source_code: String,
