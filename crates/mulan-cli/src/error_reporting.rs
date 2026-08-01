@@ -11,9 +11,28 @@ use mitsein::small_vec1::SmallVec1;
 
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
+///
+/// This trait is implemented automatically for all types that implement
+/// [`self::ReportData`].
+///
+/// ---
+///
+/// Typically, you want to implement [`ToReport`] manually
+/// for types that act as branchers for underlying types that also implement [`ToReport`].
+///
+/// ```ignore
+/// impl ToReport for MyError {
+///     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+///         match self {
+///             Self::Foo(e) => e.to_report(config),
+///             Self::Bar(e) => e.to_report(config),
+///         }
+///     }
+/// }
+/// ```
 pub trait ToReport {
-    /// Converts this error to a [`miette::Report`],
-    /// respecting the global configuration.
+    /// Converts this error to a [`miette::Report`], respecting the user's
+    /// config.
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report;
 }
 
