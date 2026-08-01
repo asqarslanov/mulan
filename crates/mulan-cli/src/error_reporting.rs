@@ -17,7 +17,7 @@ trait ReportData {
     fn message(&self, config: &mulan_config::Config) -> String;
 
     /// A globally unique diagnostic code in the Rust path format
-    /// (`foo::bar::baz`).
+    /// (e.g., `parser::validate::not_a_message`).
     fn code(&self) -> &'static str;
 
     /// ...
@@ -265,7 +265,7 @@ impl ReportData for mulan_parser::errors::YamlError {
 impl ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
-            Self::LocaleNotFound(e) => e.to_report(config),
+            Self::MissingLocale(e) => e.to_report(config),
             Self::InvalidSubkey(e) => e.to_report(config),
             Self::InvalidTemplate(e) => e.to_report(config),
             Self::NotANamespace(e) => e.to_report(config),
@@ -275,7 +275,7 @@ impl ToReport for mulan_parser::errors::TransformError {
     }
 }
 
-impl ReportData for mulan_parser::errors::LocaleNotFoundError {
+impl ReportData for mulan_parser::errors::MissingLocaleError {
     fn message(&self, config: &mulan_config::Config) -> String {
         todo!()
     }

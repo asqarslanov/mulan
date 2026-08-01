@@ -48,7 +48,7 @@ pub struct YamlError {
 #[derive(Debug)]
 pub enum TransformError {
     /// The [`Input`] does not have a locale specified in the config.
-    LocaleNotFound(LocaleNotFoundError),
+    MissingLocale(MissingLocaleError),
 
     /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
     InvalidSubkey(InvalidSubkeyError),
@@ -69,9 +69,9 @@ pub enum TransformError {
     UnknownParameters(UnknownParametersError),
 }
 
-/// See [`TransformError::LocaleNotFound`].
+/// See [`TransformError::MissingLocale`].
 #[derive(Debug)]
-pub struct LocaleNotFoundError {
+pub struct MissingLocaleError {
     pub locale: Language,
 }
 

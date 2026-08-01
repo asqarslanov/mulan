@@ -15,7 +15,7 @@ use self::schemas::input::Input;
 pub use self::schemas::input::RawKey;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
-use crate::errors::{ComposeError, LocaleNotFoundError, TransformError};
+use crate::errors::{ComposeError, MissingLocaleError, TransformError};
 
 mod chumsky_parse;
 pub mod errors;
@@ -28,7 +28,7 @@ mod template;
 pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     let mut input = Input::read(config).map_err(ComposeError::Read)?;
     let main_locale = input.locales.remove(&config.main_locale).ok_or({
-        ComposeError::Transform(TransformError::LocaleNotFound(LocaleNotFoundError {
+        ComposeError::Transform(TransformError::MissingLocale(MissingLocaleError {
             locale: config.main_locale,
         }))
     })?;
