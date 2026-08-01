@@ -197,13 +197,15 @@ impl ToReport for mulan_parser::errors::ChumskyAllErrors {
         #[diagnostic(code("..."), help("..."))]
         struct Helper(#[related] SmallVec1<[miette::Report; 1]>);
 
+        todo!();
+
         let related_errors = {
             self.errors
                 .iter1()
                 .map(|error| {
                     ChumskyErrorWrapper {
                         error,
-                        source: self.source.clone(),
+                        source: &self.source,
                     }
                     .to_report(config)
                 })
@@ -218,7 +220,7 @@ struct ChumskyErrorWrapper<'err> {
     error: &'err mulan_parser::errors::ChumskySingleError,
 
     /// ...
-    source: CompactString,
+    source: &'err str,
 }
 
 impl ReportData for self::ChumskyErrorWrapper {}
