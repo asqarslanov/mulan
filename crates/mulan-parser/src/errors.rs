@@ -42,6 +42,8 @@ pub struct ReadFileError {
 #[derive(Debug)]
 pub struct YamlError {
     pub inner: serde_saphyr::Error,
+    pub filename: PathBuf,
+    pub source_code: String,
 }
 
 /// Errors of [`crate::schemas::transform`].

@@ -156,12 +156,20 @@ pub enum DefinitionAtError {
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
     fn read(path: Cow<'_, Path>) -> Result<Self, InputError> {
-        let file_contents = fs::read_to_string(&path).map_err(|error| {
-            let path = path.into_owned();
-            InputError::ReadFile(ReadFileError { path, error })
-        })?;
-        serde_saphyr::from_str(&file_contents)
-            .map_err(|inner| InputError::Yaml(YamlError { inner }))
+        let file_contents = match fs::read_to_string(&path) {
+            Ok(contents) => contents,
+            Err(error) => {
+                let path = path.into_owned();
+                return Err(InputError::ReadFile(ReadFileError { path, error }));
+            }
+        };
+        serde_saphyr::from_str(&file_contents).map_err(|inner| {
+            InputError::Yaml(YamlError {
+                inner,
+                filename: path.into_owned(),
+                source_code: file_contents,
+            })
+        })
     }
 
     /// Returns a reference to the node at the given path.

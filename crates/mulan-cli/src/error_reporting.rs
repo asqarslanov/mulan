@@ -93,6 +93,9 @@ enum LabelSpan {
     Index(usize),
 
     /// ...
+    OffsetLen(usize, usize),
+
+    /// ...
     Range(Range<usize>),
 
     /// ...
@@ -114,7 +117,20 @@ impl<E: ReportData> ToReport for E {
                         .map(|label| {
                             let span: miette::SourceSpan = match label.span {
                                 LabelSpan::Index(i) => i.into(),
-                                LabelSpan::Range(Range { start, end }) => (start..end).into(),
+                                LabelSpan::OffsetLen(offset, len) => {
+                                    if len == 1 {
+                                        offset.into()
+                                    } else {
+                                        (offset..offset + len).into()
+                                    }
+                                }
+                                LabelSpan::Range(Range { start, end }) => {
+                                    if start + 1 == end {
+                                        start.into()
+                                    } else {
+                                        (start..end).into()
+                                    }
+                                }
                                 LabelSpan::Full => (0..=source_code.len()).into(),
                             };
                             miette::LabeledSpan::new_with_span(label.text, span)
@@ -286,20 +302,135 @@ impl ReportData for mulan_parser::errors::ReadFileError {
 }
 
 impl ReportData for mulan_parser::errors::YamlError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        self.inner.without_snippet().render()
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        use serde_saphyr::Error as E;
+        match self.inner.without_snippet() {
+            E::Message { .. } => "parser::read::yaml::message",
+            E::ExternalMessage { .. } => "parser::read::yaml::external_message",
+            E::Eof { .. } => "parser::read::yaml::eof",
+            E::MultipleDocuments { .. } => "parser::read::yaml::multiple_documents",
+            E::Unexpected { .. } => "parser::read::yaml::unexpected",
+            E::MergeValueNotMapOrSeqOfMaps { .. } => {
+                "parser::read::yaml::merge_value_not_map_or_seq_of_maps"
+            }
+            E::MergeKeyNotAllowed { .. } => "parser::read::yaml::merge_key_not_allowed",
+            E::InvalidBinaryBase64 { .. } => "parser::read::yaml::invalid_binary_base64",
+            E::BinaryNotUtf8 { .. } => "parser::read::yaml::binary_not_utf8",
+            E::TaggedScalarCannotDeserializeIntoString { .. } => {
+                "parser::read::yaml::tagged_scalar_cannot_deserialize_into_string"
+            }
+            E::UnexpectedSequenceEnd { .. } => "parser::read::yaml::unexpected_sequence_end",
+            E::UnexpectedMappingEnd { .. } => "parser::read::yaml::unexpected_mapping_end",
+            E::InvalidBooleanStrict { .. } => "parser::read::yaml::invalid_boolean_strict",
+            E::InvalidCharNull { .. } => "parser::read::yaml::invalid_char_null",
+            E::InvalidCharNotSingleScalar { .. } => {
+                "parser::read::yaml::invalid_char_not_single_scalar"
+            }
+            E::NullIntoString { .. } => "parser::read::yaml::null_into_string",
+            E::BytesNotSupportedMissingBinaryTag { .. } => {
+                "parser::read::yaml::bytes_not_supported_missing_binary_tag"
+            }
+            E::UnexpectedValueForUnit { .. } => "parser::read::yaml::unexpected_value_for_unit",
+            E::ExpectedEmptyMappingForUnitStruct { .. } => {
+                "parser::read::yaml::expected_empty_mapping_for_unit_struct"
+            }
+            E::UnexpectedContainerEndWhileSkippingNode { .. } => {
+                "parser::read::yaml::unexpected_container_end_while_skipping_node"
+            }
+            E::InternalSeedReusedForMapKey { .. } => {
+                "parser::read::yaml::internal_seed_reused_for_map_key"
+            }
+            E::ValueRequestedBeforeKey { .. } => "parser::read::yaml::value_requested_before_key",
+            E::ExpectedStringKeyForExternallyTaggedEnum { .. } => {
+                "parser::read::yaml::expected_string_key_for_externally_tagged_enum"
+            }
+            E::ExternallyTaggedEnumExpectedScalarOrMapping { .. } => {
+                "parser::read::yaml::externally_tagged_enum_expected_scalar_or_mapping"
+            }
+            E::UnexpectedValueForUnitEnumVariant { .. } => {
+                "parser::read::yaml::unexpected_value_for_unit_enum_variant"
+            }
+            E::InvalidUtf8Input => "parser::read::yaml::invalid_utf8_input",
+            E::AliasReplayCounterOverflow { .. } => {
+                "parser::read::yaml::alias_replay_counter_overflow"
+            }
+            E::AliasReplayLimitExceeded { .. } => "parser::read::yaml::alias_replay_limit_exceeded",
+            E::AliasExpansionLimitExceeded { .. } => {
+                "parser::read::yaml::alias_expansion_limit_exceeded"
+            }
+            E::AliasReplayStackDepthExceeded { .. } => {
+                "parser::read::yaml::alias_replay_stack_depth_exceeded"
+            }
+            E::FoldedBlockScalarMustIndentContent { .. } => {
+                "parser::read::yaml::folded_block_scalar_must_indent_content"
+            }
+            E::InternalDepthUnderflow { .. } => "parser::read::yaml::internal_depth_underflow",
+            E::InternalRecursionStackEmpty { .. } => {
+                "parser::read::yaml::internal_recursion_stack_empty"
+            }
+            E::RecursiveReferencesRequireWeakTypes { .. } => {
+                "parser::read::yaml::recursive_references_require_weak_types"
+            }
+            E::InvalidScalar { .. } => "parser::read::yaml::invalid_scalar",
+            E::SerdeInvalidType { .. } => "parser::read::yaml::serde_invalid_type",
+            E::SerdeInvalidValue { .. } => "parser::read::yaml::serde_invalid_value",
+            E::SerdeUnknownVariant { .. } => "parser::read::yaml::serde_unknown_variant",
+            E::SerdeUnknownField { .. } => "parser::read::yaml::serde_unknown_field",
+            E::SerdeMissingField { .. } => "parser::read::yaml::serde_missing_field",
+            E::UnexpectedContainerEndWhileReadingKeyNode { .. } => {
+                "parser::read::yaml::unexpected_container_end_while_reading_key_node"
+            }
+            E::DuplicateMappingKey { .. } => "parser::read::yaml::duplicate_mapping_key",
+            E::TaggedEnumMismatch { .. } => "parser::read::yaml::tagged_enum_mismatch",
+            E::SerdeVariantId { .. } => "parser::read::yaml::serde_variant_id",
+            E::ExpectedMappingEndAfterEnumVariantValue { .. } => {
+                "parser::read::yaml::expected_mapping_end_after_enum_variant_value"
+            }
+            E::ContainerEndMismatch { .. } => "parser::read::yaml::container_end_mismatch",
+            E::UnknownAnchor { .. } => "parser::read::yaml::unknown_anchor",
+            E::CyclicInclude { .. } => "parser::read::yaml::cyclic_include",
+            E::UnsupportedIncludeForm { .. } => "parser::read::yaml::unsupported_include_form",
+            E::ResolverError { .. } => "parser::read::yaml::resolver_error",
+            E::AliasError { .. } => "parser::read::yaml::alias_error",
+            E::HookError { .. } => "parser::read::yaml::hook_error",
+            E::UnresolvedProperty { .. } => "parser::read::yaml::unresolved_property",
+            E::InvalidPropertyName { .. } => "parser::read::yaml::invalid_property_name",
+            E::PropertyRequiredButUnset { .. } => "parser::read::yaml::property_required_but_unset",
+            E::PropertyRequiredButEmpty { .. } => "parser::read::yaml::property_required_but_empty",
+            E::Budget { .. } => "parser::read::yaml::budget",
+            E::IOError { .. } => "parser::read::yaml::io_error",
+            E::QuotingRequired { .. } => "parser::read::yaml::quoting_required",
+            E::CannotBorrowTransformedString { .. } => {
+                "parser::read::yaml::cannot_borrow_transformed_string"
+            }
+            E::IndentationError { .. } => "parser::read::yaml::indentation_error",
+            _ => "parser::read::yaml",
+        }
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        None
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        let span = self.inner.location()?.span();
+        let offset = usize::try_from(span.offset()).ok()?;
+        let len = usize::try_from(span.len()).ok()?;
+        Some(self::SourceCodeData {
+            source_code: self.source_code.clone(),
+            file_data: Some(SourceCodeFileData {
+                name: self.filename.to_string_lossy().into(),
+                language: "YAML",
+            }),
+            labels: SmallVec1::from_one(SourceCodeLabel {
+                text: None,
+                span: LabelSpan::OffsetLen(offset, len),
+            }),
+        })
     }
 }
 
