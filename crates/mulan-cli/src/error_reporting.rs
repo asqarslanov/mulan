@@ -73,7 +73,13 @@ struct SourceCodeFileData {
     name: CompactString,
 
     /// ...
-    language: &'static str,
+    language: self::SourceCodeLanguage,
+}
+
+/// ...
+#[derive(Debug)]
+enum SourceCodeLanguage {
+    Yaml,
 }
 
 /// ...
@@ -151,7 +157,11 @@ impl<E: ReportData> ToReport for E {
         if let Some((source_code, file_data)) = source_data {
             report = match file_data {
                 Some(file) => report.with_source_code(
-                    miette::NamedSource::new(file.name, source_code).with_language(file.language),
+                    miette::NamedSource::new(file.name, source_code).with_language(
+                        match file.language {
+                            self::SourceCodeLanguage::Yaml => "YAML",
+                        },
+                    ),
                 ),
                 None => report.with_source_code(source_code),
             };
@@ -439,7 +449,7 @@ impl ReportData for mulan_parser::errors::YamlError {
             source_code: self.source_code.clone(),
             file_data: Some(SourceCodeFileData {
                 name: self.filename.to_string_lossy().into(),
-                language: "YAML",
+                language: self::SourceCodeLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(SourceCodeLabel {
                 text: Some("here".to_owned()),
