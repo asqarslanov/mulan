@@ -2,7 +2,6 @@ use std::range::Range;
 
 use compact_str::CompactString;
 use mitsein::small_vec1::SmallVec1;
-use mitsein::vec1::Vec1;
 
 /// ...
 pub trait ToReport {
@@ -34,7 +33,7 @@ struct SourceCodeData {
     file_data: Option<self::SourceCodeFileData>,
 
     /// ...
-    labels: Vec1<self::SourceCodeLabel>,
+    labels: SmallVec1<[self::SourceCodeLabel; 1]>,
 }
 
 /// ...
