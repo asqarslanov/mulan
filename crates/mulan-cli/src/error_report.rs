@@ -47,14 +47,14 @@ impl ToReport for mulan_parser::errors::ComposeError {
     }
 }
 
-impl ReportData for mulan_parser::errors::ReadInputError {
+impl ReportData for mulan_parser::errors::InputError {
     fn message(&self, config: &mulan_config::Config) -> String {
         todo!()
     }
 
     fn code(&self) -> &'static str {
         match self {
-            Self::Io { .. } => "parser::input::io",
+            Self::ReadFile { .. } => "parser::input::io",
             Self::Format(_) => "parser::input::format",
         }
     }

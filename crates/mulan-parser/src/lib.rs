@@ -15,7 +15,7 @@ use self::schemas::input::Input;
 pub use self::schemas::input::RawKey;
 pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
 pub use self::template::{Parameter, Template, TemplatePart};
-use crate::errors::{ComposeError, TransformError};
+use crate::errors::{ComposeError, LocaleNotFoundError, TransformError};
 
 mod chumsky_parse;
 pub mod errors;
@@ -32,7 +32,9 @@ pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
             .locales
             .remove(&config.main_locale)
             .ok_or(ComposeError::Transform(TransformError::LocaleNotFound(
-                config.main_locale,
+                LocaleNotFoundError {
+                    locale: config.main_locale,
+                },
             )))?
     };
     let word_parser = Word::chumsky_parser();

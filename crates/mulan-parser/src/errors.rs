@@ -15,7 +15,7 @@ use crate::{Parameter, RawKey};
 #[derive(Debug)]
 pub enum ComposeError {
     /// Failed to build a [`crate::schemas::input::Input`].
-    Read(ReadInputError),
+    Read(InputError),
 
     /// Failed to build a [`crate::Output`].
     Transform(TransformError),
@@ -23,57 +23,93 @@ pub enum ComposeError {
 
 /// Errors of [`crate::schemas::input::Input::read`].
 #[derive(Debug)]
-pub enum ReadInputError {
+pub enum InputError {
     /// Failed to read a file.
-    Io { path: PathBuf, error: io::Error },
+    ReadFile(ReadFileError),
 
     /// Failed to parse a YAML file according to the schema.
     Format(serde_saphyr::Error),
+}
+
+/// See [`InputError::ReadFile`].
+#[derive(Debug)]
+pub struct ReadFileError {
+    pub path: PathBuf,
+    pub error: io::Error,
 }
 
 /// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
     /// The [`Input`] does not have a locale specified in the config.
-    LocaleNotFound(Language),
+    LocaleNotFound(LocaleNotFoundError),
 
     /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
-    InvalidSubkey {
-        locale: Language,
-
-        /// [`None`] if no parent exists (i.e., the root namespace's node).
-        parent_key: Option<RawKey>,
-
-        errors: ChumskyAllErrors,
-    },
+    InvalidSubkey(InvalidSubkeyError),
 
     /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
-    InvalidTemplate {
-        locale: Language,
-        key: RawKey,
-        errors: ChumskyAllErrors,
-    },
+    InvalidTemplate(InvalidTemplateError),
 
     /// A key corresponding to a namespace in the main locale
     /// points to a message in another locale.
-    NotANamespace {
-        locale: Language,
-
-        /// The misinterpreted key that should point to a namespace.
-        key: RawKey,
-    },
+    NotANamespace(NotANamespaceError),
 
     /// A key corresponding to a message in the main locale
     /// points to a namespace in another locale.
-    NotAMessage { locale: Language, key: RawKey },
+    NotAMessage(NotAMessageError),
 
     /// A translation of a message has parameters not specified
     /// in the main translation of this message.
-    UnknownParameters {
-        locale: Language,
-        key: RawKey,
-        parameters: BTreeSet1<Parameter>,
-    },
+    UnknownParameters(UnknownParametersError),
+}
+
+/// See [`TransformError::LocaleNotFound`].
+#[derive(Debug)]
+pub struct LocaleNotFoundError {
+    pub locale: Language,
+}
+
+/// See [`TransformError::InvalidSubkey`].
+#[derive(Debug)]
+pub struct InvalidSubkeyError {
+    pub locale: Language,
+
+    /// [`None`] if no parent exists (i.e., the root namespace's node).
+    pub parent_key: Option<RawKey>,
+
+    pub errors: ChumskyAllErrors,
+}
+
+/// See [`TransformError::InvalidTemplate`].
+#[derive(Debug)]
+pub struct InvalidTemplateError {
+    pub locale: Language,
+    pub key: RawKey,
+    pub errors: ChumskyAllErrors,
+}
+
+/// See [`TransformError::NotANamespace`].
+#[derive(Debug)]
+pub struct NotANamespaceError {
+    pub locale: Language,
+
+    /// The misinterpreted key that should point to a namespace.
+    pub key: RawKey,
+}
+
+/// See [`TransformError::NotAMessage`].
+#[derive(Debug)]
+pub struct NotAMessageError {
+    pub locale: Language,
+    pub key: RawKey,
+}
+
+/// See [`TransformError::UnknownParameters`].
+#[derive(Debug)]
+pub struct UnknownParametersError {
+    pub locale: Language,
+    pub key: RawKey,
+    pub parameters: BTreeSet1<Parameter>,
 }
 
 /// The error type of [`crate::chumsky_parse::ChumskyParser::mulan_parse`].
