@@ -16,7 +16,8 @@ trait ReportData {
     /// ...
     fn message(&self, config: &mulan_config::Config) -> String;
 
-    /// ...
+    /// A globally unique diagnostic code in the Rust path format
+    /// (`foo::bar::baz`).
     fn code(&self) -> &'static str;
 
     /// ...
