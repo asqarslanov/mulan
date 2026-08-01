@@ -10,52 +10,6 @@ pub trait ToReport {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report;
 }
 
-impl<E: ReportData> ToReport for E {
-    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let (source_data, labels) = match self.source_code_data() {
-            None => (None, None),
-            Some(SourceCodeData {
-                source_code,
-                file_data,
-                labels,
-            }) => {
-                let labeled_spans: Vec<miette::LabeledSpan> = {
-                    labels
-                        .into_iter()
-                        .map(|label| {
-                            let span: miette::SourceSpan = match label.span {
-                                LabelSpan::Index(i) => i.into(),
-                                LabelSpan::Range(Range { start, end }) => (start..end).into(),
-                                LabelSpan::Full => (0..=source_code.len()).into(),
-                            };
-                            miette::LabeledSpan::new_with_span(label.text, span)
-                        })
-                        .collect()
-                };
-                (Some((source_code, file_data)), Some(labeled_spans))
-            }
-        };
-        let mut report: miette::Report = miette::MietteDiagnostic {
-            message: self.message(config),
-            code: Some(self.code().to_owned()),
-            severity: Some(miette::Severity::Error),
-            help: self.help(config),
-            url: None,
-            labels,
-        }
-        .into();
-        if let Some((source_code, file_data)) = source_data {
-            report = match file_data {
-                Some(file) => report.with_source_code(
-                    miette::NamedSource::new(file.name, source_code).with_language(file.language),
-                ),
-                None => report.with_source_code(source_code),
-            };
-        }
-        report
-    }
-}
-
 /// ...
 trait ReportData {
     /// ...
@@ -114,6 +68,51 @@ enum LabelSpan {
 
     /// ...
     Full,
+}
+
+impl<E: ReportData> ToReport for E {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        let (source_data, labels) = match self.source_code_data() {
+            None => (None, None),
+            Some(SourceCodeData {
+                source_code,
+                file_data,
+                labels,
+            }) => {
+                let labeled_spans: Vec<miette::LabeledSpan> = {
+                    labels
+                        .into_iter()
+                        .map(|label| {
+                            let span: miette::SourceSpan = match label.span {
+                                LabelSpan::Index(i) => i.into(),
+                                LabelSpan::Range(Range { start, end }) => (start..end).into(),
+                                LabelSpan::Full => (0..=source_code.len()).into(),
+                            };
+                            miette::LabeledSpan::new_with_span(label.text, span)
+                        })
+                        .collect()
+                };
+                (Some((source_code, file_data)), Some(labeled_spans))
+            }
+        };
+        let mut report = miette::Report::from(miette::MietteDiagnostic {
+            message: self.message(config),
+            code: Some(self.code().to_owned()),
+            severity: Some(miette::Severity::Error),
+            help: self.help(config),
+            url: None,
+            labels,
+        });
+        if let Some((source_code, file_data)) = source_data {
+            report = match file_data {
+                Some(file) => report.with_source_code(
+                    miette::NamedSource::new(file.name, source_code).with_language(file.language),
+                ),
+                None => report.with_source_code(source_code),
+            };
+        }
+        report
+    }
 }
 
 impl ToReport for mulan_config::errors::ConfigError {
