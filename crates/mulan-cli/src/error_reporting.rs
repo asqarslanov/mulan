@@ -1,4 +1,5 @@
-use miette::{LabeledSpan, MietteDiagnostic};
+use compact_str::CompactString;
+use miette::{LabeledSpan, MietteDiagnostic, NamedSource};
 
 /// ...
 pub trait ToReport {
@@ -8,23 +9,53 @@ pub trait ToReport {
 
 impl<E: ReportData> ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let source_code_data = self.source_code_data();
-        MietteDiagnostic {
+        let (source_data, labels) = match self.source_code_data() {
+            None => (None, None),
+            Some(SourceCodeData {
+                source_code,
+                file_data,
+                labels,
+            }) => (Some((source_code, file_data)), Some(labels)),
+        };
+        let mut report: miette::Report = MietteDiagnostic {
             message: self.message(config),
             code: Some(self.code().to_owned()),
             severity: Some(miette::Severity::Error),
             help: self.help(config),
             url: None,
-            labels: source_code_data.map(|data| data.labels),
+            labels,
         }
-        .into()
+        .into();
+        if let Some((source_code, file_data)) = source_data {
+            report = match file_data {
+                Some(file) => report.with_source_code(
+                    NamedSource::new(file.name, source_code).with_language(file.language),
+                ),
+                None => report.with_source_code(source_code),
+            };
+        }
+        report
     }
 }
 
+/// ...
 struct SourceCodeData {
     source_code: String,
-    language: Option<&'static str>,
+
+    /// ...
+    file_data: Option<SourceCodeFileData>,
+
+    /// ...
     labels: Vec<LabeledSpan>,
+}
+
+/// ...
+struct SourceCodeFileData {
+    /// ...
+    name: CompactString,
+
+    /// ...
+    language: &'static str,
 }
 
 /// ...
