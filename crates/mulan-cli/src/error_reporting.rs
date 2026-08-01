@@ -1,7 +1,6 @@
 use std::range::Range;
 
 use compact_str::CompactString;
-use miette::{LabeledSpan, MietteDiagnostic, NamedSource, SourceSpan};
 use mitsein::vec1::Vec1;
 
 /// ...
@@ -19,23 +18,23 @@ impl<E: ReportData> ToReport for E {
                 file_data,
                 labels,
             }) => {
-                let labeled_spans: Vec<LabeledSpan> = {
+                let labeled_spans: Vec<miette::LabeledSpan> = {
                     labels
                         .into_iter()
                         .map(|label| {
-                            let span: SourceSpan = match label.span {
+                            let span: miette::SourceSpan = match label.span {
                                 LabelSpan::Index(i) => i.into(),
                                 LabelSpan::Range(r) => (r.start..r.end).into(),
                                 LabelSpan::Full => (0..=source_code.len()).into(),
                             };
-                            LabeledSpan::new_with_span(label.text, span)
+                            miette::LabeledSpan::new_with_span(label.text, span)
                         })
                         .collect()
                 };
                 (Some((source_code, file_data)), Some(labeled_spans))
             }
         };
-        let mut report: miette::Report = MietteDiagnostic {
+        let mut report: miette::Report = miette::MietteDiagnostic {
             message: self.message(config),
             code: Some(self.code().to_owned()),
             severity: Some(miette::Severity::Error),
@@ -47,7 +46,7 @@ impl<E: ReportData> ToReport for E {
         if let Some((source_code, file_data)) = source_data {
             report = match file_data {
                 Some(file) => report.with_source_code(
-                    NamedSource::new(file.name, source_code).with_language(file.language),
+                    miette::NamedSource::new(file.name, source_code).with_language(file.language),
                 ),
                 None => report.with_source_code(source_code),
             };
@@ -63,7 +62,7 @@ struct SourceCodeLabel {
     text: Option<String>,
 
     /// ...
-    span: LabelSpan,
+    span: self::LabelSpan,
 }
 
 /// ...
@@ -85,10 +84,10 @@ struct SourceCodeData {
     source_code: String,
 
     /// ...
-    file_data: Option<SourceCodeFileData>,
+    file_data: Option<self::SourceCodeFileData>,
 
     /// ...
-    labels: Vec1<SourceCodeLabel>,
+    labels: Vec1<self::SourceCodeLabel>,
 }
 
 /// ...
@@ -113,7 +112,7 @@ trait ReportData {
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
-    fn source_code_data(&self) -> Option<SourceCodeData>;
+    fn source_code_data(&self) -> Option<self::SourceCodeData>;
 }
 
 impl ToReport for mulan_config::errors::ConfigError {
