@@ -299,7 +299,7 @@ impl ReportData for mulan_parser::errors::ReadFileError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::read::fs"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -477,7 +477,7 @@ impl ReportData for mulan_parser::errors::MissingLocaleError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::missing_locale"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -495,7 +495,7 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::invalid_subkey"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -513,7 +513,7 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::invalid_template"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -531,7 +531,7 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::not_a_namespace"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -549,7 +549,7 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::not_a_message"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
@@ -567,7 +567,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::validate::unknown_parameters"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
