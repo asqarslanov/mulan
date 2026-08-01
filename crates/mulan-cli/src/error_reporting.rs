@@ -8,16 +8,23 @@ pub trait ToReport {
 
 impl<E: ReportData> ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        let source_code_data = self.source_code_data();
         MietteDiagnostic {
             message: self.message(config),
             code: Some(self.code().to_owned()),
             severity: Some(miette::Severity::Error),
             help: self.help(config),
             url: None,
-            labels: self.labels(config),
+            labels: source_code_data.map(|data| data.labels),
         }
         .into()
     }
+}
+
+struct SourceCodeData {
+    source_code: String,
+    language: Option<&'static str>,
+    labels: Vec<LabeledSpan>,
 }
 
 /// ...
@@ -32,10 +39,7 @@ trait ReportData {
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
-    fn source_code(&self) -> Option<String>;
-
-    /// ...
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>>;
+    fn source_code_data(&self) -> Option<SourceCodeData>;
 }
 
 impl ToReport for mulan_config::errors::ConfigError {
@@ -47,27 +51,7 @@ impl ToReport for mulan_config::errors::ConfigError {
     }
 }
 
-impl ReportData for mulan_config::errors::FigmentError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
+impl ReportData for mulan_config::errors::FigmentError {}
 
 impl ToReport for mulan_config::errors::MetaError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -79,71 +63,11 @@ impl ToReport for mulan_config::errors::MetaError {
     }
 }
 
-impl ReportData for mulan_config::errors::CurrentDirError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
+impl ReportData for mulan_config::errors::CurrentDirError {}
 
-    fn code(&self) -> &'static str {
-        todo!()
-    }
+impl ReportData for mulan_config::errors::SourceNotFoundError {}
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_config::errors::SourceNotFoundError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_config::errors::AmbiguousSourceError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
+impl ReportData for mulan_config::errors::AmbiguousSourceError {}
 
 impl ToReport for mulan_parser::errors::ComposeError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -163,49 +87,9 @@ impl ToReport for mulan_parser::errors::InputError {
     }
 }
 
-impl ReportData for mulan_parser::errors::ReadFileError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
+impl ReportData for mulan_parser::errors::ReadFileError {}
 
-    fn code(&self) -> &'static str {
-        "parser::input::read_file"
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_parser::errors::YamlError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        "parser::input::yaml"
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
+impl ReportData for mulan_parser::errors::YamlError {}
 
 impl ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -220,134 +104,14 @@ impl ToReport for mulan_parser::errors::TransformError {
     }
 }
 
-impl ReportData for mulan_parser::errors::LocaleNotFoundError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
+impl ReportData for mulan_parser::errors::LocaleNotFoundError {}
 
-    fn code(&self) -> &'static str {
-        todo!()
-    }
+impl ReportData for mulan_parser::errors::InvalidSubkeyError {}
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
+impl ReportData for mulan_parser::errors::InvalidTemplateError {}
 
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
+impl ReportData for mulan_parser::errors::NotANamespaceError {}
 
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
+impl ReportData for mulan_parser::errors::NotAMessageError {}
 
-impl ReportData for mulan_parser::errors::InvalidSubkeyError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_parser::errors::InvalidTemplateError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_parser::errors::NotANamespaceError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_parser::errors::NotAMessageError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
-
-impl ReportData for mulan_parser::errors::UnknownParametersError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        todo!()
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code(&self) -> Option<String> {
-        todo!()
-    }
-
-    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
-        todo!()
-    }
-}
+impl ReportData for mulan_parser::errors::UnknownParametersError {}
