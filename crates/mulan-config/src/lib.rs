@@ -86,6 +86,18 @@ impl crate::Config {
             .filter(|&locale| locale != self.main_locale)
     }
 
+    /// A basic stand-in for a config without useful data.
+    ///
+    /// Can be used when an instance of [`crate::Config`] is required, but none
+    /// is available.
+    pub fn dummy() -> Self {
+        Self {
+            meta: ConfigMeta::default(),
+            locales: BTreeSet::default(),
+            main_locale: Language::EnUs,
+        }
+    }
+
     /// Used at deserialization with [`mod@serdev`].
     fn validate(&self) -> Result<(), String> {
         if !self.locales.contains(&self.main_locale) {
