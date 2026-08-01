@@ -5,9 +5,11 @@ use std::range::Range;
 use compact_str::CompactString;
 use mitsein::small_vec1::SmallVec1;
 
-/// See [`ToReport::to_report`].
+/// A trait to converting strongly typed errors to human-readable
+/// [`miette::Report`]s with [`ToReport::to_report`].
 pub trait ToReport {
-    /// Converts a strongly typed error to a human-readable [`miette::Report`].
+    /// Converts this error to a [`miette::Report`],
+    /// respecting the global configuration.
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report;
 }
 
