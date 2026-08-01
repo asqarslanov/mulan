@@ -24,7 +24,7 @@ impl<E: ReportData> ToReport for E {
                         .map(|label| {
                             let span: miette::SourceSpan = match label.span {
                                 LabelSpan::Index(i) => i.into(),
-                                LabelSpan::Range(r) => (r.start..r.end).into(),
+                                LabelSpan::Range(Range { start, end }) => (start..end).into(),
                                 LabelSpan::Full => (0..=source_code.len()).into(),
                             };
                             miette::LabeledSpan::new_with_span(label.text, span)
