@@ -303,14 +303,22 @@ impl ReportData for mulan_parser::errors::ReadFileError {
 
 impl ReportData for mulan_parser::errors::YamlError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        self.inner.without_snippet().render()
+        use serde_saphyr::Error as E;
+        match self.inner.without_snippet() {
+            E::DuplicateMappingKey { key, location: _ } => {
+                format!(
+                    "duplicate mapping key{}",
+                    key.as_ref()
+                        .map_or_else(String::default, |k| format!(": `{k}`")),
+                )
+            }
+            e => e.render(),
+        }
     }
 
     fn code(&self) -> &'static str {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
-            E::Message { .. } => "parser::read::yaml::message",
-            E::ExternalMessage { .. } => "parser::read::yaml::external_message",
             E::Eof { .. } => "parser::read::yaml::eof",
             E::MultipleDocuments { .. } => "parser::read::yaml::multiple_documents",
             E::Unexpected { .. } => "parser::read::yaml::unexpected",
@@ -413,7 +421,14 @@ impl ReportData for mulan_parser::errors::YamlError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        None
+        use serde_saphyr::Error as E;
+        match self.inner.without_snippet() {
+            E::DuplicateMappingKey {
+                key: _,
+                location: _,
+            } => Some("remove duplicates to make all keys in the same namespace unique".to_owned()),
+            _ => None,
+        }
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
