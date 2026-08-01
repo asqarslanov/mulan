@@ -12,7 +12,6 @@ publish.workspace = true
 
 [dependencies]
 clap = { workspace = true, features = ["cargo", "derive", "wrap_help"] }
-compact_str = { workspace = true }
 miette = { workspace = true, features = ["fancy"] }
 mulan-config = { workspace = true }
 mulan-parser = { workspace = true }
