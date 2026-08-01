@@ -17,7 +17,7 @@ foldhash = { workspace = true }
 mitsein = { workspace = true, features = ["compact-str", "serde", "smallvec"] }
 mulan-config = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde-saphyr = { workspace = true, features = ["miette"] }
+serde-saphyr = { workspace = true }
 smallvec = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 

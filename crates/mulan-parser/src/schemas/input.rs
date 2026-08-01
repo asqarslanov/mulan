@@ -108,8 +108,7 @@ impl Input {
                 .iter()
                 .map(|&locale| {
                     let path = locales_dir.join(locale.tag()).with_extension("yaml");
-                    let definition =
-                        Definition::read(path.to_path(&config.meta.current_dir).into())?;
+                    let definition = Definition::read(path.to_path("").into())?;
                     Ok((locale, definition))
                 })
                 .collect::<Result<_, _>>()?
