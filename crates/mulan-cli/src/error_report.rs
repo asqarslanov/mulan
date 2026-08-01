@@ -38,6 +38,113 @@ trait ReportData {
     fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>>;
 }
 
+impl ToReport for mulan_config::errors::ConfigError {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::Figment(e) => e.to_report(config),
+            Self::Meta(e) => e.to_report(config),
+        }
+    }
+}
+
+impl ReportData for mulan_config::errors::FigmentError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code(&self) -> Option<String> {
+        todo!()
+    }
+
+    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
+        todo!()
+    }
+}
+
+impl ToReport for mulan_config::errors::MetaError {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::CurrentDir(e) => e.to_report(config),
+            Self::SourceNotFound(e) => e.to_report(config),
+            Self::AmbiguousSource(e) => e.to_report(config),
+        }
+    }
+}
+
+impl ReportData for mulan_config::errors::CurrentDirError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code(&self) -> Option<String> {
+        todo!()
+    }
+
+    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_config::errors::SourceNotFoundError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code(&self) -> Option<String> {
+        todo!()
+    }
+
+    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_config::errors::AmbiguousSourceError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code(&self) -> Option<String> {
+        todo!()
+    }
+
+    fn labels(&self, config: &mulan_config::Config) -> Option<Vec<LabeledSpan>> {
+        todo!()
+    }
+}
+
 impl ToReport for mulan_parser::errors::ComposeError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {

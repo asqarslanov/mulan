@@ -90,6 +90,7 @@ impl crate::Config {
     ///
     /// Can be used when an instance of [`crate::Config`] is required, but none
     /// is available.
+    #[must_use]
     pub fn dummy() -> Self {
         Self {
             meta: ConfigMeta::default(),
