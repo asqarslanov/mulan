@@ -224,4 +224,4 @@ struct ChumskyErrorWrapper<'err> {
     source: &'err str,
 }
 
-impl ReportData for self::ChumskyErrorWrapper {}
+impl ReportData for self::ChumskyErrorWrapper<'_> {}
