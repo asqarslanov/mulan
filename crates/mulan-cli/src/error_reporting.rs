@@ -442,7 +442,7 @@ impl ReportData for mulan_parser::errors::YamlError {
                 language: "YAML",
             }),
             labels: SmallVec1::from_one(SourceCodeLabel {
-                text: None,
+                text: Some("here".to_owned()),
                 span: LabelSpan::OffsetLen(offset, len),
             }),
         })
