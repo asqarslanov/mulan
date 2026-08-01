@@ -18,7 +18,8 @@ use mitsein::small_vec1::SmallVec1;
 /// ---
 ///
 /// Typically, you want to implement [`ToReport`] manually
-/// for types that act as branchers for underlying types that also implement [`ToReport`].
+/// for types that act as branchers for underlying types that also implement
+/// [`ToReport`].
 ///
 /// ```ignore
 /// impl ToReport for MyError {
