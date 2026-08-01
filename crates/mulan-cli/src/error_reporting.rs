@@ -126,7 +126,23 @@ impl ToReport for mulan_config::errors::ConfigError {
     }
 }
 
-impl ReportData for mulan_config::errors::FigmentError {}
+impl ReportData for mulan_config::errors::FigmentError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
 
 impl ToReport for mulan_config::errors::MetaError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -138,11 +154,59 @@ impl ToReport for mulan_config::errors::MetaError {
     }
 }
 
-impl ReportData for mulan_config::errors::CurrentDirError {}
+impl ReportData for mulan_config::errors::CurrentDirError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
 
-impl ReportData for mulan_config::errors::SourceNotFoundError {}
+    fn code(&self) -> &'static str {
+        todo!()
+    }
 
-impl ReportData for mulan_config::errors::AmbiguousSourceError {}
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_config::errors::SourceNotFoundError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_config::errors::AmbiguousSourceError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
 
 impl ToReport for mulan_parser::errors::ComposeError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -162,9 +226,41 @@ impl ToReport for mulan_parser::errors::InputError {
     }
 }
 
-impl ReportData for mulan_parser::errors::ReadFileError {}
+impl ReportData for mulan_parser::errors::ReadFileError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
 
-impl ReportData for mulan_parser::errors::YamlError {}
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_parser::errors::YamlError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
 
 impl ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -179,17 +275,113 @@ impl ToReport for mulan_parser::errors::TransformError {
     }
 }
 
-impl ReportData for mulan_parser::errors::LocaleNotFoundError {}
+impl ReportData for mulan_parser::errors::LocaleNotFoundError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
 
-impl ReportData for mulan_parser::errors::InvalidSubkeyError {}
+    fn code(&self) -> &'static str {
+        todo!()
+    }
 
-impl ReportData for mulan_parser::errors::InvalidTemplateError {}
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
 
-impl ReportData for mulan_parser::errors::NotANamespaceError {}
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
 
-impl ReportData for mulan_parser::errors::NotAMessageError {}
+impl ReportData for mulan_parser::errors::InvalidSubkeyError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
 
-impl ReportData for mulan_parser::errors::UnknownParametersError {}
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_parser::errors::InvalidTemplateError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_parser::errors::NotANamespaceError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_parser::errors::NotAMessageError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
+
+impl ReportData for mulan_parser::errors::UnknownParametersError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
 
 impl ToReport for mulan_parser::errors::ChumskyAllErrors {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
@@ -224,4 +416,20 @@ struct ChumskyErrorWrapper<'err> {
     source: &'err str,
 }
 
-impl ReportData for self::ChumskyErrorWrapper<'_> {}
+impl ReportData for self::ChumskyErrorWrapper<'_> {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+}
