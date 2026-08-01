@@ -158,7 +158,7 @@ impl Definition {
     fn read(path: Cow<'_, Path>) -> Result<Self, InputError> {
         let file_contents = fs::read_to_string(&path).map_err(|error| {
             let path = path.into_owned();
-            InputError::ReadFile(ReadFileError { error, path })
+            InputError::ReadFile(ReadFileError { path, error })
         })?;
         serde_saphyr::from_str(&file_contents)
             .map_err(|inner| InputError::Yaml(YamlError { inner }))
