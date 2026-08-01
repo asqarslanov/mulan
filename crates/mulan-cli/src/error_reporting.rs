@@ -1,4 +1,8 @@
-//! ...
+//! Conversions from custom Mulan error types to human-readable reports that can
+//! be displayed in the CLI.
+//!
+//! This module defines the [`ToReport`] trait and implements it for all used
+//! error types.
 
 use std::range::Range;
 
