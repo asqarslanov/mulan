@@ -198,8 +198,28 @@ impl ToReport for mulan_parser::errors::ChumskyAllErrors {
         struct Helper(#[related] SmallVec1<[miette::Report; 1]>);
 
         todo!();
-        Helper(self.errors.iter1().map(|e| e.to_report(config)).collect1()).into()
+        Helper(
+            self.errors
+                .iter1()
+                .map(|error| {
+                    ChumskyErrorWrapper {
+                        error,
+                        source: self.source.clone(),
+                    }
+                    .to_report(config)
+                })
+                .collect1(),
+        )
+        .into()
     }
 }
 
-impl ReportData for mulan_parser::errors::ChumskySingleError {}
+/// ...
+struct ChumskyErrorWrapper {
+    error: mulan_parser::errors::ChumskySingleError,
+
+    /// ...
+    source: CompactString,
+}
+
+impl ReportData for self::ChumskyErrorWrapper {}
