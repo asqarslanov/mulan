@@ -27,16 +27,11 @@ mod template;
 /// The result of this function can be used to generate bindings.
 pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     let mut input = Input::read(config).map_err(ComposeError::Read)?;
-    let main_locale = {
-        input
-            .locales
-            .remove(&config.main_locale)
-            .ok_or(ComposeError::Transform(TransformError::LocaleNotFound(
-                LocaleNotFoundError {
-                    locale: config.main_locale,
-                },
-            )))?
-    };
+    let main_locale = input.locales.remove(&config.main_locale).ok_or({
+        ComposeError::Transform(TransformError::LocaleNotFound(LocaleNotFoundError {
+            locale: config.main_locale,
+        }))
+    })?;
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
     let subkey_parser = Subkey::chumsky_parser(&ident_parser);
