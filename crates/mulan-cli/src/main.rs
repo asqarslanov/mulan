@@ -3,7 +3,7 @@ use std::process::ExitCode;
 use clap::crate_description;
 
 mod cmd_gen;
-mod error_report;
+mod error_reporting;
 
 fn main() -> miette::Result<ExitCode> {
     let cli = <self::Cli as clap::Parser>::parse();

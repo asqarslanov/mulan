@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use crate::error_report::ToReport as _;
+use crate::error_reporting::ToReport as _;
 
 #[derive(clap::Args)]
 pub struct Args;
