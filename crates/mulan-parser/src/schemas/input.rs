@@ -12,7 +12,7 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
-use crate::errors::{InputError, ReadFileError};
+use crate::errors::{InputError, ReadFileError, YamlError};
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
 ///
@@ -160,7 +160,8 @@ impl Definition {
             let path = path.into_owned();
             InputError::ReadFile(ReadFileError { error, path })
         })?;
-        serde_saphyr::from_str(&file_contents).map_err(InputError::Format)
+        serde_saphyr::from_str(&file_contents)
+            .map_err(|inner| InputError::Yaml(YamlError { inner }))
     }
 
     /// Returns a reference to the node at the given path.

@@ -28,7 +28,7 @@ pub enum InputError {
     ReadFile(ReadFileError),
 
     /// Failed to parse a YAML file according to the schema.
-    Format(serde_saphyr::Error),
+    Yaml(YamlError),
 }
 
 /// See [`InputError::ReadFile`].
@@ -36,6 +36,12 @@ pub enum InputError {
 pub struct ReadFileError {
     pub path: PathBuf,
     pub error: io::Error,
+}
+
+/// See [`InputError::Format`].
+#[derive(Debug)]
+pub struct YamlError {
+    pub inner: serde_saphyr::Error,
 }
 
 /// Errors of [`crate::schemas::transform`].

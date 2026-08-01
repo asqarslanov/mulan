@@ -55,7 +55,7 @@ impl ReportData for mulan_parser::errors::InputError {
     fn code(&self) -> &'static str {
         match self {
             Self::ReadFile { .. } => "parser::input::io",
-            Self::Format(_) => "parser::input::format",
+            Self::Yaml(_) => "parser::input::format",
         }
     }
 
