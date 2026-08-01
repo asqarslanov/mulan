@@ -9,7 +9,7 @@ use itertools::Itertools as _;
 use mitsein::iter1::IteratorExt as _;
 use relative_path::RelativePathBuf;
 
-use crate::errors::MetaError;
+use crate::errors::{AmbiguousSourceError, CurrentDirError, MetaError, SourceNotFoundError};
 
 /// See [`crate::Config::meta`]. Build with [`ConfigMeta::compute`].
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -25,7 +25,8 @@ pub struct ConfigMeta {
 impl ConfigMeta {
     /// Obtain runtime context needed for the config.
     pub(super) fn compute(figment: &Figment) -> Result<Self, MetaError> {
-        let current_dir = env::current_dir().map_err(MetaError::CurrentDir)?;
+        let current_dir =
+            env::current_dir().map_err(|inner| MetaError::CurrentDir(CurrentDirError { inner }))?;
         let (root_dir, _config_file) = {
             figment
                 .metadata()
@@ -57,16 +58,17 @@ impl ConfigMeta {
                 })
                 .exactly_one()
                 .map_err(|locations| {
-                    locations
-                        .try_into_iter1()
-                        .map_or(MetaError::SourceNotFound, |sources_raw| {
-                            let sources = {
+                    locations.try_into_iter1().map_or(
+                        MetaError::SourceNotFound(SourceNotFoundError),
+                        |sources_raw| {
+                            let possible_sources = {
                                 sources_raw
                                     .map(|(root_dir, config_file)| root_dir.join(config_file))
                                     .collect1()
                             };
-                            MetaError::AmbiguousSource(sources)
-                        })
+                            MetaError::AmbiguousSource(AmbiguousSourceError { possible_sources })
+                        },
+                    )
                 })?
         };
         Ok(Self {
