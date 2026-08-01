@@ -433,10 +433,9 @@ impl ReportData for mulan_parser::errors::YamlError {
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
-            E::DuplicateMappingKey {
-                key: _,
-                location: _,
-            } => Some("remove duplicates to make all keys in the same namespace unique".to_owned()),
+            E::DuplicateMappingKey { .. } => {
+                Some("remove duplicates to make all keys in the same namespace unique".to_owned())
+            }
             _ => None,
         }
     }
