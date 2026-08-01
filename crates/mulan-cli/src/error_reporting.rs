@@ -1,3 +1,5 @@
+//! ...
+
 use std::range::Range;
 
 use compact_str::CompactString;
