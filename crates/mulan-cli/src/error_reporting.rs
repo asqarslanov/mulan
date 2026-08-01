@@ -1,6 +1,7 @@
 use std::range::Range;
 
 use compact_str::CompactString;
+use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 
 /// ...
@@ -188,3 +189,17 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {}
 impl ReportData for mulan_parser::errors::NotAMessageError {}
 
 impl ReportData for mulan_parser::errors::UnknownParametersError {}
+
+impl ToReport for mulan_parser::errors::ChumskyAllErrors {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        #[derive(Debug, thiserror::Error, miette::Diagnostic)]
+        #[error("...")]
+        #[diagnostic(code("..."), help("..."))]
+        struct Helper(#[related] SmallVec1<[miette::Report; 1]>);
+
+        todo!();
+        Helper(self.errors.iter1().map(|e| e.to_report(config)).collect1()).into()
+    }
+}
+
+impl ReportData for mulan_parser::errors::ChumskySingleError {}
