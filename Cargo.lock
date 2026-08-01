@@ -812,6 +812,7 @@ dependencies = [
  "clap",
  "compact_str",
  "miette",
+ "mitsein",
  "mulan-config",
  "mulan-parser",
 ]

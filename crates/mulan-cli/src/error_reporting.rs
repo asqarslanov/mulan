@@ -1,5 +1,8 @@
+use std::range::Range;
+
 use compact_str::CompactString;
-use miette::{LabeledSpan, MietteDiagnostic, NamedSource};
+use miette::{LabeledSpan, MietteDiagnostic, NamedSource, SourceSpan};
+use mitsein::vec1::Vec1;
 
 /// ...
 pub trait ToReport {
@@ -15,7 +18,22 @@ impl<E: ReportData> ToReport for E {
                 source_code,
                 file_data,
                 labels,
-            }) => (Some((source_code, file_data)), Some(labels)),
+            }) => {
+                let labeled_spans: Vec<LabeledSpan> = {
+                    labels
+                        .into_iter()
+                        .map(|label| {
+                            let span: SourceSpan = match label.span {
+                                LabelSpan::Index(i) => i.into(),
+                                LabelSpan::Range(r) => (r.start..r.end).into(),
+                                LabelSpan::Full => (0..=source_code.len()).into(),
+                            };
+                            LabeledSpan::new_with_span(label.text, span)
+                        })
+                        .collect()
+                };
+                (Some((source_code, file_data)), Some(labeled_spans))
+            }
         };
         let mut report: miette::Report = MietteDiagnostic {
             message: self.message(config),
@@ -39,6 +57,30 @@ impl<E: ReportData> ToReport for E {
 }
 
 /// ...
+#[derive(Debug)]
+struct SourceCodeLabel {
+    /// ...
+    text: Option<String>,
+
+    /// ...
+    span: LabelSpan,
+}
+
+/// ...
+#[derive(Debug)]
+enum LabelSpan {
+    /// ...
+    Index(usize),
+
+    /// ...
+    Range(Range<usize>),
+
+    /// ...
+    Full,
+}
+
+/// ...
+#[derive(Debug)]
 struct SourceCodeData {
     source_code: String,
 
@@ -46,10 +88,11 @@ struct SourceCodeData {
     file_data: Option<SourceCodeFileData>,
 
     /// ...
-    labels: Vec<LabeledSpan>,
+    labels: Vec1<SourceCodeLabel>,
 }
 
 /// ...
+#[derive(Debug)]
 struct SourceCodeFileData {
     /// ...
     name: CompactString,
