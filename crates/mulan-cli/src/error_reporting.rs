@@ -154,20 +154,34 @@ impl ToReport for mulan_config::errors::ConfigError {
 }
 
 impl ReportData for mulan_config::errors::FigmentError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        self.inner.to_string()
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        use figment2::error::Kind as K;
+        match self.inner.kind {
+            K::Message(_) => "config::parse::message",
+            K::InvalidType(_, _) => "config::parse::invalid_type",
+            K::InvalidValue(_, _) => "config::parse::invalid_value",
+            K::InvalidLength(_, _) => "config::parse::invalid_length",
+            K::UnknownVariant(_, _) => "config::parse::unknown_variant",
+            K::UnknownField(_, _) => "config::parse::unknown_field",
+            K::MissingField(_) => "config::parse::missing_field",
+            K::DuplicateField(_) => "config::parse::duplicate_field",
+            K::ISizeOutOfRange(_) => "config::parse::isize_out_of_range",
+            K::USizeOutOfRange(_) => "config::parse::usize_out_of_range",
+            K::Unsupported(_) => "config::parse::unsupported",
+            K::UnsupportedKey(_, _) => "config::parse::unsupported_key",
+        }
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        None
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 

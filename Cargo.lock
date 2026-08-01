@@ -811,6 +811,7 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "compact_str",
+ "figment2",
  "miette",
  "mitsein",
  "mulan-config",
