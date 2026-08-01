@@ -57,26 +57,18 @@ impl<E: ReportData> ToReport for E {
 }
 
 /// ...
-#[derive(Debug)]
-struct SourceCodeLabel {
+trait ReportData {
     /// ...
-    text: Option<String>,
+    fn message(&self, config: &mulan_config::Config) -> String;
 
     /// ...
-    span: self::LabelSpan,
-}
-
-/// ...
-#[derive(Debug)]
-enum LabelSpan {
-    /// ...
-    Index(usize),
+    fn code(&self) -> &'static str;
 
     /// ...
-    Range(Range<usize>),
+    fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
-    Full,
+    fn source_code_data(&self) -> Option<self::SourceCodeData>;
 }
 
 /// ...
@@ -102,18 +94,26 @@ struct SourceCodeFileData {
 }
 
 /// ...
-trait ReportData {
+#[derive(Debug)]
+struct SourceCodeLabel {
     /// ...
-    fn message(&self, config: &mulan_config::Config) -> String;
+    text: Option<String>,
 
     /// ...
-    fn code(&self) -> &'static str;
+    span: self::LabelSpan,
+}
+
+/// ...
+#[derive(Debug)]
+enum LabelSpan {
+    /// ...
+    Index(usize),
 
     /// ...
-    fn help(&self, config: &mulan_config::Config) -> Option<String>;
+    Range(Range<usize>),
 
     /// ...
-    fn source_code_data(&self) -> Option<self::SourceCodeData>;
+    Full,
 }
 
 impl ToReport for mulan_config::errors::ConfigError {
@@ -197,8 +197,7 @@ impl ToReport for mulan_parser::errors::ChumskyAllErrors {
         #[diagnostic(code("..."), help("..."))]
         struct Helper(#[related] SmallVec1<[miette::Report; 1]>);
 
-        todo!();
-        Helper(
+        let related_errors = {
             self.errors
                 .iter1()
                 .map(|error| {
@@ -208,15 +207,15 @@ impl ToReport for mulan_parser::errors::ChumskyAllErrors {
                     }
                     .to_report(config)
                 })
-                .collect1(),
-        )
-        .into()
+                .collect1()
+        };
+        Helper(related_errors).into()
     }
 }
 
 /// ...
-struct ChumskyErrorWrapper {
-    error: mulan_parser::errors::ChumskySingleError,
+struct ChumskyErrorWrapper<'err> {
+    error: &'err mulan_parser::errors::ChumskySingleError,
 
     /// ...
     source: CompactString,
