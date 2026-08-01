@@ -20,7 +20,8 @@ trait ReportData {
     /// (e.g., `parser::validate::not_a_message`).
     fn code(&self) -> &'static str;
 
-    /// ...
+    /// A user-friendly message on what could be the cause of the error
+    /// or how to fix it.
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
