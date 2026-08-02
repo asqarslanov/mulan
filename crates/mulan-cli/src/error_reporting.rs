@@ -412,20 +412,20 @@ impl ReportData for mulan_parser::errors::YamlError {
             E::UnknownAnchor { .. } => "parser::read::yaml::unknown_anchor",
             E::CyclicInclude { .. } => "parser::read::yaml::cyclic_include",
             E::UnsupportedIncludeForm { .. } => "parser::read::yaml::unsupported_include_form",
-            E::ResolverError { .. } => "parser::read::yaml::resolver_error",
-            E::AliasError { .. } => "parser::read::yaml::alias_error",
-            E::HookError { .. } => "parser::read::yaml::hook_error",
+            E::ResolverError { .. } => "parser::read::yaml::resolver",
+            E::AliasError { .. } => "parser::read::yaml::alias",
+            E::HookError { .. } => "parser::read::yaml::hook",
             E::UnresolvedProperty { .. } => "parser::read::yaml::unresolved_property",
             E::InvalidPropertyName { .. } => "parser::read::yaml::invalid_property_name",
             E::PropertyRequiredButUnset { .. } => "parser::read::yaml::property_required_but_unset",
             E::PropertyRequiredButEmpty { .. } => "parser::read::yaml::property_required_but_empty",
             E::Budget { .. } => "parser::read::yaml::budget",
-            E::IOError { .. } => "parser::read::yaml::io_error",
+            E::IOError { .. } => "parser::read::yaml::io",
             E::QuotingRequired { .. } => "parser::read::yaml::quoting_required",
             E::CannotBorrowTransformedString { .. } => {
                 "parser::read::yaml::cannot_borrow_transformed_string"
             }
-            E::IndentationError { .. } => "parser::read::yaml::indentation_error",
+            E::IndentationError { .. } => "parser::read::yaml::indentation",
             _ => "parser::read::yaml",
         }
     }
