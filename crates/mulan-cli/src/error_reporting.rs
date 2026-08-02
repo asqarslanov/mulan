@@ -279,7 +279,7 @@ impl ToReport for mulan_parser::errors::InputError {
 }
 
 impl ReportData for mulan_parser::errors::ReadFileError {
-    fn message(&self, config: &mulan_config::Config) -> String {
+    fn message(&self, _config: &mulan_config::Config) -> String {
         todo!()
     }
 
@@ -287,7 +287,7 @@ impl ReportData for mulan_parser::errors::ReadFileError {
         "parser::read::fs"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
         todo!()
     }
 
