@@ -4,9 +4,11 @@
 //! This module defines the [`ToReport`] trait and implements it for all used
 //! error types.
 
+use std::fmt::Display;
 use std::range::Range;
 
 use compact_str::CompactString;
+use mitsein::iter1::IntoIterator1 as _;
 use mitsein::small_vec1::SmallVec1;
 
 /// A trait to converting strongly typed errors to human-readable
@@ -110,10 +112,10 @@ enum LabelSpan {
 
 impl<E: ReportData> ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let (source_data, labels) = match self.source_code_data() {
+        let (source_code, labels) = match self.source_code_data() {
             None => (None, None),
             Some(data) => {
-                let annotations: Vec<miette::LabeledSpan> = {
+                let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
                     let to_label_span = |label: self::SourceCodeLabel| -> miette::LabeledSpan {
                         use self::LabelSpan as S;
                         let span: miette::SourceSpan = match label.span {
@@ -126,32 +128,99 @@ impl<E: ReportData> ToReport for E {
                         };
                         miette::LabeledSpan::new_with_span(label.text, span)
                     };
-                    data.labels.into_iter().map(to_label_span).collect()
+                    data.labels.into_iter1().map(to_label_span).collect1()
                 };
-                (Some((data.source_code, data.file_data)), Some(annotations))
+                let source_code = match data.file_data {
+                    Some(file) => self::SourceCodeKind::File(
+                        miette::NamedSource::new(file.name, data.source_code).with_language(
+                            match file.language {
+                                self::SourceCodeLanguage::Yaml => "YAML",
+                            },
+                        ),
+                    ),
+                    None => self::SourceCodeKind::Unnamed(data.source_code),
+                };
+                (Some(source_code), Some(labels))
             }
         };
-        let mut report = miette::Report::from(miette::MietteDiagnostic {
+        let value = self::ReportableError {
             message: self.message(config),
-            code: Some(self.code().to_owned()),
-            severity: Some(miette::Severity::Error),
+            code: self.code(),
             help: self.help(config),
-            url: None,
+            source_code,
             labels,
-        });
-        if let Some((source_code, file_data)) = source_data {
-            report = match file_data {
-                Some(file) => report.with_source_code(
-                    miette::NamedSource::new(file.name, source_code).with_language(
-                        match file.language {
-                            self::SourceCodeLanguage::Yaml => "YAML",
-                        },
-                    ),
-                ),
-                None => report.with_source_code(source_code),
-            };
-        }
+        };
+        let report = miette::Report::from(value);
         report
+    }
+}
+
+/// ...
+#[derive(Debug, thiserror::Error)]
+#[error("{message}")]
+struct ReportableError {
+    /// ...
+    message: String,
+
+    /// ...
+    code: &'static str,
+
+    /// ...
+    help: Option<String>,
+
+    /// ...
+    source_code: Option<self::SourceCodeKind>,
+
+    /// ...
+    labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
+}
+
+/// ...
+#[derive(Debug)]
+enum SourceCodeKind {
+    /// ...
+    Unnamed(String),
+
+    /// ...
+    File(miette::NamedSource<String>),
+}
+
+impl miette::Diagnostic for self::ReportableError {
+    fn code<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+        Some(Box::new(self.code))
+    }
+
+    fn severity(&self) -> Option<miette::Severity> {
+        Some(miette::Severity::Error)
+    }
+
+    fn help<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+        self.help.as_ref().map(|s| Box::new(s) as _)
+    }
+
+    fn url<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+        None
+    }
+
+    fn source_code(&self) -> Option<&dyn miette::SourceCode> {
+        self.source_code.as_ref().map(|kind| match kind {
+            SourceCodeKind::Unnamed(string) => string as &dyn miette::SourceCode,
+            SourceCodeKind::File(named_source) => named_source,
+        })
+    }
+
+    fn labels(&self) -> Option<Box<dyn Iterator<Item = miette::LabeledSpan> + '_>> {
+        self.labels
+            .clone()
+            .map(|labels| Box::new(labels.into_iter()) as _)
+    }
+
+    fn related<'a>(&'a self) -> Option<Box<dyn Iterator<Item = &'a dyn miette::Diagnostic> + 'a>> {
+        todo!()
+    }
+
+    fn diagnostic_source(&self) -> Option<&dyn miette::Diagnostic> {
+        None
     }
 }
 
