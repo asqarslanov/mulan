@@ -112,38 +112,22 @@ impl<E: ReportData> ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         let (source_data, labels) = match self.source_code_data() {
             None => (None, None),
-            Some(SourceCodeData {
-                source_code,
-                file_data,
-                labels,
-            }) => {
-                let labeled_spans: Vec<miette::LabeledSpan> = {
-                    labels
-                        .into_iter()
-                        .map(|label| {
-                            let span: miette::SourceSpan = match label.span {
-                                LabelSpan::Index(i) => i.into(),
-                                LabelSpan::OffsetLen(offset, len) => {
-                                    if len == 1 {
-                                        offset.into()
-                                    } else {
-                                        (offset..offset + len).into()
-                                    }
-                                }
-                                LabelSpan::Range(Range { start, end }) => {
-                                    if start + 1 == end {
-                                        start.into()
-                                    } else {
-                                        (start..end).into()
-                                    }
-                                }
-                                LabelSpan::Full => (0..=source_code.len()).into(),
-                            };
-                            miette::LabeledSpan::new_with_span(label.text, span)
-                        })
-                        .collect()
+            Some(data) => {
+                let annotations: Vec<miette::LabeledSpan> = {
+                    let to_label_span = |label: SourceCodeLabel| -> miette::LabeledSpan {
+                        let span: miette::SourceSpan = match label.span {
+                            LabelSpan::Index(i) => i.into(),
+                            LabelSpan::OffsetLen(offset, len) if len == 1 => offset.into(),
+                            LabelSpan::OffsetLen(offset, len) => (offset..offset + len).into(),
+                            LabelSpan::Range(r) if r.start + 1 == r.end => r.start.into(),
+                            LabelSpan::Range(r) => (r.start..r.end).into(),
+                            LabelSpan::Full => (0..=data.source_code.len()).into(),
+                        };
+                        miette::LabeledSpan::new_with_span(label.text, span)
+                    };
+                    data.labels.into_iter().map(to_label_span).collect()
                 };
-                (Some((source_code, file_data)), Some(labeled_spans))
+                (Some((data.source_code, data.file_data)), Some(annotations))
             }
         };
         let mut report = miette::Report::from(miette::MietteDiagnostic {
