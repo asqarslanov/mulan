@@ -54,6 +54,8 @@ trait ReportData {
 
     /// ...
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>>;
 }
 
 /// See [`ReportData::source_code_data`].
@@ -269,6 +271,10 @@ impl ReportData for mulan_config::errors::FigmentError {
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        None
+    }
 }
 
 impl ToReport for mulan_config::errors::MetaError {
@@ -297,6 +303,10 @@ impl ReportData for mulan_config::errors::CurrentDirError {
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        None
+    }
 }
 
 impl ReportData for mulan_config::errors::SourceNotFoundError {
@@ -313,6 +323,10 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        None
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
         None
     }
 }
@@ -332,6 +346,10 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         todo!()
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        None
     }
 }
 
@@ -368,6 +386,10 @@ impl ReportData for mulan_parser::errors::ReadFileError {
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
     }
 }
 
@@ -516,6 +538,10 @@ impl ReportData for mulan_parser::errors::YamlError {
             }),
         })
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
+    }
 }
 
 impl ToReport for mulan_parser::errors::TransformError {
@@ -546,6 +572,10 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         todo!()
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
+    }
 }
 
 impl ReportData for mulan_parser::errors::InvalidTemplateError {
@@ -562,6 +592,10 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -582,6 +616,10 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
+    }
 }
 
 impl ReportData for mulan_parser::errors::NotAMessageError {
@@ -600,6 +638,10 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
+    }
 }
 
 impl ReportData for mulan_parser::errors::UnknownParametersError {
@@ -617,6 +659,10 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
     }
 }
 
@@ -667,6 +713,10 @@ impl ReportData for self::ChumskyErrorWrapper<'_> {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        todo!()
+    }
+
+    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
