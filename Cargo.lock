@@ -812,6 +812,7 @@ dependencies = [
  "clap",
  "compact_str",
  "figment2",
+ "indoc",
  "miette",
  "mitsein",
  "mulan-config",

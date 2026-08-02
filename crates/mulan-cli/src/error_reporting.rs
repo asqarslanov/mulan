@@ -8,6 +8,7 @@ use std::fmt::Display;
 use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _};
+use indoc::formatdoc;
 use mitsein::iter1::IntoIterator1 as _;
 use mitsein::small_vec1::SmallVec1;
 
@@ -246,10 +247,15 @@ impl ReportData for mulan_config::errors::FigmentError {
         use figment2::error::Kind as K;
         match &self.inner.kind {
             K::InvalidType(actual, expected) => {
-                format!(
-                    "invalid type: expected `{expected}`, found `{actual}` for `{}`",
+                formatdoc! {
+                    "
+                        invalid type:
+                          expected `{expected}`
+                          found `{actual}`
+                          for key `{}`\
+                    ",
                     (&self.inner.path).join_compact("."),
-                )
+                }
             }
             _ => self.inner.to_string(),
         }
