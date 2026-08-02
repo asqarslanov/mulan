@@ -470,7 +470,7 @@ impl ReportData for mulan_parser::errors::MissingLocaleError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
@@ -524,7 +524,7 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
@@ -542,7 +542,7 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
@@ -560,7 +560,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
