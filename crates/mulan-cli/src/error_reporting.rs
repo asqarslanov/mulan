@@ -119,9 +119,9 @@ impl<E: ReportData> ToReport for E {
                         let span: miette::SourceSpan = match label.span {
                             S::Index(i) => i.into(),
                             S::OffsetLen(offset, len) if len == 1 => offset.into(),
-                            S::OffsetLen(o, l) => (o..o + l).into(),
-                            S::Range(r) if r.start + 1 == r.end => r.start.into(),
-                            S::Range(r) => (r.start..r.end).into(),
+                            S::OffsetLen(offset, len) => (offset..offset + len).into(),
+                            S::Range(Range { start, end }) if start + 1 == end => start.into(),
+                            S::Range(Range { start, end }) => (start..end).into(),
                             S::Full => (0..=data.source_code.len()).into(),
                         };
                         miette::LabeledSpan::new_with_span(label.text, span)
