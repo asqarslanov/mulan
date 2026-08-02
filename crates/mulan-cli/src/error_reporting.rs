@@ -115,13 +115,14 @@ impl<E: ReportData> ToReport for E {
             Some(data) => {
                 let annotations: Vec<miette::LabeledSpan> = {
                     let to_label_span = |label: self::SourceCodeLabel| -> miette::LabeledSpan {
+                        use self::LabelSpan as S;
                         let span: miette::SourceSpan = match label.span {
-                            self::LabelSpan::Index(i) => i.into(),
-                            self::LabelSpan::OffsetLen(offset, len) if len == 1 => offset.into(),
-                            self::LabelSpan::OffsetLen(o, l) => (o..o + l).into(),
-                            self::LabelSpan::Range(r) if r.start + 1 == r.end => r.start.into(),
-                            self::LabelSpan::Range(r) => (r.start..r.end).into(),
-                            self::LabelSpan::Full => (0..=data.source_code.len()).into(),
+                            S::Index(i) => i.into(),
+                            S::OffsetLen(offset, len) if len == 1 => offset.into(),
+                            S::OffsetLen(o, l) => (o..o + l).into(),
+                            S::Range(r) if r.start + 1 == r.end => r.start.into(),
+                            S::Range(r) => (r.start..r.end).into(),
+                            S::Full => (0..=data.source_code.len()).into(),
                         };
                         miette::LabeledSpan::new_with_span(label.text, span)
                     };
