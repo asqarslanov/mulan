@@ -246,6 +246,7 @@ impl ReportData for mulan_config::errors::FigmentError {
     fn message(&self, _: &mulan_config::Config) -> String {
         use figment2::error::Kind as K;
         match &self.inner.kind {
+            K::Message(msg) => msg.trim_end().to_owned(),
             K::InvalidType(actual, expected) => {
                 formatdoc! {
                     "
@@ -264,7 +265,6 @@ impl ReportData for mulan_config::errors::FigmentError {
     fn code(&self) -> &'static str {
         use figment2::error::Kind as K;
         match self.inner.kind {
-            K::Message(_) => "config::parse::message",
             K::InvalidType(_, _) => "config::parse::invalid_type",
             K::InvalidValue(_, _) => "config::parse::invalid_value",
             K::InvalidLength(_, _) => "config::parse::invalid_length",
@@ -276,6 +276,7 @@ impl ReportData for mulan_config::errors::FigmentError {
             K::USizeOutOfRange(_) => "config::parse::usize_out_of_range",
             K::Unsupported(_) => "config::parse::unsupported",
             K::UnsupportedKey(_, _) => "config::parse::unsupported_key",
+            K::Message(_) => "config::parse",
         }
     }
 
