@@ -190,7 +190,7 @@ enum SourceCodeKind {
 }
 
 impl miette::Diagnostic for self::ReportableError {
-    fn code<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+    fn code(&self) -> Option<Box<dyn Display>> {
         Some(Box::new(self.code))
     }
 
@@ -198,11 +198,11 @@ impl miette::Diagnostic for self::ReportableError {
         Some(miette::Severity::Error)
     }
 
-    fn help<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+    fn help(&self) -> Option<Box<dyn Display + '_>> {
         self.help.as_ref().map(|s| Box::new(s) as _)
     }
 
-    fn url<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+    fn url(&self) -> Option<Box<dyn Display>> {
         None
     }
 
@@ -219,7 +219,7 @@ impl miette::Diagnostic for self::ReportableError {
             .map(|labels| Box::new(labels.into_iter()) as _)
     }
 
-    fn related<'a>(&'a self) -> Option<Box<dyn Iterator<Item = &'a dyn miette::Diagnostic> + 'a>> {
+    fn related(&self) -> Option<Box<dyn Iterator<Item = &dyn miette::Diagnostic> + '_>> {
         self.related
             .as_ref()
             .map(|related| Box::new(related.iter().map(AsRef::as_ref)) as _)
