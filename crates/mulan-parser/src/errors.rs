@@ -133,7 +133,7 @@ pub struct ChumskyAllErrors {
 #[derive(Debug)]
 pub struct ChumskySingleError {
     /// A description of the error.
-    pub message: CompactString,
+    pub message: String,
 
     /// The problematic byte indices in the `source` string.
     pub span: Range<usize>,
