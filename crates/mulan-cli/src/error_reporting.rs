@@ -446,11 +446,11 @@ impl ReportData for mulan_parser::errors::YamlError {
         let len = usize::try_from(span.len()).ok()?;
         Some(self::SourceCodeData {
             source_code: self.source_code.clone(),
-            file_data: Some(SourceCodeFileData {
+            file_data: Some(self::SourceCodeFileData {
                 name: self.filename.to_string_lossy().into(),
                 language: self::SourceCodeLanguage::Yaml,
             }),
-            labels: SmallVec1::from_one(SourceCodeLabel {
+            labels: SmallVec1::from_one(self::SourceCodeLabel {
                 text: Some("here".to_owned()),
                 span: LabelSpan::OffsetLen(offset, len),
             }),
