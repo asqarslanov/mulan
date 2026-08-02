@@ -149,6 +149,7 @@ impl<E: ReportData> ToReport for E {
             help: self.help(config),
             source_code,
             labels,
+            related: todo!(),
         };
         let report = miette::Report::from(value);
         report
@@ -173,6 +174,9 @@ struct ReportableError {
 
     /// ...
     labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
+
+    /// ...
+    related: Option<SmallVec1<[miette::Report; 1]>>,
 }
 
 /// ...
@@ -216,7 +220,9 @@ impl miette::Diagnostic for self::ReportableError {
     }
 
     fn related<'a>(&'a self) -> Option<Box<dyn Iterator<Item = &'a dyn miette::Diagnostic> + 'a>> {
-        todo!()
+        self.related
+            .as_ref()
+            .map(|related| Box::new(related.iter().map(AsRef::as_ref)) as _)
     }
 
     fn diagnostic_source(&self) -> Option<&dyn miette::Diagnostic> {
