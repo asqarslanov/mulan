@@ -250,9 +250,9 @@ impl ReportData for mulan_config::errors::FigmentError {
                 formatdoc! {
                     "
                         invalid type:
-                          expected `{expected}`
-                          found `{actual}`
-                          for key `{}`\
+                          key `{}`
+                          is expected to be `{expected}`
+                          but actually has type `{actual}`\
                     ",
                     (&self.inner.path).join_compact("."),
                 }
