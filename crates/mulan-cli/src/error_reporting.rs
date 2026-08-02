@@ -160,22 +160,22 @@ impl<E: ReportData> ToReport for E {
 #[derive(Debug, thiserror::Error)]
 #[error("{message}")]
 struct ReportableError {
-    /// ...
+    /// The error message for [`std::error::Error`].
     message: String,
 
-    /// ...
+    /// The value for [`miette::Diagnostic::code`].
     code: &'static str,
 
-    /// ...
+    /// The value for [`miette::Diagnostic::help`].
     help: Option<String>,
 
-    /// ...
+    /// The value for [`miette::Diagnostic::source_code`].
     source_code: Option<self::SourceCodeKind>,
 
-    /// ...
+    /// The value for [`miette::Diagnostic::labels`].
     labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
 
-    /// ...
+    /// The value for [`miette::Diagnostic::related`].
     related: Option<SmallVec1<[miette::Report; 1]>>,
 }
 
