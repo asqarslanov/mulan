@@ -165,7 +165,7 @@ impl ToReport for mulan_config::errors::ConfigError {
 }
 
 impl ReportData for mulan_config::errors::FigmentError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, _: &mulan_config::Config) -> String {
         self.inner.to_string()
     }
 
@@ -187,7 +187,7 @@ impl ReportData for mulan_config::errors::FigmentError {
         }
     }
 
-    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
         None
     }
 
@@ -207,7 +207,7 @@ impl ToReport for mulan_config::errors::MetaError {
 }
 
 impl ReportData for mulan_config::errors::CurrentDirError {
-    fn message(&self, config: &mulan_config::Config) -> String {
+    fn message(&self, _: &mulan_config::Config) -> String {
         todo!()
     }
 
@@ -215,17 +215,17 @@ impl ReportData for mulan_config::errors::CurrentDirError {
         "config::meta::current_dir"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
         todo!()
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
 impl ReportData for mulan_config::errors::SourceNotFoundError {
-    fn message(&self, config: &mulan_config::Config) -> String {
+    fn message(&self, _: &mulan_config::Config) -> String {
         todo!()
     }
 
@@ -233,17 +233,17 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
         "config::meta::source_not_found"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
         todo!()
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
 impl ReportData for mulan_config::errors::AmbiguousSourceError {
-    fn message(&self, config: &mulan_config::Config) -> String {
+    fn message(&self, _: &mulan_config::Config) -> String {
         todo!()
     }
 
@@ -251,7 +251,7 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
         "config::meta::ambiguous_source"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
         todo!()
     }
 
