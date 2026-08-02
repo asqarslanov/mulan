@@ -55,7 +55,7 @@ trait ReportData {
     /// ...
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>>;
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>>;
 }
 
 /// See [`ReportData::source_code_data`].
@@ -151,7 +151,7 @@ impl<E: ReportData> ToReport for E {
             help: self.help(config),
             source_code,
             labels,
-            related: todo!(),
+            related: self.related(config),
         };
         let report = miette::Report::from(value);
         report
@@ -272,7 +272,7 @@ impl ReportData for mulan_config::errors::FigmentError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         None
     }
 }
@@ -304,7 +304,7 @@ impl ReportData for mulan_config::errors::CurrentDirError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         None
     }
 }
@@ -326,7 +326,7 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         None
     }
 }
@@ -348,7 +348,7 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
         todo!()
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         None
     }
 }
@@ -388,7 +388,7 @@ impl ReportData for mulan_parser::errors::ReadFileError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -539,7 +539,7 @@ impl ReportData for mulan_parser::errors::YamlError {
         })
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -573,7 +573,7 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
         todo!()
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -595,7 +595,7 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
         todo!()
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -617,7 +617,7 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -639,7 +639,7 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -661,7 +661,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
         None
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
@@ -716,7 +716,7 @@ impl ReportData for self::ChumskyErrorWrapper<'_> {
         todo!()
     }
 
-    fn related(&self) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
         todo!()
     }
 }
