@@ -56,6 +56,7 @@ trait ReportData {
     /// ...
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 
+    /// ...
     fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>>;
 }
 
