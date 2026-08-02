@@ -49,9 +49,6 @@ pub struct YamlError {
 /// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
-    /// The [`Input`] does not have a locale specified in the config.
-    MissingLocale(MissingLocaleError),
-
     /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
     InvalidSubkey(InvalidSubkeyError),
 
@@ -69,12 +66,6 @@ pub enum TransformError {
     /// A translation of a message has parameters not specified
     /// in the main translation of this message.
     UnknownParameters(UnknownParametersError),
-}
-
-/// See [`TransformError::MissingLocale`].
-#[derive(Debug)]
-pub struct MissingLocaleError {
-    pub locale: Language,
 }
 
 /// See [`TransformError::InvalidSubkey`].

@@ -13,8 +13,8 @@ use self::input::{Definition, DefinitionAtError, Input, RawKey, RawNamespace, Ra
 use self::output::{Namespace, Node, Output, Subkey, Translations};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
-    InvalidSubkeyError, InvalidTemplateError, MissingLocaleError, NotAMessageError,
-    NotANamespaceError, TransformError, UnknownParametersError,
+    InvalidSubkeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
+    UnknownParametersError,
 };
 use crate::{Parameter, Template};
 
@@ -90,9 +90,11 @@ fn translations<'input>(
     let main_params: HashSet<&Parameter> = main_translation.parameters().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
-        let Some(definition) = input.locales.get(&locale) else {
-            let err = MissingLocaleError { locale };
-            return Err(TransformError::MissingLocale(err));
+        let definition = {
+            input
+                .locales
+                .get(&locale)
+                .expect("all locales should've been read when parsing `input`")
         };
         let raw_node = match definition.at(key) {
             Ok(node) => node,

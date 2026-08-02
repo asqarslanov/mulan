@@ -446,31 +446,12 @@ impl ReportData for mulan_parser::errors::YamlError {
 impl ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
-            Self::MissingLocale(e) => e.to_report(config),
             Self::InvalidSubkey(e) => e.to_report(config),
             Self::InvalidTemplate(e) => e.to_report(config),
             Self::NotANamespace(e) => e.to_report(config),
             Self::NotAMessage(e) => e.to_report(config),
             Self::UnknownParameters(e) => e.to_report(config),
         }
-    }
-}
-
-impl ReportData for mulan_parser::errors::MissingLocaleError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
-    }
-
-    fn code(&self) -> &'static str {
-        "parser::validate::missing_locale"
-    }
-
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
-    }
-
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        None
     }
 }
 
