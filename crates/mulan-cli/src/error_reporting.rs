@@ -292,7 +292,7 @@ impl ReportData for mulan_parser::errors::ReadFileError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 }
 
