@@ -9,7 +9,7 @@ use std::iter;
 use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
-use indoc::{formatdoc, indoc};
+use indoc::formatdoc;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
