@@ -8,7 +8,7 @@ use std::fmt::Display;
 use std::iter;
 use std::range::Range;
 
-use compact_str::{CompactString, CompactStringExt as _};
+use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::formatdoc;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
@@ -575,30 +575,33 @@ impl ToReport for mulan_parser::errors::TransformError {
 
 impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        match &self.parent_key {
-            Some(key) => format!(
-                "in {}, in the namespace `{}`",
-                self.locale.tag(),
-                key.to_compact_string1(),
-            ),
-            None => format!("in {}, in the root namespace"),
+        formatdoc! {"
+            found invalid key
+              locale: {}
+              {}\
+            ",
+            self.locale.tag(),
+            match &self.parent_key {
+                Some(key) => format_compact!("namespace `{}`", key.to_compact_string1()),
+                None => "root namespace".to_compact_string(),
+            },
         }
     }
 
     fn code(&self) -> &'static str {
-        "parser::validate::invalid_subkey"
+        "parser::validate::invalid_key"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        None
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some("it should look like a variable in a programming language".to_owned())
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(self.errors.to_report(config))
     }
 }
 
