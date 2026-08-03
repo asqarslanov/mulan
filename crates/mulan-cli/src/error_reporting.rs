@@ -11,6 +11,7 @@ use compact_str::{CompactString, CompactStringExt as _};
 use indoc::formatdoc;
 use mitsein::iter1::IntoIterator1 as _;
 use mitsein::small_vec1::SmallVec1;
+use smallvec::SmallVec;
 
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
@@ -57,7 +58,7 @@ trait ReportData {
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 
     /// ...
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>>;
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]>;
 }
 
 /// See [`ReportData::source_code_data`].
@@ -182,7 +183,7 @@ struct ReportableError {
     labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
 
     /// The value for [`miette::Diagnostic::related`].
-    related: Option<SmallVec1<[miette::Report; 1]>>,
+    related: SmallVec<[miette::Report; 1]>,
 }
 
 /// ...
@@ -226,9 +227,7 @@ impl miette::Diagnostic for self::ReportableError {
     }
 
     fn related(&self) -> Option<Box<dyn Iterator<Item = &dyn miette::Diagnostic> + '_>> {
-        self.related
-            .as_ref()
-            .map(|related| Box::new(related.iter().map(AsRef::as_ref)) as _)
+        Some(Box::new(self.related.iter().map(AsRef::as_ref)))
     }
 
     fn diagnostic_source(&self) -> Option<&dyn miette::Diagnostic> {
@@ -288,8 +287,8 @@ impl ReportData for mulan_config::errors::FigmentError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        None
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }
 
@@ -320,8 +319,8 @@ impl ReportData for mulan_config::errors::CurrentDirError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        None
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }
 
@@ -342,8 +341,8 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        None
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }
 
@@ -364,8 +363,8 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
         todo!()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        None
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }
 
@@ -404,8 +403,8 @@ impl ReportData for mulan_parser::errors::ReadFileError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        todo!()
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }
 
@@ -555,7 +554,7 @@ impl ReportData for mulan_parser::errors::YamlError {
         })
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
@@ -589,7 +588,7 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
         todo!()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
@@ -611,7 +610,7 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
         todo!()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
@@ -633,7 +632,7 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
@@ -655,7 +654,7 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
@@ -677,46 +676,43 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
         todo!()
     }
 }
 
 impl ReportData for mulan_parser::errors::ChumskyAllErrors {
     fn message(&self, config: &mulan_config::Config) -> String {
-        self::ChumskyErrorWrapper {
-            error: self.errors.first(),
-            source: &self.source,
-        }
-        .message(config)
+        let error = self.errors.first();
+        let source = &self.source;
+        self::ChumskyErrorWrapper { error, source }.message(config)
     }
 
     fn code(&self) -> &'static str {
-        self::ChumskyErrorWrapper {
-            error: self.errors.first(),
-            source: &self.source,
-        }
-        .code()
+        let error = self.errors.first();
+        let source = &self.source;
+        self::ChumskyErrorWrapper { error, source }.code()
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        self::ChumskyErrorWrapper {
-            error: self.errors.first(),
-            source: &self.source,
-        }
-        .help(config)
+        let error = self.errors.first();
+        let source = &self.source;
+        self::ChumskyErrorWrapper { error, source }.help(config)
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        self::ChumskyErrorWrapper {
-            error: self.errors.first(),
-            source: &self.source,
-        }
-        .source_code_data()
+        let error = self.errors.first();
+        let source = &self.source;
+        self::ChumskyErrorWrapper { error, source }.source_code_data()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        todo!()
+    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        let source = &self.source;
+        self.errors
+            .iter()
+            .map(|error| self::ChumskyErrorWrapper { error, source }.to_report(config))
+            .skip(1)
+            .collect()
     }
 }
 
@@ -752,7 +748,7 @@ impl ReportData for self::ChumskyErrorWrapper<'_> {
         })
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        None
+    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+        SmallVec::default()
     }
 }

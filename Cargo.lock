@@ -818,6 +818,7 @@ dependencies = [
  "mulan-config",
  "mulan-parser",
  "serde-saphyr",
+ "smallvec",
  "thiserror",
 ]
 
