@@ -135,13 +135,15 @@ impl<E: ReportData> ToReport for E {
                     data.labels.into_iter1().map(to_label_span).collect1()
                 };
                 let source_code = match data.file_data {
-                    Some(file) => self::SourceCodeKind::File(
-                        miette::NamedSource::new(file.name, data.source_code).with_language(
-                            match file.language {
-                                self::SourceCodeLanguage::Yaml => "YAML",
-                            },
-                        ),
-                    ),
+                    Some(file) => {
+                        use self::SourceCodeLanguage as L;
+                        let l = match file.language {
+                            L::Yaml => "YAML",
+                        };
+                        self::SourceCodeKind::File(
+                            miette::NamedSource::new(file.name, data.source_code).with_language(l),
+                        )
+                    }
                     None => self::SourceCodeKind::Unnamed(data.source_code),
                 };
                 (Some(source_code), Some(labels))
