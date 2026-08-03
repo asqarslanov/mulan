@@ -371,7 +371,16 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
 
 impl ReportData for mulan_config::errors::AmbiguousSourceError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        todo!()
+        let all_config_alternatives = {
+            self.possible_sources
+                .iter1()
+                .map(|path| format_compact!("- {path}"))
+                .join_compact("\n")
+        };
+        formatdoc! {"
+            multiple possible config locations
+            {all_config_alternatives}\
+        "}
     }
 
     fn code(&self) -> &'static str {
@@ -379,11 +388,18 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(format!(
+            "only choose one config to remain, and delete the other{}",
+            if self.possible_sources.len().get() == 2 {
+                ""
+            } else {
+                "s"
+            },
+        ))
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
