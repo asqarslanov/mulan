@@ -587,7 +587,7 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
@@ -609,7 +609,7 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        None
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
