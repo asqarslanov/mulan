@@ -255,7 +255,7 @@ impl ReportData for mulan_config::errors::FigmentError {
         match &self.inner.kind {
             K::Message(msg) => msg.trim_end().to_owned(),
             K::InvalidType(actual, expected) => formatdoc! {"
-                invalid type:
+                invalid type
                   key `{}`
                   is expected to be `{expected}`
                   but actually has type `{actual}`\
@@ -323,7 +323,7 @@ impl ReportData for mulan_config::errors::CurrentDirError {
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
         Some(formatdoc! {"
-            make sure that:
+            make sure that
             - the current working directory exists
             - you have permissions to access it\
         "})
@@ -693,7 +693,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
                 .join_compact(", ")
         };
         formatdoc! {"
-            unknown parameters:
+            unknown parameters
               locale: {}
               key: {}
               found: {all_unknown_parameters}\
