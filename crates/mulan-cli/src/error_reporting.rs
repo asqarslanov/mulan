@@ -306,7 +306,12 @@ impl ToReport for mulan_config::errors::MetaError {
 
 impl ReportData for mulan_config::errors::CurrentDirError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        todo!()
+        formatdoc! {"
+            couldn't get current working directory
+            - {}\
+            ",
+            self.inner,
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -314,7 +319,11 @@ impl ReportData for mulan_config::errors::CurrentDirError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(formatdoc! {"
+            make sure that:
+            - the current directory exists
+            - you have permissions to access it\
+        "})
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
