@@ -574,8 +574,15 @@ impl ToReport for mulan_parser::errors::TransformError {
 }
 
 impl ReportData for mulan_parser::errors::InvalidSubkeyError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        match &self.parent_key {
+            Some(key) => format!(
+                "in {}, in the namespace `{}`",
+                self.locale.tag(),
+                key.to_compact_string1(),
+            ),
+            None => format!("in {}, in the root namespace"),
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -583,7 +590,7 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+        None
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
