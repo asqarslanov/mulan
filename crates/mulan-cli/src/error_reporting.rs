@@ -557,7 +557,7 @@ impl ReportData for mulan_parser::errors::YamlError {
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+        iter::empty()
     }
 }
 
