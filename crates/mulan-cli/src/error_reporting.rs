@@ -682,28 +682,41 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 }
 
-impl ToReport for mulan_parser::errors::ChumskyAllErrors {
-    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        #[derive(Debug, thiserror::Error, miette::Diagnostic)]
-        #[error("...")]
-        #[diagnostic(code("..."), help("..."))]
-        struct Helper(#[related] SmallVec1<[miette::Report; 1]>);
+impl ReportData for mulan_parser::errors::ChumskyAllErrors {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        self::ChumskyErrorWrapper {
+            error: self.errors.first(),
+            source: &self.source,
+        }
+        .message(config)
+    }
 
-        todo!();
+    fn code(&self) -> &'static str {
+        self::ChumskyErrorWrapper {
+            error: self.errors.first(),
+            source: &self.source,
+        }
+        .code()
+    }
 
-        let related_errors = {
-            self.errors
-                .iter1()
-                .map(|error| {
-                    ChumskyErrorWrapper {
-                        error,
-                        source: &self.source,
-                    }
-                    .to_report(config)
-                })
-                .collect1()
-        };
-        Helper(related_errors).into()
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        self::ChumskyErrorWrapper {
+            error: self.errors.first(),
+            source: &self.source,
+        }
+        .help(config)
+    }
+
+    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+        self::ChumskyErrorWrapper {
+            error: self.errors.first(),
+            source: &self.source,
+        }
+        .source_code_data()
+    }
+
+    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+        todo!()
     }
 }
 
@@ -717,7 +730,7 @@ struct ChumskyErrorWrapper<'err> {
 
 impl ReportData for self::ChumskyErrorWrapper<'_> {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        self.error.message.to_owned()
+        self.error.message.clone()
     }
 
     fn code(&self) -> &'static str {
