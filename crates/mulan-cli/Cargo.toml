@@ -20,7 +20,6 @@ mitsein = { workspace = true, features = ["smallvec"] }
 mulan-config = { workspace = true }
 mulan-parser = { workspace = true }
 serde-saphyr = { workspace = true }
-smallvec = { workspace = true }
 thiserror = { workspace = true }
 
 [lints]

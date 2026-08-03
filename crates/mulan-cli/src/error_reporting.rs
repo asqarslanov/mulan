@@ -10,9 +10,8 @@ use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _};
 use indoc::formatdoc;
-use mitsein::iter1::IntoIterator1 as _;
+use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
-use smallvec::SmallVec;
 
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
@@ -157,7 +156,7 @@ impl<E: ReportData> ToReport for E {
             help: self.help(config),
             source_code,
             labels,
-            related: self.related(config).collect(),
+            related: self.related(config).try_collect1().ok(),
         };
         let report = miette::Report::from(value);
         report
@@ -184,7 +183,7 @@ struct ReportableError {
     labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
 
     /// The value for [`miette::Diagnostic::related`].
-    related: SmallVec<[miette::Report; 1]>,
+    related: Option<SmallVec1<[miette::Report; 1]>>,
 }
 
 /// ...
@@ -228,7 +227,9 @@ impl miette::Diagnostic for self::ReportableError {
     }
 
     fn related(&self) -> Option<Box<dyn Iterator<Item = &dyn miette::Diagnostic> + '_>> {
-        Some(Box::new(self.related.iter().map(AsRef::as_ref)))
+        self.related
+            .as_ref()
+            .map(|related| Box::new(related.iter().map(AsRef::as_ref)) as _)
     }
 
     fn diagnostic_source(&self) -> Option<&dyn miette::Diagnostic> {
