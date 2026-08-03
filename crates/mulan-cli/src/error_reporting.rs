@@ -5,6 +5,7 @@
 //! error types.
 
 use std::fmt::Display;
+use std::iter;
 use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _};
@@ -58,7 +59,7 @@ trait ReportData {
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 
     /// ...
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]>;
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
 /// See [`ReportData::source_code_data`].
@@ -156,7 +157,7 @@ impl<E: ReportData> ToReport for E {
             help: self.help(config),
             source_code,
             labels,
-            related: self.related(config),
+            related: self.related(config).collect(),
         };
         let report = miette::Report::from(value);
         report
@@ -287,8 +288,8 @@ impl ReportData for mulan_config::errors::FigmentError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
@@ -319,8 +320,8 @@ impl ReportData for mulan_config::errors::CurrentDirError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
@@ -341,8 +342,8 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
@@ -363,8 +364,8 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
         todo!()
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
@@ -403,8 +404,8 @@ impl ReportData for mulan_parser::errors::ReadFileError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
@@ -554,8 +555,8 @@ impl ReportData for mulan_parser::errors::YamlError {
         })
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -588,8 +589,8 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
         todo!()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -610,8 +611,8 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
         todo!()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -632,8 +633,8 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -654,8 +655,8 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -676,8 +677,8 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        todo!()
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::once(todo!())
     }
 }
 
@@ -706,13 +707,12 @@ impl ReportData for mulan_parser::errors::ChumskyAllErrors {
         self::ChumskyErrorWrapper { error, source }.source_code_data()
     }
 
-    fn related(&self, config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         let source = &self.source;
         self.errors
             .iter()
             .map(|error| self::ChumskyErrorWrapper { error, source }.to_report(config))
             .skip(1)
-            .collect()
     }
 }
 
@@ -748,7 +748,7 @@ impl ReportData for self::ChumskyErrorWrapper<'_> {
         })
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> SmallVec<[miette::Report; 1]> {
-        SmallVec::default()
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
