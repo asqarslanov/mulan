@@ -411,7 +411,13 @@ impl ToReport for mulan_parser::errors::InputError {
 
 impl ReportData for mulan_parser::errors::ReadFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        todo!()
+        formatdoc! {"
+            failed to read {}
+            OS error: {}\
+            ",
+            self.path.display(),
+            self.error,
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -419,7 +425,14 @@ impl ReportData for mulan_parser::errors::ReadFileError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(formatdoc! {"
+            make sure
+            - {} exists
+            - it contains valid UTF-8
+            - you have permissions to read it\
+            ",
+            self.path.display(),
+        })
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
