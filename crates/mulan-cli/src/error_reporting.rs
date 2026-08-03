@@ -13,6 +13,9 @@ use indoc::formatdoc;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
+/// ...
+const CASE_GUARDRAIL: () = ();
+
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
 ///
@@ -681,8 +684,23 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
 }
 
 impl ReportData for mulan_parser::errors::UnknownParametersError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        () = CASE_GUARDRAIL;
+        let all_unknown_parameters = {
+            self.parameters
+                .iter1()
+                .map(|param| format_compact!("`{}`", param.to_kebab_case()))
+                .join_compact(", ")
+        };
+        formatdoc! {"
+            unknown parameters:
+              locale: {}
+              key: {}
+              found: {all_unknown_parameters}
+            ",
+            self.locale.tag(),
+            self.key.to_compact_string1(),
+        }
     }
 
     fn code(&self) -> &'static str {

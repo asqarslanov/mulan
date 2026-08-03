@@ -1,6 +1,7 @@
 //! See [`Template`].
 
 use compact_str::CompactString;
+use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
 
@@ -47,6 +48,13 @@ pub enum TemplatePart {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Parameter {
     name: Identifier,
+}
+
+impl Parameter {
+    /// Converts this parameter to a kebab-case string (e.g., `first-name`).
+    pub fn to_kebab_case(&self) -> CompactString1 {
+        self.name.to_kebab_case()
+    }
 }
 
 /// Defines parsers with [`mod@chumsky`].
