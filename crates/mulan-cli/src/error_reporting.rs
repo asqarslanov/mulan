@@ -10,6 +10,7 @@ use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::{formatdoc, indoc};
+use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
@@ -371,16 +372,7 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
 
 impl ReportData for mulan_config::errors::AmbiguousSourceError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        let all_config_alternatives = {
-            self.possible_sources
-                .iter1()
-                .map(|path| format_compact!("- {path}"))
-                .join_compact("\n")
-        };
-        formatdoc! {"
-            multiple possible config locations
-            {all_config_alternatives}\
-        "}
+        "multiple possible config locations".to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -399,7 +391,30 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        None
+        Some(self::SourceCodeData {
+            source_code: self.possible_sources.iter1().into_iter().join("\n"),
+            file_data: None,
+            labels: {
+                let mut line_i_start = 0;
+                self.possible_sources
+                    .iter1()
+                    .enumerate()
+                    .map(|(i, path)| {
+                        let text = Some(
+                            match i {
+                                0 => "maybe this?",
+                                1 => "or maybe this?",
+                                _ => "or maybe even this?",
+                            }
+                            .to_owned(),
+                        );
+                        let span = self::LabelSpan::OffsetLen(line_i_start, path.as_str().len());
+                        line_i_start += path.as_str().len() + 1;
+                        self::SourceCodeLabel { text, span }
+                    })
+                    .collect1()
+            },
+        })
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
