@@ -9,7 +9,7 @@ use std::iter;
 use std::range::Range;
 
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
-use indoc::formatdoc;
+use indoc::{formatdoc, indoc};
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
@@ -696,7 +696,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
             unknown parameters:
               locale: {}
               key: {}
-              found: {all_unknown_parameters}
+              found: {all_unknown_parameters}\
             ",
             self.locale.tag(),
             self.key.to_compact_string1(),
@@ -708,7 +708,12 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(formatdoc! {"
+            a translation of a message is allowed to have less parameters than the original ({}), \
+            but never more\
+            ",
+            config.main_locale.tag(),
+        })
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
@@ -716,7 +721,7 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+        iter::empty()
     }
 }
 
