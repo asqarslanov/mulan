@@ -716,23 +716,30 @@ struct ChumskyErrorWrapper<'err> {
 }
 
 impl ReportData for self::ChumskyErrorWrapper<'_> {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        self.error.message.to_owned()
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "parser::syntax"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        None
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        todo!()
+        Some(self::SourceCodeData {
+            source_code: self.source.to_owned(),
+            file_data: None,
+            labels: SmallVec1::from_one(self::SourceCodeLabel {
+                text: None,
+                span: self::LabelSpan::Range(self.error.span),
+            }),
+        })
     }
 
-    fn related(&self, config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
-        todo!()
+    fn related(&self, _config: &mulan_config::Config) -> Option<SmallVec1<[miette::Report; 1]>> {
+        None
     }
 }
