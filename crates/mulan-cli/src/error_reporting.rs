@@ -737,6 +737,7 @@ impl ReportData for mulan_parser::errors::ChumskyAllErrors {
 }
 
 /// ...
+#[derive(Debug)]
 struct ChumskyErrorWrapper<'err> {
     error: &'err mulan_parser::errors::ChumskySingleError,
 
