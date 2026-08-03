@@ -241,10 +241,10 @@ impl miette::Diagnostic for self::ReportableError {
 }
 
 impl ToReport for mulan_config::errors::ConfigError {
-    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+    fn to_report(&self, dummy_config: &mulan_config::Config) -> miette::Report {
         match self {
-            Self::Figment(e) => e.to_report(config),
-            Self::Meta(e) => e.to_report(config),
+            Self::Figment(e) => e.to_report(dummy_config),
+            Self::Meta(e) => e.to_report(dummy_config),
         }
     }
 }
@@ -292,7 +292,7 @@ impl ReportData for mulan_config::errors::FigmentError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }
@@ -333,7 +333,7 @@ impl ReportData for mulan_config::errors::CurrentDirError {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }
