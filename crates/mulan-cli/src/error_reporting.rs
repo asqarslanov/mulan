@@ -738,18 +738,10 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
 
 impl ReportData for mulan_parser::errors::UnknownParametersError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        () = CASE_GUARDRAIL;
-        let all_unknown_parameters = {
-            self.parameters
-                .iter1()
-                .map(|param| format_compact!("`{}`", param.to_kebab_case()))
-                .join_compact(", ")
-        };
         formatdoc! {"
             unknown parameters
               locale: {}
-              key: {}
-              found: {all_unknown_parameters}\
+              key: `{}`\
             ",
             self.locale.tag(),
             self.key.to_compact_string1(),
@@ -770,7 +762,38 @@ impl ReportData for mulan_parser::errors::UnknownParametersError {
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        None
+        () = CASE_GUARDRAIL;
+        Some(self::SourceCodeData {
+            source_code: {
+                self.parameters
+                    .iter1()
+                    .map(|param| param.to_kebab_case())
+                    .into_iter()
+                    .join("\n")
+            },
+            file_data: None,
+            labels: {
+                let mut line_i_start = 0;
+                self.parameters
+                    .iter1()
+                    .enumerate()
+                    .map(|(i, param)| {
+                        let param = param.to_kebab_case();
+                        let text = Some(
+                            match i {
+                                0 => "remove this parameter",
+                                1 => "and this",
+                                _ => "and also this",
+                            }
+                            .to_owned(),
+                        );
+                        let span = self::LabelSpan::OffsetLen(line_i_start, param.len().get());
+                        line_i_start += param.len().get() + 1;
+                        self::SourceCodeLabel { text, span }
+                    })
+                    .collect1()
+            },
+        })
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
