@@ -350,7 +350,7 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
         Some(
             indoc! {"
-                make sure you're inside your project and it uses Mulan
+                make sure you're inside your project that uses Mulan
                 or run `mulan init` to get started
 
                 Mulan is an i18n framework
