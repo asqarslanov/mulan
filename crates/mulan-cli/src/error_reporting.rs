@@ -318,7 +318,7 @@ impl ReportData for mulan_config::errors::CurrentDirError {
     }
 
     fn code(&self) -> &'static str {
-        "config::meta::current_dir"
+        "config::current_dir"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
@@ -344,7 +344,7 @@ impl ReportData for mulan_config::errors::SourceNotFoundError {
     }
 
     fn code(&self) -> &'static str {
-        "config::meta::source_not_found"
+        "config::not_found"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
@@ -375,7 +375,7 @@ impl ReportData for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn code(&self) -> &'static str {
-        "config::meta::ambiguous_source"
+        "config::ambiguous_source"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
