@@ -248,17 +248,15 @@ impl ReportData for mulan_config::errors::FigmentError {
         use figment2::error::Kind as K;
         match &self.inner.kind {
             K::Message(msg) => msg.trim_end().to_owned(),
-            K::InvalidType(actual, expected) => {
-                formatdoc! {
-                    "
-                        invalid type:
-                          key `{}`
-                          is expected to be `{expected}`
-                          but actually has type `{actual}`\
-                    ",
-                    (&self.inner.path).join_compact("."),
-                }
-            }
+            K::InvalidType(actual, expected) => formatdoc! {
+                "
+                    invalid type:
+                      key `{}`
+                      is expected to be `{expected}`
+                      but actually has type `{actual}`\
+                ",
+                (&self.inner.path).join_compact("."),
+            },
             _ => self.inner.to_string(),
         }
     }
