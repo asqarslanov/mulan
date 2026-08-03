@@ -666,21 +666,29 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        todo!("make sure multiple errors can be output");
         iter::once(self.errors.to_report(config))
     }
 }
 
 impl ReportData for mulan_parser::errors::InvalidTemplateError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            found invalid message
+              locale: {}
+              key: `{}`\
+            ",
+            self.locale.tag(),
+            self.key.to_compact_string1(),
+        }
     }
 
     fn code(&self) -> &'static str {
         "parser::validate::invalid_template"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        None
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
@@ -688,7 +696,7 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+        iter::once(self.errors.to_report(config))
     }
 }
 
