@@ -886,10 +886,8 @@ impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         let source = &self.source;
-        self.errors
-            .iter()
-            .map(|error| self::ChumskyErrorWrapper { error, source }.to_report(config))
-            .skip(1)
+        let to_report = |error| self::ChumskyErrorWrapper { error, source }.to_report(config);
+        self.errors.iter().map(to_report).skip(1)
     }
 }
 
