@@ -14,7 +14,11 @@ use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
-/// ...
+/// I plan to add support for different cases for identifier names
+/// (kebab-case, snake_case, camelCase).
+///
+/// When I do it, `() = CASE_GUARDRAIL` will fail to compile,
+/// so I can refactor these places manually.
 const CASE_GUARDRAIL: () = ();
 
 /// A trait to converting strongly typed errors to human-readable
