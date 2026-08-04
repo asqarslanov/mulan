@@ -31,7 +31,7 @@ mod meta;
 /// See <https://github.com/asqarslanov/mulan> for more details.
 #[serde_as]
 #[derive(Debug, PartialEq, Eq, serdev::Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
 pub struct Config {
     /// Information about the execution context obtained at runtime.

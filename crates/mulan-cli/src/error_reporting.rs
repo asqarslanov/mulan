@@ -283,6 +283,7 @@ impl self::ReportData for mulan_config::errors::FigmentError {
                     .map(|variant| format_compact!("`{variant}`"))
                     .join_compact(", "),
             },
+            K::UnknownField(actual, _) => format!("unknown field: `{actual}`"),
             _ => self.inner.to_string(),
         }
     }
@@ -306,7 +307,11 @@ impl self::ReportData for mulan_config::errors::FigmentError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        None
+        use figment2::error::Kind as K;
+        match self.inner.kind {
+            K::UnknownField(_, _) => Some("maybe, you mistyped it?".to_owned()),
+            _ => None,
+        }
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
