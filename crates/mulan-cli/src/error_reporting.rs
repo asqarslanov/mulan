@@ -701,8 +701,15 @@ impl ReportData for mulan_parser::errors::InvalidTemplateError {
 }
 
 impl ReportData for mulan_parser::errors::NotANamespaceError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            expected a namespace, found a message
+              locale: {}
+              key: `{}`\
+            ",
+            self.locale.tag(),
+            self.key.to_compact_string1(),
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -710,21 +717,32 @@ impl ReportData for mulan_parser::errors::NotANamespaceError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(format!(
+            "see how `{}` is defined in {}",
+            self.key.to_compact_string1(),
+            config.main_locale.tag(),
+        ))
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
 impl ReportData for mulan_parser::errors::NotAMessageError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            expected a message, found a namespace
+              locale: {}
+              key: `{}`\
+            ",
+            self.locale.tag(),
+            self.key.to_compact_string1(),
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -732,15 +750,19 @@ impl ReportData for mulan_parser::errors::NotAMessageError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+        Some(format!(
+            "see how `{}` is defined in {}",
+            self.key.to_compact_string1(),
+            config.main_locale.tag(),
+        ))
     }
 
     fn source_code_data(&self) -> Option<self::SourceCodeData> {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        iter::once(todo!())
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
     }
 }
 
