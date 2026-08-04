@@ -167,9 +167,9 @@ impl Definition {
                 return Err(InputError::ReadFile(ReadFileError { path, error }));
             }
         };
-        serde_saphyr::from_str(&file_contents).map_err(|inner| {
+        serde_saphyr::from_str(&file_contents).map_err(|err| {
             InputError::Yaml(YamlError {
-                inner,
+                inner: Box::new(err),
                 filename: path.into_owned(),
                 source_code: file_contents,
             })

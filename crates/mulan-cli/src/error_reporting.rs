@@ -15,7 +15,7 @@ use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
 /// I plan to add support for different cases for identifier names
-/// (kebab-case, snake_case, camelCase).
+/// (`kebab-case`, `snake_case`, `camelCase`).
 ///
 /// When I do it, `() = CASE_GUARDRAIL` will fail to compile,
 /// so I can refactor these places manually.
@@ -134,7 +134,7 @@ impl<E: self::ReportData> self::ToReport for E {
                         use self::LabelSpan as S;
                         let span: miette::SourceSpan = match label.span {
                             S::Index(i) => i.into(),
-                            S::OffsetLen(offset, len) if len == 1 => offset.into(),
+                            S::OffsetLen(offset, 1) => offset.into(),
                             S::OffsetLen(offset, len) => (offset..offset + len).into(),
                             S::Range(Range { start, end }) if start + 1 == end => start.into(),
                             S::Range(Range { start, end }) => (start..end).into(),
@@ -159,16 +159,14 @@ impl<E: self::ReportData> self::ToReport for E {
                 (Some(source_code), Some(labels))
             }
         };
-        let value = self::ReportableError {
+        miette::Report::from(self::ReportableError {
             message: self.message(config),
             code: self.code(),
             help: self.help(config),
             source_code,
             labels,
             related: self.related(config).try_collect1().ok(),
-        };
-        let report = miette::Report::from(value);
-        report
+        })
     }
 }
 
@@ -495,6 +493,7 @@ impl self::ReportData for mulan_parser::errors::YamlError {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn code(&self) -> &'static str {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
@@ -651,10 +650,10 @@ impl self::ReportData for mulan_parser::errors::InvalidSubkeyError {
               {}\
             ",
             self.locale.tag(),
-            match &self.parent_key {
-                Some(key) => format_compact!("namespace `{}`", key.to_compact_string1()),
-                None => "root namespace".to_compact_string(),
-            },
+            self.parent_key.as_ref().map_or_else(
+                || "root namespace".to_compact_string(),
+                |key| format_compact!("namespace `{}`", key.to_compact_string1()),
+            ),
         }
     }
 
@@ -801,7 +800,7 @@ impl self::ReportData for mulan_parser::errors::UnknownParametersError {
             source_code: {
                 self.parameters
                     .iter1()
-                    .map(|param| param.to_kebab_case())
+                    .map(mulan_parser::Parameter::to_kebab_case)
                     .into_iter()
                     .join("\n")
             },

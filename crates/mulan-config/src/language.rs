@@ -6,6 +6,7 @@ use serde::Deserialize;
 /// (e.g., English, Canadian French, or Esperanto).
 ///
 /// Uses [`Self::tag`] for de/serialization.
+#[allow(clippy::unsafe_derive_deserialize)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub enum Language {
     /// English (United States)

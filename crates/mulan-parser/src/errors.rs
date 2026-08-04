@@ -41,7 +41,7 @@ pub struct ReadFileError {
 /// See [`InputError::Format`].
 #[derive(Debug)]
 pub struct YamlError {
-    pub inner: serde_saphyr::Error,
+    pub inner: Box<serde_saphyr::Error>,
     pub filename: PathBuf,
     pub source_code: String,
 }

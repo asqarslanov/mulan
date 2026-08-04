@@ -52,6 +52,7 @@ pub struct Parameter {
 
 impl Parameter {
     /// Converts this parameter to a kebab-case string (e.g., `first-name`).
+    #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.name.to_kebab_case()
     }
