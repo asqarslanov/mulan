@@ -104,6 +104,7 @@ struct SourceCodeLabel {
 }
 
 /// ...
+#[allow(dead_code)]
 #[derive(Debug)]
 enum LabelSpan {
     /// ...
