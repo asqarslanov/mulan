@@ -666,7 +666,6 @@ impl ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        todo!("make sure multiple errors can be output");
         iter::once(self.errors.to_report(config))
     }
 }
