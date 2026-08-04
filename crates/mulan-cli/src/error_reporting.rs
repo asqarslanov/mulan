@@ -25,7 +25,7 @@ const CASE_GUARDRAIL: () = ();
 /// [`miette::Report`]s with [`ToReport::to_report`].
 ///
 /// This trait is implemented automatically for all types that implement
-/// [`self::ReportData`].
+/// [`self::ReportData`]. If possible, prefer implementing [`ReportData`].
 ///
 /// ---
 ///
@@ -65,7 +65,10 @@ trait ReportData {
     /// ...
     fn source_code_data(&self) -> Option<self::SourceCodeData>;
 
-    /// ...
+    /// Additional reports displayed under this one.
+    ///
+    /// This method is used for stacking multiple reports together.
+    /// If this is not what you want, simply return [`iter::empty()`].
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
