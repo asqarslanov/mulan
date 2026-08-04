@@ -94,7 +94,7 @@ struct SourceCodeFileData {
     language: self::SourceCodeLanguage,
 }
 
-/// ...
+/// A markup language name used for syntax highlighting.
 #[derive(Debug)]
 enum SourceCodeLanguage {
     Yaml,
