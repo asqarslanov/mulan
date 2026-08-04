@@ -25,7 +25,7 @@ const CASE_GUARDRAIL: () = ();
 /// [`miette::Report`]s with [`ToReport::to_report`].
 ///
 /// This trait is implemented automatically for all types that implement
-/// [`self::ReportData`]. If possible, prefer implementing [`ReportData`].
+/// [`self::Reportable`]. If possible, prefer implementing [`Reportable`].
 ///
 /// ---
 ///
@@ -50,7 +50,7 @@ pub trait ToReport {
 }
 
 /// ...
-trait ReportData {
+trait Reportable {
     /// ...
     fn message(&self, config: &mulan_config::Config) -> String;
 
@@ -72,7 +72,7 @@ trait ReportData {
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
-/// See [`self::ReportData::source_code_data`].
+/// See [`self::Reportable::source_code_data`].
 #[derive(Debug)]
 struct SourceCodeData {
     source_code: String,
@@ -127,7 +127,7 @@ enum LabelSpan {
     Full,
 }
 
-impl<E: self::ReportData> self::ToReport for E {
+impl<E: self::Reportable> self::ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         let (source_code, labels) = match self.source_code_data() {
             None => (None, None),
@@ -162,7 +162,7 @@ impl<E: self::ReportData> self::ToReport for E {
                 (Some(source_code), Some(labels))
             }
         };
-        miette::Report::from(self::ReportableError {
+        miette::Report::from(self::ReportData {
             message: self.message(config),
             code: self.code(),
             help: self.help(config),
@@ -176,7 +176,7 @@ impl<E: self::ReportData> self::ToReport for E {
 /// ...
 #[derive(Debug, thiserror::Error)]
 #[error("{message}")]
-struct ReportableError {
+struct ReportData {
     /// The error message for [`std::error::Error`].
     message: String,
 
@@ -206,7 +206,7 @@ enum SourceCodeKind {
     File(miette::NamedSource<String>),
 }
 
-impl miette::Diagnostic for self::ReportableError {
+impl miette::Diagnostic for self::ReportData {
     fn code(&self) -> Option<Box<dyn Display>> {
         Some(Box::new(self.code))
     }
@@ -256,7 +256,7 @@ impl self::ToReport for mulan_config::errors::ConfigError {
     }
 }
 
-impl self::ReportData for mulan_config::errors::FigmentError {
+impl self::Reportable for mulan_config::errors::FigmentError {
     fn message(&self, _: &mulan_config::Config) -> String {
         use figment2::error::Kind as K;
         match &self.inner.kind {
@@ -336,7 +336,7 @@ impl self::ToReport for mulan_config::errors::MetaError {
     }
 }
 
-impl self::ReportData for mulan_config::errors::CurrentDirError {
+impl self::Reportable for mulan_config::errors::CurrentDirError {
     fn message(&self, _: &mulan_config::Config) -> String {
         formatdoc! {"
             failed to get current working directory
@@ -367,7 +367,7 @@ impl self::ReportData for mulan_config::errors::CurrentDirError {
     }
 }
 
-impl self::ReportData for mulan_config::errors::SourceNotFoundError {
+impl self::Reportable for mulan_config::errors::SourceNotFoundError {
     fn message(&self, _: &mulan_config::Config) -> String {
         "Mulan config not found in any parent dirctory".to_owned()
     }
@@ -398,7 +398,7 @@ impl self::ReportData for mulan_config::errors::SourceNotFoundError {
     }
 }
 
-impl self::ReportData for mulan_config::errors::AmbiguousSourceError {
+impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     fn message(&self, _: &mulan_config::Config) -> String {
         "multiple possible config locations".to_owned()
     }
@@ -468,7 +468,7 @@ impl self::ToReport for mulan_parser::errors::InputError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::ReadFileError {
+impl self::Reportable for mulan_parser::errors::ReadFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             failed to read {}
@@ -503,7 +503,7 @@ impl self::ReportData for mulan_parser::errors::ReadFileError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::YamlError {
+impl self::Reportable for mulan_parser::errors::YamlError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
@@ -667,7 +667,7 @@ impl self::ToReport for mulan_parser::errors::TransformError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::InvalidSubkeyError {
+impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             found invalid key
@@ -699,7 +699,7 @@ impl self::ReportData for mulan_parser::errors::InvalidSubkeyError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::InvalidTemplateError {
+impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             found invalid message
@@ -728,7 +728,7 @@ impl self::ReportData for mulan_parser::errors::InvalidTemplateError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::NotANamespaceError {
+impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             expected a namespace, found a message
@@ -761,7 +761,7 @@ impl self::ReportData for mulan_parser::errors::NotANamespaceError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::NotAMessageError {
+impl self::Reportable for mulan_parser::errors::NotAMessageError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             expected a message, found a namespace
@@ -794,7 +794,7 @@ impl self::ReportData for mulan_parser::errors::NotAMessageError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::UnknownParametersError {
+impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             unknown parameters
@@ -859,7 +859,7 @@ impl self::ReportData for mulan_parser::errors::UnknownParametersError {
     }
 }
 
-impl self::ReportData for mulan_parser::errors::ChumskyAllErrors {
+impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
     fn message(&self, config: &mulan_config::Config) -> String {
         let error = self.errors.first();
         let source = &self.source;
@@ -904,7 +904,7 @@ struct ChumskyErrorWrapper<'err> {
     source: &'err str,
 }
 
-impl self::ReportData for self::ChumskyErrorWrapper<'_> {
+impl self::Reportable for self::ChumskyErrorWrapper<'_> {
     fn message(&self, _config: &mulan_config::Config) -> String {
         self.error.message.clone()
     }
