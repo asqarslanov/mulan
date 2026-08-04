@@ -266,6 +266,23 @@ impl self::ReportData for mulan_config::errors::FigmentError {
                 ",
                 (&self.inner.path).join_compact("."),
             },
+            K::UnknownVariant(actual, expected) => formatdoc! {"
+                unknown variant
+                  key `{}`
+                  is{}
+                  but is expected to be one of: {}\
+                ",
+                (&self.inner.path).join_compact("."),
+                if actual.is_empty() {
+                    " an empty string".to_compact_string()
+                } else {
+                    format_compact!(": `{actual}`")
+                },
+                expected
+                    .iter()
+                    .map(|variant| format_compact!("`{variant}`"))
+                    .join_compact(", "),
+            },
             _ => self.inner.to_string(),
         }
     }
