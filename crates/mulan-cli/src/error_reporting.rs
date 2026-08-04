@@ -871,7 +871,7 @@ impl ReportData for mulan_parser::errors::ChumskyAllErrors {
 
 /// References a [`mulan_parser::errors::ChumskySingleError`]
 /// with its corresponding source code, which makes this type
-/// convertible to `miette::Report`.
+/// convertible to [`miette::Report`].
 #[derive(Debug)]
 struct ChumskyErrorWrapper<'err> {
     error: &'err mulan_parser::errors::ChumskySingleError,
