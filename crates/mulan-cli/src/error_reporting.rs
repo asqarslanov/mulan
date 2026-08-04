@@ -876,7 +876,7 @@ impl ReportData for mulan_parser::errors::ChumskyAllErrors {
 struct ChumskyErrorWrapper<'err> {
     error: &'err mulan_parser::errors::ChumskySingleError,
 
-    /// ...
+    /// The original string we failed to parse.
     source: &'err str,
 }
 
