@@ -522,6 +522,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
     fn code(&self) -> &'static str {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
+            E::InvalidOptions { .. } => "parser::read::yaml::invalid_options",
             E::Eof { .. } => "parser::read::yaml::eof",
             E::MultipleDocuments { .. } => "parser::read::yaml::multiple_documents",
             E::Unexpected { .. } => "parser::read::yaml::unexpected",
@@ -587,6 +588,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
                 "parser::read::yaml::recursive_references_require_weak_types"
             }
             E::InvalidScalar { .. } => "parser::read::yaml::invalid_scalar",
+            E::NonFiniteFloat { .. } => "parser::read::yaml::non_finite_float",
             E::SerdeInvalidType { .. } => "parser::read::yaml::serde_invalid_type",
             E::SerdeInvalidValue { .. } => "parser::read::yaml::serde_invalid_value",
             E::SerdeUnknownVariant { .. } => "parser::read::yaml::serde_unknown_variant",
