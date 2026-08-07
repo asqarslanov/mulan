@@ -62,7 +62,6 @@ nursery = "warn"
 pedantic = "warn"
 
 [profile.release]
-opt-level = "z"
 strip = true
 lto = true
 panic = "abort"
