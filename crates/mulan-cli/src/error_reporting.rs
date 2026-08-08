@@ -94,12 +94,6 @@ struct SourceCodeFileData {
     language: self::SourceCodeLanguage,
 }
 
-/// A markup language name used for syntax highlighting.
-#[derive(Debug)]
-enum SourceCodeLanguage {
-    Yaml,
-}
-
 /// ...
 #[derive(Debug)]
 struct SourceCodeLabel {
@@ -125,6 +119,12 @@ enum LabelSpan {
 
     /// ...
     Full,
+}
+
+/// A markup language name used for syntax highlighting.
+#[derive(Debug)]
+enum SourceCodeLanguage {
+    Yaml,
 }
 
 impl<E: self::Reportable> self::ToReport for E {
