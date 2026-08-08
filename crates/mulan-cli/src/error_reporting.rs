@@ -63,7 +63,7 @@ trait Reportable {
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
-    fn source_code_data(&self) -> Option<self::SourceCodeData>;
+    fn source_code_data(&self) -> Option<self::SourceData>;
 
     /// Additional reports displayed under this one.
     ///
@@ -74,19 +74,19 @@ trait Reportable {
 
 /// See [`self::Reportable::source_code_data`].
 #[derive(Debug)]
-struct SourceCodeData {
+struct SourceData {
     source_code: String,
 
     /// ...
-    file_data: Option<self::SourceCodeFileData>,
+    file_data: Option<self::SourceFileData>,
 
     /// ...
-    labels: SmallVec1<[self::SourceCodeLabel; 1]>,
+    labels: SmallVec1<[self::SourceLabel; 1]>,
 }
 
 /// ...
 #[derive(Debug)]
-struct SourceCodeFileData {
+struct SourceFileData {
     /// ...
     name: CompactString,
 
@@ -96,7 +96,7 @@ struct SourceCodeFileData {
 
 /// ...
 #[derive(Debug)]
-struct SourceCodeLabel {
+struct SourceLabel {
     /// ...
     text: Option<String>,
 
@@ -133,7 +133,7 @@ impl<E: self::Reportable> self::ToReport for E {
             None => (None, None),
             Some(data) => {
                 let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
-                    let to_label_span = |label: self::SourceCodeLabel| -> miette::LabeledSpan {
+                    let to_label_span = |label: self::SourceLabel| -> miette::LabeledSpan {
                         use self::SpanKind as S;
                         let span: miette::SourceSpan = match label.span {
                             S::Index(i) => i.into(),
@@ -317,7 +317,7 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         }
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -358,7 +358,7 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
         "})
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -389,7 +389,7 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
         )
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -418,8 +418,8 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        Some(self::SourceCodeData {
+    fn source_code_data(&self) -> Option<self::SourceData> {
+        Some(self::SourceData {
             source_code: self.possible_sources.iter1().into_iter().join("\n"),
             file_data: None,
             labels: {
@@ -438,7 +438,7 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
                         );
                         let span = self::SpanKind::OffsetLen(line_i_start, path.as_str().len());
                         line_i_start += path.as_str().len() + 1;
-                        self::SourceCodeLabel { text, span }
+                        self::SourceLabel { text, span }
                     })
                     .collect1()
             },
@@ -494,7 +494,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -635,17 +635,17 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         let span = self.inner.location()?.span();
         let offset = usize::try_from(span.offset()).ok()?;
         let len = usize::try_from(span.len()).ok()?;
-        Some(self::SourceCodeData {
+        Some(self::SourceData {
             source_code: self.source_code.clone(),
-            file_data: Some(self::SourceCodeFileData {
+            file_data: Some(self::SourceFileData {
                 name: self.filename.to_string_lossy().into(),
                 language: self::SourceLanguage::Yaml,
             }),
-            labels: SmallVec1::from_one(self::SourceCodeLabel {
+            labels: SmallVec1::from_one(self::SourceLabel {
                 text: Some("here".to_owned()),
                 span: SpanKind::OffsetLen(offset, len),
             }),
@@ -692,7 +692,7 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
         Some("it should look like a variable in a programming language".to_owned())
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -721,7 +721,7 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
         None
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -754,7 +754,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -787,7 +787,7 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -821,9 +821,9 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         () = CASE_GUARDRAIL;
-        Some(self::SourceCodeData {
+        Some(self::SourceData {
             source_code: {
                 self.parameters
                     .iter1()
@@ -849,7 +849,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                         );
                         let span = self::SpanKind::OffsetLen(line_i_start, param.len().get());
                         line_i_start += param.len().get() + 1;
-                        self::SourceCodeLabel { text, span }
+                        self::SourceLabel { text, span }
                     })
                     .collect1()
             },
@@ -880,7 +880,7 @@ impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
         self::ChumskyErrorWrapper { error, source }.help(config)
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
+    fn source_code_data(&self) -> Option<self::SourceData> {
         let error = self.errors.first();
         let source = &self.source;
         self::ChumskyErrorWrapper { error, source }.source_code_data()
@@ -917,11 +917,11 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         None
     }
 
-    fn source_code_data(&self) -> Option<self::SourceCodeData> {
-        Some(self::SourceCodeData {
+    fn source_code_data(&self) -> Option<self::SourceData> {
+        Some(self::SourceData {
             source_code: self.source.to_owned(),
             file_data: None,
-            labels: SmallVec1::from_one(self::SourceCodeLabel {
+            labels: SmallVec1::from_one(self::SourceLabel {
                 text: None,
                 span: self::SpanKind::Range(self.error.span),
             }),
