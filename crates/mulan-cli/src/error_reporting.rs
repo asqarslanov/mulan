@@ -63,7 +63,7 @@ trait Reportable {
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
     /// ...
-    fn source_code_data(&self) -> Option<self::SourceData>;
+    fn source_data(&self) -> Option<self::SourceData>;
 
     /// Additional reports displayed under this one.
     ///
@@ -72,7 +72,7 @@ trait Reportable {
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
-/// See [`self::Reportable::source_code_data`].
+/// See [`self::Reportable::source_data`].
 #[derive(Debug)]
 struct SourceData {
     source_code: String,
@@ -129,7 +129,7 @@ enum SourceLanguage {
 
 impl<E: self::Reportable> self::ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let (source_code, labels) = match self.source_code_data() {
+        let (source_code, labels) = match self.source_data() {
             None => (None, None),
             Some(data) => {
                 let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
@@ -153,11 +153,11 @@ impl<E: self::Reportable> self::ToReport for E {
                         let l = match file.language {
                             L::Yaml => "YAML",
                         };
-                        self::SourceCodeKind::File(
+                        self::SourceKind::File(
                             miette::NamedSource::new(file.name, data.source_code).with_language(l),
                         )
                     }
-                    None => self::SourceCodeKind::Unnamed(data.source_code),
+                    None => self::SourceKind::Unnamed(data.source_code),
                 };
                 (Some(source_code), Some(labels))
             }
@@ -187,7 +187,7 @@ struct ReportData {
     help: Option<String>,
 
     /// The value for [`miette::Diagnostic::source_code`].
-    source_code: Option<self::SourceCodeKind>,
+    source_code: Option<self::SourceKind>,
 
     /// The value for [`miette::Diagnostic::labels`].
     labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
@@ -198,7 +198,7 @@ struct ReportData {
 
 /// ...
 #[derive(Debug)]
-enum SourceCodeKind {
+enum SourceKind {
     /// ...
     Unnamed(String),
 
@@ -225,8 +225,8 @@ impl miette::Diagnostic for self::ReportData {
 
     fn source_code(&self) -> Option<&dyn miette::SourceCode> {
         self.source_code.as_ref().map(|kind| match kind {
-            SourceCodeKind::Unnamed(string) => string as &dyn miette::SourceCode,
-            SourceCodeKind::File(named_source) => named_source,
+            SourceKind::Unnamed(string) => string as &dyn miette::SourceCode,
+            SourceKind::File(named_source) => named_source,
         })
     }
 
@@ -317,7 +317,7 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         }
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -358,7 +358,7 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
         "})
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -389,7 +389,7 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
         )
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -418,7 +418,7 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         Some(self::SourceData {
             source_code: self.possible_sources.iter1().into_iter().join("\n"),
             file_data: None,
@@ -494,7 +494,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -635,7 +635,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         let span = self.inner.location()?.span();
         let offset = usize::try_from(span.offset()).ok()?;
         let len = usize::try_from(span.len()).ok()?;
@@ -692,7 +692,7 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
         Some("it should look like a variable in a programming language".to_owned())
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -721,7 +721,7 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
         None
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -754,7 +754,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -787,7 +787,7 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
         ))
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         None
     }
 
@@ -821,7 +821,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
         })
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         () = CASE_GUARDRAIL;
         Some(self::SourceData {
             source_code: {
@@ -880,10 +880,10 @@ impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
         self::ChumskyErrorWrapper { error, source }.help(config)
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         let error = self.errors.first();
         let source = &self.source;
-        self::ChumskyErrorWrapper { error, source }.source_code_data()
+        self::ChumskyErrorWrapper { error, source }.source_data()
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
@@ -917,7 +917,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         None
     }
 
-    fn source_code_data(&self) -> Option<self::SourceData> {
+    fn source_data(&self) -> Option<self::SourceData> {
         Some(self::SourceData {
             source_code: self.source.to_owned(),
             file_data: None,
