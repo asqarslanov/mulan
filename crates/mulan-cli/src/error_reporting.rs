@@ -88,7 +88,7 @@ struct SourceData {
 /// See [`self::SourceData::file_data`].
 #[derive(Debug)]
 struct SourceFileData {
-    /// ...
+    /// The filename relative to the project root where the error has occured.
     name: CompactString,
 
     /// ...
