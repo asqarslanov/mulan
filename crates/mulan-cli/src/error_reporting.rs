@@ -51,7 +51,7 @@ pub trait ToReport {
 
 /// ...
 trait Reportable {
-    /// ...
+    /// The main reason this error has occured, displayed to the user.
     fn message(&self, config: &mulan_config::Config) -> String;
 
     /// A globally unique diagnostic code in the Rust path format
