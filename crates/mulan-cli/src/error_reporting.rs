@@ -91,7 +91,7 @@ struct SourceCodeFileData {
     name: CompactString,
 
     /// ...
-    language: self::SourceCodeLanguage,
+    language: self::SourceLanguage,
 }
 
 /// ...
@@ -101,13 +101,13 @@ struct SourceCodeLabel {
     text: Option<String>,
 
     /// ...
-    span: self::LabelSpan,
+    span: self::SpanKind,
 }
 
 /// ...
 #[allow(dead_code)]
 #[derive(Debug)]
-enum LabelSpan {
+enum SpanKind {
     /// ...
     Index(usize),
 
@@ -123,7 +123,7 @@ enum LabelSpan {
 
 /// A markup language name used for syntax highlighting.
 #[derive(Debug)]
-enum SourceCodeLanguage {
+enum SourceLanguage {
     Yaml,
 }
 
@@ -134,7 +134,7 @@ impl<E: self::Reportable> self::ToReport for E {
             Some(data) => {
                 let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
                     let to_label_span = |label: self::SourceCodeLabel| -> miette::LabeledSpan {
-                        use self::LabelSpan as S;
+                        use self::SpanKind as S;
                         let span: miette::SourceSpan = match label.span {
                             S::Index(i) => i.into(),
                             S::OffsetLen(offset, 1) => offset.into(),
@@ -149,7 +149,7 @@ impl<E: self::Reportable> self::ToReport for E {
                 };
                 let source_code = match data.file_data {
                     Some(file) => {
-                        use self::SourceCodeLanguage as L;
+                        use self::SourceLanguage as L;
                         let l = match file.language {
                             L::Yaml => "YAML",
                         };
@@ -436,7 +436,7 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
                             }
                             .to_owned(),
                         );
-                        let span = self::LabelSpan::OffsetLen(line_i_start, path.as_str().len());
+                        let span = self::SpanKind::OffsetLen(line_i_start, path.as_str().len());
                         line_i_start += path.as_str().len() + 1;
                         self::SourceCodeLabel { text, span }
                     })
@@ -643,11 +643,11 @@ impl self::Reportable for mulan_parser::errors::YamlError {
             source_code: self.source_code.clone(),
             file_data: Some(self::SourceCodeFileData {
                 name: self.filename.to_string_lossy().into(),
-                language: self::SourceCodeLanguage::Yaml,
+                language: self::SourceLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(self::SourceCodeLabel {
                 text: Some("here".to_owned()),
-                span: LabelSpan::OffsetLen(offset, len),
+                span: SpanKind::OffsetLen(offset, len),
             }),
         })
     }
@@ -847,7 +847,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                             }
                             .to_owned(),
                         );
-                        let span = self::LabelSpan::OffsetLen(line_i_start, param.len().get());
+                        let span = self::SpanKind::OffsetLen(line_i_start, param.len().get());
                         line_i_start += param.len().get() + 1;
                         self::SourceCodeLabel { text, span }
                     })
@@ -923,7 +923,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
             file_data: None,
             labels: SmallVec1::from_one(self::SourceCodeLabel {
                 text: None,
-                span: self::LabelSpan::Range(self.error.span),
+                span: self::SpanKind::Range(self.error.span),
             }),
         })
     }
