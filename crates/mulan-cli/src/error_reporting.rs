@@ -72,9 +72,10 @@ trait Reportable {
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
-/// See [`self::Reportable::source_data`].
+/// The return type of [`self::Reportable::source_data`].
 #[derive(Debug)]
 struct SourceData {
+    /// ...
     source_code: String,
 
     /// ...
@@ -84,7 +85,7 @@ struct SourceData {
     labels: SmallVec1<[self::SourceLabel; 1]>,
 }
 
-/// ...
+/// See [`self::SourceData::file_data`].
 #[derive(Debug)]
 struct SourceFileData {
     /// ...
@@ -94,7 +95,7 @@ struct SourceFileData {
     language: self::SourceLanguage,
 }
 
-/// ...
+/// See [`self::SourceData::labels`].
 #[derive(Debug)]
 struct SourceLabel {
     /// ...
@@ -104,7 +105,7 @@ struct SourceLabel {
     span: self::SpanKind,
 }
 
-/// ...
+/// See [`self::SourceLabel::span`].
 #[allow(dead_code)]
 #[derive(Debug)]
 enum SpanKind {
