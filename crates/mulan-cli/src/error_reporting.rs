@@ -99,7 +99,7 @@ struct SourceFileData {
 #[derive(Debug)]
 struct SourceLabel {
     /// ...
-    text: Option<String>,
+    text: String,
 
     /// ...
     span: self::SpanKind,
@@ -145,7 +145,7 @@ impl<E: self::Reportable> self::ToReport for E {
                             S::Range(Range { start, end }) => (start..end).into(),
                             S::Full => (0..=data.source_code.len()).into(),
                         };
-                        miette::LabeledSpan::new_with_span(label.text, span)
+                        miette::LabeledSpan::new_with_span(Some(label.text), span)
                     };
                     data.labels.into_iter1().map(to_label_span).collect1()
                 };
@@ -430,14 +430,12 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
                     .iter1()
                     .enumerate()
                     .map(|(i, path)| {
-                        let text = Some(
-                            match i {
-                                0 => "maybe this?",
-                                1 => "or maybe this?",
-                                _ => "or maybe even this?",
-                            }
-                            .to_owned(),
-                        );
+                        let text = match i {
+                            0 => "maybe this?",
+                            1 => "or maybe this?",
+                            _ => "or maybe even this?",
+                        }
+                        .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, path.as_str().len());
                         line_i_start += path.as_str().len() + 1;
                         self::SourceLabel { text, span }
@@ -648,7 +646,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
                 language: self::SourceLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: Some("here".to_owned()),
+                text: "here".to_owned(),
                 span: SpanKind::OffsetLen(offset, len),
             }),
         })
@@ -841,14 +839,12 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .enumerate()
                     .map(|(i, param)| {
                         let param = param.to_kebab_case();
-                        let text = Some(
-                            match i {
-                                0 => "remove this parameter",
-                                1 => "and this",
-                                _ => "and also this",
-                            }
-                            .to_owned(),
-                        );
+                        let text = match i {
+                            0 => "remove this parameter",
+                            1 => "and this",
+                            _ => "and also this",
+                        }
+                        .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, param.len().get());
                         line_i_start += param.len().get() + 1;
                         self::SourceLabel { text, span }
@@ -924,7 +920,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
             source_code: self.source.to_owned(),
             file_data: None,
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: None,
+                text: "here".to_owned(),
                 span: self::SpanKind::Range(self.error.span),
             }),
         })
