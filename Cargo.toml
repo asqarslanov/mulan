@@ -44,6 +44,7 @@ mulan-config = { path = "crates/mulan-config/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 pathdiff = "0.2.3"
 relative-path = "2.0.1"
+relative-path-utils = "0.3.1"
 rstest = "0.26.1"
 serde = "1.0.229"
 serde-saphyr = "1.0.1"
