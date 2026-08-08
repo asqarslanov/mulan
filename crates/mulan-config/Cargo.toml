@@ -16,7 +16,6 @@ itertools = { workspace = true }
 mitsein = { workspace = true }
 pathdiff = { workspace = true }
 relative-path = { workspace = true }
-relative-path-utils = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 serdev = { workspace = true }
