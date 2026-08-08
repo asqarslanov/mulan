@@ -109,16 +109,17 @@ struct SourceLabel {
 #[allow(dead_code)]
 #[derive(Debug)]
 enum SpanKind {
-    /// ...
+    /// A single problematic byte (0-based index).
     Index(usize),
 
-    /// ...
+    /// A problematic byte range (offset from the start and length, 0-based).
     OffsetLen(usize, usize),
 
-    /// ...
+    /// A problematic byte range (0-based indexing).
     Range(Range<usize>),
 
-    /// ...
+    /// Signifies that the entire source is problematic
+    /// (use with caution, check the output first).
     Full,
 }
 
