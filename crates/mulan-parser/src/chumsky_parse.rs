@@ -11,6 +11,7 @@ use crate::errors::{ChumskyAllErrors, ChumskySingleError};
 ///
 /// Provides [`ChumskyParser::mulan_parse`] that conviniently wraps parse
 /// results.
+#[expect(clippy::disallowed_types, reason = "to make `Parser::parse` available")]
 pub trait ChumskyParser<'src, Out>:
     Parser<'src, &'src str, Out, extra::Err<Rich<'src, char>>>
 {
@@ -18,6 +19,10 @@ pub trait ChumskyParser<'src, Out>:
     /// to a [`std::result::Result`] with a custom [`ChumskyAllErrors`] error
     /// type.
     fn mulan_parse(&self, source: &'src str) -> Result<Out, ChumskyAllErrors> {
+        #[expect(
+            clippy::disallowed_methods,
+            reason = "this is the reason `parse` is disallowed in favor of `mulan_parse`"
+        )]
         self.parse(source)
             .into_result()
             .map_err(|errors| ChumskyAllErrors {
@@ -35,6 +40,10 @@ pub trait ChumskyParser<'src, Out>:
     }
 }
 
+#[expect(
+    clippy::disallowed_types,
+    reason = "this is the reason `Parser` is disallowed in favor of `ChumskyParser`"
+)]
 impl<'src, Out, T: Parser<'src, &'src str, Out, extra::Err<Rich<'src, char>>>>
     ChumskyParser<'src, Out> for T
 {
