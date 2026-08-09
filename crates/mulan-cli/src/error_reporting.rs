@@ -212,13 +212,13 @@ struct ReportData {
     related: Option<SmallVec1<[miette::Report; 1]>>,
 }
 
-/// ...
+/// Represents different kinds of values that implement [`miette::SourceCode`].
 #[derive(Debug)]
 enum SourceKind {
-    /// ...
+    /// Plain text without syntax highligthing and file data.
     Unnamed(String),
 
-    /// ...
+    /// Refers to the contents of a file. Can have syntax highligthing.
     File(miette::NamedSource<String>),
 }
 
