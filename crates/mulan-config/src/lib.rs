@@ -61,7 +61,10 @@ impl crate::Config {
     /// and read + validate it.
     ///
     /// Uses [`mod@figment2`] under the hood.
-    #[allow(clippy::result_large_err)]
+    #[expect(
+        clippy::result_large_err,
+        reason = "`ConfigError` is mostly a wrapper around `figment2::Error`"
+    )]
     pub fn locate_and_read() -> Result<Self, ConfigError> {
         let figment = Figment::from(Toml::file("mulan.toml"));
         let meta = ConfigMeta::compute(&figment).map_err(ConfigError::Meta)?;

@@ -117,7 +117,10 @@ struct SourceLabel {
 }
 
 /// See [`self::SourceLabel::span`].
-#[allow(dead_code)]
+#[expect(
+    dead_code,
+    reason = "some variants aren't used yet, though they can be useful"
+)]
 #[derive(Debug)]
 enum SpanKind {
     /// A single problematic byte (0-based index).
@@ -534,7 +537,15 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         }
     }
 
-    #[allow(clippy::too_many_lines)]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "
+            This error type is external.
+            Remapping everything to an in-house data type would be insane.
+            I match against every variant to observe whether new variants
+            are added with new updates.
+        "
+    )]
     fn code(&self) -> &'static str {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
