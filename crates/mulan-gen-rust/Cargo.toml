@@ -1,0 +1,18 @@
+[package]
+name = "mulan-gen-rust"
+version.workspace = true
+edition = "2024"
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+mulan-config = { workspace = true }
+mulan-parser = { workspace = true }
+
+[lints]
+workspace = true

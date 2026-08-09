@@ -908,6 +908,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mulan-gen-rust"
+version = "0.0.0"
+dependencies = [
+ "mulan-config",
+ "mulan-parser",
+]
+
+[[package]]
 name = "mulan-parser"
 version = "0.0.0"
 dependencies = [
