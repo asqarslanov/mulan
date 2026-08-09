@@ -95,7 +95,7 @@ struct SourceFileData {
     /// The filename relative to the project root where the error has occured.
     name: PathBuf,
 
-    /// ...
+    /// The markup language name used for syntax highlighting.
     language: self::SourceLanguage,
 }
 
@@ -127,7 +127,7 @@ enum SpanKind {
     Full,
 }
 
-/// A markup language name used for syntax highlighting.
+/// See [`self::SourceFileData::language`].
 #[derive(Debug)]
 enum SourceLanguage {
     Yaml,
