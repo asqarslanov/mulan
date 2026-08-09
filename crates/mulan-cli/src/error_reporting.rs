@@ -50,7 +50,10 @@ pub trait ToReport {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report;
 }
 
-/// ...
+/// Rich metadata about an error to turn into a pretty human-readable report.
+///
+/// Implement this for error types that represent a specific kind of error
+/// (can be assigned a [`self::Reportable::code`]).
 trait Reportable {
     /// The main reason this error has occured, displayed to the user.
     fn message(&self, config: &mulan_config::Config) -> String;
