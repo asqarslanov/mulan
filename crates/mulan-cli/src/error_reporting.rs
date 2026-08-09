@@ -185,7 +185,11 @@ impl<E: self::Reportable> self::ToReport for E {
     }
 }
 
-/// ...
+/// A structure that contains all data an error report might need to implement
+/// [`miette::Diagnostic`].
+///
+/// All [`self::Reportable`] errors in this file are first converted
+/// to [`self::ReportData`] before being transformed to a [`miette::Report`].
 #[derive(Debug, thiserror::Error)]
 #[error("{message}")]
 struct ReportData {
