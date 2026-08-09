@@ -6,9 +6,10 @@
 
 use std::fmt::Display;
 use std::iter;
+use std::path::PathBuf;
 use std::range::Range;
 
-use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
+use compact_str::{CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::{formatdoc, indoc};
 use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
@@ -89,7 +90,7 @@ struct SourceData {
 #[derive(Debug)]
 struct SourceFileData {
     /// The filename relative to the project root where the error has occured.
-    name: CompactString,
+    name: PathBuf,
 
     /// ...
     language: self::SourceLanguage,
@@ -156,7 +157,8 @@ impl<E: self::Reportable> self::ToReport for E {
                             L::Yaml => "YAML",
                         };
                         self::SourceKind::File(
-                            miette::NamedSource::new(file.name, data.source_code).with_language(l),
+                            miette::NamedSource::new(file.name.to_string_lossy(), data.source_code)
+                                .with_language(l),
                         )
                     }
                     None => self::SourceKind::Unnamed(data.source_code),
@@ -642,7 +644,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         Some(self::SourceData {
             source_code: self.source_code.clone(),
             file_data: Some(self::SourceFileData {
-                name: self.filename.to_string_lossy().into(),
+                name: self.filename.clone(),
                 language: self::SourceLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(self::SourceLabel {
