@@ -66,9 +66,11 @@ trait Reportable {
     /// or how to fix it.
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
-    /// A labelled snippet with arrowed annotations to expain the error
-    /// visually.
-    fn source_data(&self) -> Option<self::SourceData>;
+    /// A text block with annotations (labels with arrows) that expains
+    /// the error visually.
+    ///
+    /// Most often, used to show the source code.
+    fn annotation_block(&self) -> Option<self::AnnotationBlock>;
 
     /// Additional reports displayed under this one.
     ///
@@ -79,7 +81,7 @@ trait Reportable {
 
 /// The return type of [`self::Reportable::source_data`].
 #[derive(Debug)]
-struct SourceData {
+struct AnnotationBlock {
     /// ...
     source_code: String,
 
@@ -90,7 +92,7 @@ struct SourceData {
     labels: SmallVec1<[self::SourceLabel; 1]>,
 }
 
-/// See [`self::SourceData::file_data`].
+/// See [`self::AnnotationBlock::file_data`].
 #[derive(Debug)]
 struct SourceFileData {
     /// The filename relative to the project root where the error has occured.
@@ -100,7 +102,7 @@ struct SourceFileData {
     language: self::SourceLanguage,
 }
 
-/// See [`self::SourceData::labels`].
+/// See [`self::AnnotationBlock::labels`].
 #[derive(Debug)]
 struct SourceLabel {
     /// ...
@@ -136,7 +138,7 @@ enum SourceLanguage {
 
 impl<E: self::Reportable> self::ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let (source_code, labels) = match self.source_data() {
+        let (source_code, labels) = match self.annotation_block() {
             None => (None, None),
             Some(data) => {
                 let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
@@ -325,7 +327,7 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         }
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -366,7 +368,7 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
         "})
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -397,7 +399,7 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
         )
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -426,8 +428,8 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
         ))
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
-        Some(self::SourceData {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+        Some(self::AnnotationBlock {
             source_code: self.possible_sources.iter1().into_iter().join("\n"),
             file_data: None,
             labels: {
@@ -500,7 +502,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
         })
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -641,11 +643,11 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         })
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         let span = self.inner.location()?.span();
         let offset = usize::try_from(span.offset()).ok()?;
         let len = usize::try_from(span.len()).ok()?;
-        Some(self::SourceData {
+        Some(self::AnnotationBlock {
             source_code: self.source_code.clone(),
             file_data: Some(self::SourceFileData {
                 name: self.filename.clone(),
@@ -698,7 +700,7 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
         Some("it should look like a variable in a programming language".to_owned())
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -727,7 +729,7 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
         None
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -760,7 +762,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
         ))
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -793,7 +795,7 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
         ))
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -827,9 +829,9 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
         })
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         () = CASE_GUARDRAIL;
-        Some(self::SourceData {
+        Some(self::AnnotationBlock {
             source_code: {
                 self.parameters
                     .iter1()
@@ -884,10 +886,10 @@ impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
         self::ChumskyErrorWrapper { error, source }.help(config)
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         let error = self.errors.first();
         let source = &self.source;
-        self::ChumskyErrorWrapper { error, source }.source_data()
+        self::ChumskyErrorWrapper { error, source }.annotation_block()
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
@@ -921,8 +923,8 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         None
     }
 
-    fn source_data(&self) -> Option<self::SourceData> {
-        Some(self::SourceData {
+    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+        Some(self::AnnotationBlock {
             source_code: self.source.to_owned(),
             file_data: None,
             labels: SmallVec1::from_one(self::SourceLabel {
