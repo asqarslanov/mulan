@@ -107,10 +107,12 @@ struct SourceFileData {
 /// See [`self::AnnotationBlock::labels`].
 #[derive(Debug)]
 struct SourceLabel {
-    /// ...
+    /// The message of this annotation.
+    ///
+    /// Short text with a concise explanation. Or just `"here"`.
     text: String,
 
-    /// ...
+    /// What exact part of the source text this annotation refers to.
     span: self::SpanKind,
 }
 
