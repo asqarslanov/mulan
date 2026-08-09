@@ -886,6 +886,7 @@ dependencies = [
  "miette",
  "mitsein",
  "mulan-config",
+ "mulan-gen-rust",
  "mulan-parser",
  "serde-saphyr",
  "thiserror",
