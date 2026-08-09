@@ -79,16 +79,18 @@ trait Reportable {
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report>;
 }
 
-/// The return type of [`self::Reportable::source_data`].
+/// The return type of [`self::Reportable::annotation_block`].
 #[derive(Debug)]
 struct AnnotationBlock {
-    /// ...
+    /// The text to annotate. E.g., source code.
     text: String,
 
-    /// ...
+    /// Used if this block refers to text from a file.
     file_data: Option<self::SourceFileData>,
 
-    /// ...
+    /// Annotations that point to specific parts of the text with arrows.
+    ///
+    /// At least one label must be present for the block to render.
     labels: SmallVec1<[self::SourceLabel; 1]>,
 }
 
