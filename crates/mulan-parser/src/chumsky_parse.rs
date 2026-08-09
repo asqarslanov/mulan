@@ -3,7 +3,6 @@
 //! See [`ChumskyParser`].
 
 use chumsky::prelude::*;
-use compact_str::ToCompactString as _;
 use mitsein::iter1::IteratorExt as _;
 
 use crate::errors::{ChumskyAllErrors, ChumskySingleError};
@@ -28,7 +27,7 @@ pub trait ChumskyParser<'src, Out>:
                     .try_into_iter1()
                     .expect("if parsing failed, there should at least be one error")
                     .map(|err| ChumskySingleError {
-                        message: err.to_compact_string(),
+                        message: err.to_string(),
                         span: err.span().into_range().into(),
                     })
                     .collect1(),

@@ -12,7 +12,10 @@ use mitsein::vec1::Vec1;
 use self::input::{Definition, DefinitionAtError, Input, RawKey, RawNamespace, RawNode};
 use self::output::{Namespace, Node, Output, Subkey, Translations};
 use crate::chumsky_parse::ChumskyParser;
-use crate::errors::TransformError;
+use crate::errors::{
+    InvalidSubkeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
+    UnknownParametersError,
+};
 use crate::{Parameter, Template};
 
 pub mod input;
@@ -53,10 +56,12 @@ fn handle_node<'input>(
             let template = {
                 template_parser
                     .mulan_parse(raw_template)
-                    .map_err(|errors| TransformError::InvalidTemplate {
-                        locale: config.main_locale,
-                        key: key.clone(),
-                        errors,
+                    .map_err(|errors| {
+                        TransformError::InvalidTemplate(InvalidTemplateError {
+                            locale: config.main_locale,
+                            key: key.clone(),
+                            errors,
+                        })
                     })?
             };
             Node::Message(translations(input, key, template, template_parser, config)?)
@@ -85,8 +90,11 @@ fn translations<'input>(
     let main_params: HashSet<&Parameter> = main_translation.parameters().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
-        let Some(definition) = input.locales.get(&locale) else {
-            return Err(TransformError::LocaleNotFound(locale));
+        let definition = {
+            input
+                .locales
+                .get(&locale)
+                .expect("all locales should've been read when parsing `input`")
         };
         let raw_node = match definition.at(key) {
             Ok(node) => node,
@@ -100,34 +108,34 @@ fn translations<'input>(
                     let segments = Vec1::try_from(&key.segments[..=index])
                         .expect("`..=n` slices are always non-empty");
                     let key = RawKey { segments };
-                    return Err(TransformError::NotANamespace { locale, key });
+                    let err = NotANamespaceError { locale, key };
+                    return Err(TransformError::NotANamespace(err));
                 }
             },
         };
         let Some(raw_template) = raw_node.try_as_message_ref() else {
-            return Err(TransformError::NotAMessage {
-                locale,
-                key: key.clone(),
-            });
+            let key = key.clone();
+            let err = NotAMessageError { locale, key };
+            return Err(TransformError::NotAMessage(err));
         };
         let template = match template_parser.mulan_parse(raw_template) {
             Ok(template) => template,
             Err(errors) => {
-                return Err(TransformError::InvalidTemplate {
+                return Err(TransformError::InvalidTemplate(InvalidTemplateError {
                     locale,
                     key: key.clone(),
                     errors,
-                });
+                }));
             }
         };
         let params = template.parameters().collect::<HashSet<_>>();
         let unknown_params = params.difference(&main_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
-            return Err(TransformError::UnknownParameters {
+            return Err(TransformError::UnknownParameters(UnknownParametersError {
                 locale,
                 key: key.clone(),
                 parameters: unknown_params.cloned().collect1(),
-            });
+            }));
         }
         other_translations.insert(locale, template);
     }
@@ -153,11 +161,11 @@ fn traverse_namespace<'input>(
     let mut map = BTreeMap::new();
     for (raw_subkey, raw_node) in &namespace.map {
         let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
-            TransformError::InvalidSubkey {
+            TransformError::InvalidSubkey(InvalidSubkeyError {
                 locale: config.main_locale,
                 parent_key: namespace_key.cloned(),
                 errors,
-            }
+            })
         })?;
         let rtail = {
             namespace_key

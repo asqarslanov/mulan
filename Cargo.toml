@@ -29,7 +29,7 @@ publish = false
 
 [workspace.dependencies]
 chumsky = "0.13.0"
-clap = "4.6.5"
+clap = "4.6.6"
 compact_str = "0.10.0"
 figment2 = "0.11.5"
 foldhash = "0.2.0"
@@ -46,13 +46,13 @@ pathdiff = "0.2.3"
 relative-path = "2.0.1"
 rstest = "0.26.1"
 serde = "1.0.229"
-serde-saphyr = "0.0.29"
-serde_with = "3.21.0"
+serde-saphyr = "1.0.1"
+serde_with = "3.22.0"
 serdev = "0.3.2"
 smallvec = "1.15.2"
 strum = "0.28.0"
 tempfile = "3.27.0"
-toml = { version = "1.1.4", features = ["fast_hash"] }
+thiserror = "2.0.20"
 
 [workspace.lints.clippy]
 all = "warn"

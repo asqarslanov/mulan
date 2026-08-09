@@ -17,7 +17,7 @@ use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
 pub use self::meta::ConfigMeta;
-use crate::errors::ConfigError;
+use crate::errors::{ConfigError, FigmentError};
 
 pub mod errors;
 mod language;
@@ -31,7 +31,7 @@ mod meta;
 /// See <https://github.com/asqarslanov/mulan> for more details.
 #[serde_as]
 #[derive(Debug, PartialEq, Eq, serdev::Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 #[serde(validate = "Self::validate")]
 pub struct Config {
     /// Information about the execution context obtained at runtime.
@@ -65,7 +65,11 @@ impl crate::Config {
     pub fn locate_and_read() -> Result<Self, ConfigError> {
         let figment = Figment::from(Toml::file("mulan.toml"));
         let meta = ConfigMeta::compute(&figment).map_err(ConfigError::Meta)?;
-        let mut config = figment.extract::<Self>().map_err(ConfigError::Figment);
+        let mut config = {
+            figment
+                .extract::<Self>()
+                .map_err(|inner| ConfigError::Figment(FigmentError { inner }))
+        };
         if let Ok(config) = &mut config {
             // Its value was `serde(skip)`ped (only available at runtime).
             config.meta = meta;
@@ -80,6 +84,19 @@ impl crate::Config {
             .iter()
             .copied()
             .filter(|&locale| locale != self.main_locale)
+    }
+
+    /// A basic stand-in for a config without useful data.
+    ///
+    /// Can be used when an instance of [`crate::Config`] is required, but none
+    /// is available.
+    #[must_use]
+    pub fn dummy() -> Self {
+        Self {
+            meta: ConfigMeta::default(),
+            locales: BTreeSet::default(),
+            main_locale: Language::EnUs,
+        }
     }
 
     /// Used at deserialization with [`mod@serdev`].
