@@ -66,7 +66,8 @@ trait Reportable {
     /// or how to fix it.
     fn help(&self, config: &mulan_config::Config) -> Option<String>;
 
-    /// ...
+    /// A labelled snippet with arrowed annotations to expain the error
+    /// visually.
     fn source_data(&self) -> Option<self::SourceData>;
 
     /// Additional reports displayed under this one.
