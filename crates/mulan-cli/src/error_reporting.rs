@@ -83,7 +83,7 @@ trait Reportable {
 #[derive(Debug)]
 struct AnnotationBlock {
     /// ...
-    source_code: String,
+    text: String,
 
     /// ...
     file_data: Option<self::SourceFileData>,
@@ -150,7 +150,7 @@ impl<E: self::Reportable> self::ToReport for E {
                             S::OffsetLen(offset, len) => (offset..offset + len).into(),
                             S::Range(Range { start, end }) if start + 1 == end => start.into(),
                             S::Range(Range { start, end }) => (start..end).into(),
-                            S::Full => (0..=data.source_code.len()).into(),
+                            S::Full => (0..=data.text.len()).into(),
                         };
                         miette::LabeledSpan::new_with_span(Some(label.text), span)
                     };
@@ -163,11 +163,11 @@ impl<E: self::Reportable> self::ToReport for E {
                             L::Yaml => "YAML",
                         };
                         self::SourceKind::File(
-                            miette::NamedSource::new(file.name.to_string_lossy(), data.source_code)
+                            miette::NamedSource::new(file.name.to_string_lossy(), data.text)
                                 .with_language(l),
                         )
                     }
-                    None => self::SourceKind::Unnamed(data.source_code),
+                    None => self::SourceKind::Unnamed(data.text),
                 };
                 (Some(source_code), Some(labels))
             }
@@ -430,7 +430,7 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
 
     fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         Some(self::AnnotationBlock {
-            source_code: self.possible_sources.iter1().into_iter().join("\n"),
+            text: self.possible_sources.iter1().into_iter().join("\n"),
             file_data: None,
             labels: {
                 let mut line_i_start = 0;
@@ -648,7 +648,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         let offset = usize::try_from(span.offset()).ok()?;
         let len = usize::try_from(span.len()).ok()?;
         Some(self::AnnotationBlock {
-            source_code: self.source_code.clone(),
+            text: self.source_code.clone(),
             file_data: Some(self::SourceFileData {
                 name: self.filename.clone(),
                 language: self::SourceLanguage::Yaml,
@@ -832,7 +832,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         () = CASE_GUARDRAIL;
         Some(self::AnnotationBlock {
-            source_code: {
+            text: {
                 self.parameters
                     .iter1()
                     .map(mulan_parser::Parameter::to_kebab_case)
@@ -925,7 +925,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
 
     fn annotation_block(&self) -> Option<self::AnnotationBlock> {
         Some(self::AnnotationBlock {
-            source_code: self.source.to_owned(),
+            text: self.source.to_owned(),
             file_data: None,
             labels: SmallVec1::from_one(self::SourceLabel {
                 text: "here".to_owned(),
