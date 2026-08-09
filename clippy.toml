@@ -1,0 +1,8 @@
+disallowed-methods = [
+  { path = "chumsky::Parser::parse", replacement = "mulan_parser::chumsky_parse::ChumskyParser::mulan_parse" },
+]
+disallowed-types = [
+  { path = "std::collections::HashMap", reason = "foldhash::HashMap" },
+  { path = "std::collections::HashSet", reason = "foldhash::HashSet" },
+  { path = "chumsky::Parser", replacement = "mulan_parser::chumsky_parse::ChumskyParser" },
+]
