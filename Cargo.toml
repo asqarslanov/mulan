@@ -55,11 +55,18 @@ tempfile = "3.27.0"
 thiserror = "2.0.20"
 
 [workspace.lints.clippy]
-all = "warn"
+all = { level = "warn", priority = -1 }
+allow_attributes = "warn"
+allow_attributes_without_reason = "warn"
+dbg_macro = "warn"
 missing-errors-doc = { level = "allow", priority = 1 }
 missing-panics-doc = { level = "allow", priority = 1 }
-nursery = "warn"
-pedantic = "warn"
+non_ascii_literal = "warn"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+print_stderr = "warn"
+print_stdout = "warn"
+unwrap_used = "warn"
 
 [profile.release]
 opt-level = "z"
