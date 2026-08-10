@@ -38,6 +38,21 @@ impl Language {
         }
     }
 
+    /// Returns the full language name with an optional subtag.
+    ///
+    /// For example:
+    /// - `English (United States)`
+    /// - `French (Canada)`
+    /// - `Esperanto`
+    #[must_use]
+    pub const fn name(&self) -> &'static Str1 {
+        match self {
+            Self::EnUs => str1!("English (United States)"),
+            Self::FrCa => str1!("French (Canada)"),
+            Self::RuRu => str1!("Russian (Russia)"),
+        }
+    }
+
     /// Similar to [`Self::tag`], but the result is in `PascalCase`
     /// (e.g., `EnUs`, `FrCa`, or `Eo`).
     #[must_use]
