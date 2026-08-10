@@ -26,6 +26,8 @@ pub struct Bindings<'src> {
 impl Bindings<'_> {
     fn generate(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
+            //! # Mulan
+
             {enum_locale}
 
             {mod_t}
@@ -36,7 +38,26 @@ impl Bindings<'_> {
     }
 
     fn enum_locale(config: &mulan_config::Config) -> String {
+        let doc_comment = indent::indent_all_with(
+            "/// - ",
+            formatdoc! {"
+                [`{main}`](Self::{main}) (main)
+                {other}\
+                ",
+                main = config.main_locale.tag_pascal_case(),
+                other = {
+                    config
+                        .locales_except_main()
+                        .map(|lang| format_compact!(
+                            "[`{variant}`](Self::{variant})",
+                            variant = lang.tag_pascal_case(),
+                        ))
+                        .join_compact("\n")
+                },
+            },
+        );
         formatdoc! {"
+            {doc_comment}
             #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
             pub enum Locale {{
                 {variants}
