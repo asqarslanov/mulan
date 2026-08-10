@@ -1,6 +1,5 @@
 //! See [`Template`].
 
-use chumsky::text;
 use compact_str::{CompactString, format_compact};
 use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
