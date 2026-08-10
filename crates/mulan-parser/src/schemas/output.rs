@@ -44,7 +44,7 @@ pub struct Namespace {
 ///
 /// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
 /// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Subkey {
     value: Identifier,
 }
@@ -183,4 +183,32 @@ mod tests {
         });
         assert_eq!(actual_output, expected_output);
     }
+}
+
+impl Output {
+    /// ...
+    fn iter(&self) -> impl Iterator<Item = NodeData<'_>> {
+        self.root.iter(None)
+    }
+}
+
+impl Namespace {
+    /// ...
+    fn iter<'a>(&'a self, parent_path: Option<&Key>) -> impl Iterator<Item = NodeData<'a>> {
+        let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
+        self.map.iter().map(move |(subkey, node)| {
+            let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
+            let key = Key { segments };
+            NodeData { key, node }
+        })
+    }
+}
+
+/// ...
+pub struct NodeData<'a> {
+    /// ...
+    key: Key,
+
+    /// ...
+    node: &'a Node,
 }
