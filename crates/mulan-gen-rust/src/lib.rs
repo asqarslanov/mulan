@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::iter;
 
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::formatdoc;
@@ -12,12 +13,11 @@ pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> S
 
 #[derive(Debug)]
 pub struct Bindings<'src> {
-    locales: &'src [Language],
     t: Module<'src>,
 }
 
 impl Bindings<'_> {
-    fn generate(&self) -> String {
+    fn generate(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
             pub enum Locale {{
                 {locale_variants}
@@ -26,7 +26,8 @@ impl Bindings<'_> {
             {mod_t}
             ",
             locale_variants = indent::indent_by(4, {
-                self.locales
+                config
+                    .locales
                     .iter()
                     .map(|lang| format_compact!("{},", lang.tag_pascal_case()))
                     .join_compact("\n")
@@ -46,6 +47,8 @@ impl Module<'_> {
     fn generate(&self, name: &str) -> String {
         formatdoc! {"
             pub mod {name} {{
+                use crate::Locale;
+
                 {structs}
 
                 {submodules}
@@ -126,38 +129,45 @@ impl Struct<'_> {
     }
 
     fn gen_impl(&self, name: &str) -> String {
-        self.translations.others.iter().map(|(lang, msg)| {
-            format!(
-                "Locale::{} => {}",
-                lang.tag_pascal_case(),
-                msg.try_as_plain_text().expect("..."),
-            )
-        });
-        // self.translations
-        //     .others
-        //     .iter()
-        //     .map(|(lang, msg)| format!("Locale::{} =>", lang.tag_pascal_case()));
-
+        let matching = |allow_str: bool| -> String {
+            self.translations
+                .others
+                .iter()
+                .map(move |(lang, msg)| {
+                    format!(
+                        "Locale::{locale} => {result},",
+                        locale = lang.tag_pascal_case(),
+                        result = generate_message(msg, allow_str),
+                    )
+                })
+                .chain(iter::once(format!(
+                    "_ => {result},",
+                    result = generate_message(&self.translations.main, allow_str),
+                )))
+                .collect()
+        };
         match &self.fields {
-            Some(fields) => formatdoc! {"
+            Some(_) => formatdoc! {"
                 impl {name} {{
                     pub fn get_in(&self, locale: Locale) -> String {{
                         match locale {{
-                            _ => todo!(),
+                            {}
                         }}
                     }}
                 }}\
                 ",
+                indent::indent_by(12, matching(false)),
             },
             None => formatdoc! {"
                 impl {name} {{
                     pub fn get_in(&self, locale: Locale) -> &'static str {{
                         match locale {{
-                            _ => todo!(),
+                            {}
                         }}
                     }}
                 }}\
                 ",
+                indent::indent_by(12, matching(true)),
             },
         }
     }

@@ -97,7 +97,7 @@ pub enum Node {
 #[derive(Debug)]
 pub struct Translations {
     /// The message written in the main locale.
-    pub(super) main: Template,
+    pub main: Template,
 
     /// Other translations of the message.
     ///
