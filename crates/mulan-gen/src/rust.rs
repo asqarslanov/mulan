@@ -27,12 +27,12 @@ impl Bindings<'_> {
     fn generate(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
             pub enum Locale {{
-                {locale_variants}
+                {variants}
             }}
 
             {mod_t}
             ",
-            locale_variants = indent::indent_by(INDENT, {
+            variants = indent::indent_by(INDENT, {
                 config
                     .locales
                     .iter()
