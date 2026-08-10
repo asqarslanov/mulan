@@ -1,3 +1,5 @@
+//! ...
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::iter;
 
