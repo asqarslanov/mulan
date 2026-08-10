@@ -103,12 +103,6 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    pub fn preview(&self) -> CompactString1 {
-        format_compact!("{{{}}}", self.to_kebab_case())
-            .try_into()
-            .expect("not empty")
-    }
-
     /// Converts this parameter to a `kebab-case` string (e.g., `first-name`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
@@ -119,6 +113,14 @@ impl Parameter {
     #[must_use]
     pub fn to_snake_case(&self) -> CompactString1 {
         self.name.to_snake_case()
+    }
+
+    /// ...
+    #[must_use]
+    fn preview(&self) -> CompactString1 {
+        format_compact!("{{{}}}", self.to_kebab_case())
+            .try_into()
+            .expect("not empty")
     }
 }
 
