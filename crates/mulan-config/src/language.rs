@@ -38,7 +38,8 @@ impl Language {
         }
     }
 
-    /// ...
+    /// Similar to [Self::tag], but the result is in `PascalCase`
+    /// (e.g., `EnUs`, `FrCa`, or `Eo`).
     #[must_use]
     pub const fn tag_pascal_case(&self) -> &'static Str1 {
         match self {
