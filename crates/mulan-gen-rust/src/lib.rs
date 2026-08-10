@@ -10,10 +10,10 @@ pub const INDENT: usize = 4;
 
 #[must_use]
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
-    let bindings = Bindings {
+    Bindings {
         t: Module::new(&data.root),
-    };
-    bindings.generate(config)
+    }
+    .generate(config)
 }
 
 #[derive(Debug)]
