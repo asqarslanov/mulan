@@ -26,12 +26,21 @@ pub struct Bindings<'src> {
 impl Bindings<'_> {
     fn generate(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
+            {enum_locale}
+
+            {mod_t}
+            ",
+            enum_locale = Self::enum_locale(config),
+            mod_t = self.t.generate("t"),
+        }
+    }
+
+    fn enum_locale(config: &mulan_config::Config) -> String {
+        formatdoc! {"
             #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
             pub enum Locale {{
                 {variants}
-            }}
-
-            {mod_t}
+            }}\
             ",
             variants = indent::indent_by(INDENT, {
                 config
@@ -53,7 +62,6 @@ impl Bindings<'_> {
                     })
                     .join_compact("\n\n")
             }),
-            mod_t = self.t.generate("t"),
         }
     }
 }
