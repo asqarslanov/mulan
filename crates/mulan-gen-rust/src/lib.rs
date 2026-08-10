@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::iter;
 
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
@@ -226,6 +226,8 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
     let named_parameters = {
         template
             .parameters()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
             .map(|param| format_compact!("{name} = self.{name}", name = param.to_snake_case()))
             .join(", ")
     };
