@@ -42,7 +42,7 @@ mitsein = {
   branch = "compact-str",
 }
 mulan-config = { path = "crates/mulan-config/" }
-mulan-gen-rust = { path = "crates/mulan-gen-rust/" }
+mulan-gen = { path = "crates/mulan-gen/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 pathdiff = "0.2.3"
 relative-path = "2.0.1"

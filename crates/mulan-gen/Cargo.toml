@@ -1,5 +1,5 @@
 [package]
-name = "mulan-gen-rust"
+name = "mulan-gen"
 version.workspace = true
 edition = "2024"
 description.workspace = true

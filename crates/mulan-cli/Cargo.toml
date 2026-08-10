@@ -19,7 +19,7 @@ itertools = { workspace = true }
 miette = { workspace = true, features = ["fancy"] }
 mitsein = { workspace = true, features = ["smallvec"] }
 mulan-config = { workspace = true }
-mulan-gen-rust = { workspace = true }
+mulan-gen = { workspace = true }
 mulan-parser = { workspace = true }
 serde-saphyr = { workspace = true }
 thiserror = { workspace = true }

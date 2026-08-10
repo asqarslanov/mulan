@@ -19,7 +19,7 @@ impl self::Args {
         let config = mulan_config::Config::locate_and_read()
             .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
-        let rust_bindings = mulan_gen_rust::generate(&output, &config);
+        let rust_bindings = mulan_gen::rust::generate(&output, &config);
         #[expect(
             clippy::print_stdout,
             reason = "it's the most the program can produce for now"

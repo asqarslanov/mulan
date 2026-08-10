@@ -892,7 +892,7 @@ dependencies = [
  "miette",
  "mitsein",
  "mulan-config",
- "mulan-gen-rust",
+ "mulan-gen",
  "mulan-parser",
  "serde-saphyr",
  "thiserror",
@@ -915,7 +915,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mulan-gen-rust"
+name = "mulan-gen"
 version = "0.0.0"
 dependencies = [
  "compact_str",
