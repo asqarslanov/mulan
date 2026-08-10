@@ -136,6 +136,16 @@ impl<'src> Struct<'src> {
         )
     }
 
+    fn gen_lifetime_placeholders(&self) -> CompactString {
+        let Some(fields) = &self.fields else {
+            return CompactString::default();
+        };
+        format_compact!(
+            "<{}>",
+            iter::repeat_n("'_", fields.len().get()).join_compact(", "),
+        )
+    }
+
     fn gen_block(&self) -> String {
         let Some(fields) = &self.fields else {
             return ";".to_owned();
@@ -176,9 +186,10 @@ impl<'src> Struct<'src> {
                 )))
                 .join("\n")
         };
+        let lifetime_placeholders = self.gen_lifetime_placeholders();
         match &self.fields {
             Some(_) => formatdoc! {"
-                impl {name} {{
+                impl {name}{lifetime_placeholders} {{
                     pub fn get_in(&self, locale: Locale) -> String {{
                         match locale {{
                             {}
