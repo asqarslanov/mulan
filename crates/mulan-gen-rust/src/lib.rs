@@ -7,7 +7,10 @@ use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
 
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
-    todo!();
+    let bindings = Bindings {
+        t: Module::new(&data.root),
+    };
+    bindings.generate(config)
 }
 
 #[derive(Debug)]
@@ -38,11 +41,32 @@ impl Bindings<'_> {
 
 #[derive(Debug)]
 struct Module<'src> {
-    structs: BTreeMap<&'src mulan_parser::Subkey, Struct<'src>>,
-    submodules: BTreeMap<&'src mulan_parser::Subkey, Module<'src>>,
+    structs: BTreeMap<mulan_parser::Subkey, Struct<'src>>,
+    submodules: BTreeMap<mulan_parser::Subkey, Module<'src>>,
 }
 
-impl Module<'_> {
+impl<'src> Module<'src> {
+    pub fn new(namespace: &'src mulan_parser::Namespace) -> Self {
+        let mut structs = BTreeMap::new();
+        let mut submodules = BTreeMap::new();
+        for (key, node) in namespace.iter(None) {
+            let name = key.name().clone();
+            use mulan_parser::Node as N;
+            match node {
+                N::Message(msg) => {
+                    structs.insert(name, Struct::new(msg));
+                }
+                N::Namespace(ns) => {
+                    submodules.insert(name, Module::new(ns));
+                }
+            }
+        }
+        Self {
+            structs,
+            submodules,
+        }
+    }
+
     fn generate(&self, name: &str) -> String {
         formatdoc! {"
             pub mod {name} {{
@@ -75,11 +99,18 @@ impl Module<'_> {
 
 #[derive(Debug)]
 struct Struct<'src> {
-    translations: mulan_parser::Translations,
-    fields: Option<BTreeSet1<&'src mulan_parser::Subkey>>,
+    translations: &'src mulan_parser::Translations,
+    fields: Option<BTreeSet1<&'src mulan_parser::Parameter>>,
 }
 
-impl Struct<'_> {
+impl<'src> Struct<'src> {
+    fn new(translations: &'src mulan_parser::Translations) -> Self {
+        Self {
+            translations,
+            fields: translations.parameters(),
+        }
+    }
+
     fn generate(&self, name: &str) -> String {
         formatdoc! {"
             pub struct {name}{lifetimes}{block}

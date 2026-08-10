@@ -2,10 +2,13 @@
 
 use std::collections::BTreeMap;
 
+use mitsein::btree_set1::BTreeSet1;
 use mitsein::compact_string1::CompactString1;
+use mitsein::iter1::{Iterator1, IteratorExt};
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
+use crate::Parameter;
 use crate::identifier::Identifier;
 use crate::template::Template;
 
@@ -21,7 +24,7 @@ pub struct Output {
     /// [`Output`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
     /// It is always present, even if the main locale definition is empty.
-    pub(super) root: Namespace,
+    pub root: Namespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.
@@ -78,6 +81,13 @@ pub struct Key {
     pub(crate) segments: Vec1<Subkey>,
 }
 
+impl Key {
+    /// ...
+    pub fn name(&self) -> &Subkey {
+        self.segments.last()
+    }
+}
+
 /// A value in a [`Namespace`].
 ///
 /// Can either be a message template's [`Translations`] or another namespace.
@@ -103,6 +113,17 @@ pub struct Translations {
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
     pub others: BTreeMap<Language, Template>,
+}
+
+impl Translations {
+    /// ...
+    pub fn parameters(&self) -> Option<BTreeSet1<&Parameter>> {
+        self.main
+            .parameters()
+            .try_into_iter1()
+            .ok()
+            .map(Iterator1::collect1)
+    }
 }
 
 /// Defines parsers with [`mod@chumsky`].
@@ -185,30 +206,14 @@ mod tests {
     }
 }
 
-impl Output {
-    /// ...
-    fn iter(&self) -> impl Iterator<Item = NodeData<'_>> {
-        self.root.iter(None)
-    }
-}
-
 impl Namespace {
     /// ...
-    fn iter<'a>(&'a self, parent_path: Option<&Key>) -> impl Iterator<Item = NodeData<'a>> {
+    pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
         let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
         self.map.iter().map(move |(subkey, node)| {
             let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
             let key = Key { segments };
-            NodeData { key, node }
+            (key, node)
         })
     }
-}
-
-/// ...
-pub struct NodeData<'a> {
-    /// ...
-    key: Key,
-
-    /// ...
-    node: &'a Node,
 }
