@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use compact_str::CompactString;
+use indoc::formatdoc;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::compact_string1::CompactString1;
 use mitsein::iter1::{Iterator1, IteratorExt};
@@ -120,8 +120,16 @@ pub struct Translations {
 impl Translations {
     /// ...
     #[must_use]
-    pub fn preview(&self) -> (CompactString, usize) {
-        (self.main.preview(), self.main.max_consecutive_backticks())
+    pub fn markdown_preview(&self) -> String {
+        let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
+        formatdoc! {"
+            {backticks}txt
+            {preview}
+            {backticks}\
+            ",
+            backticks = "`".repeat(backticks_n),
+            preview = self.main.preview(),
+        }
     }
 
     /// ...
