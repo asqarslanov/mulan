@@ -11,7 +11,7 @@ pub const INDENT: usize = 4;
 #[must_use]
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
     Bindings {
-        t: Module::new(&data.root),
+        t: Module::new(&data.root, None),
     }
     .generate(config)
 }
@@ -49,10 +49,13 @@ struct Module<'src> {
 }
 
 impl<'src> Module<'src> {
-    pub fn new(namespace: &'src mulan_parser::Namespace) -> Self {
+    pub fn new(
+        namespace: &'src mulan_parser::Namespace,
+        parent_key: Option<&mulan_parser::Key>,
+    ) -> Self {
         let mut structs = BTreeMap::new();
         let mut submodules = BTreeMap::new();
-        for (key, node) in namespace.iter(None) {
+        for (key, node) in namespace.iter(parent_key) {
             use mulan_parser::Node as N;
             match node {
                 N::Message(msg) => {
@@ -60,7 +63,7 @@ impl<'src> Module<'src> {
                 }
                 N::Namespace(ns) => {
                     let name = key.name().clone();
-                    submodules.insert(name, Module::new(ns));
+                    submodules.insert(name, Module::new(ns, Some(&key)));
                 }
             }
         }
@@ -127,12 +130,10 @@ impl<'src> Struct<'src> {
     }
 
     fn generate(&self, key: &mulan_parser::Key) -> String {
-        let name = &key.name().to_pascal_case();
-
         let doc_comment = formatdoc! {"
             /// `{key}`
             ///
-            /// {markdown_preview}
+            /// {markdown_preview}\
             ",
             key = key.to_kebab_case(),
             markdown_preview = indent::indent_with(
@@ -140,6 +141,7 @@ impl<'src> Struct<'src> {
                 self.translations.markdown_preview(),
             ),
         };
+        let name = &key.name().to_pascal_case();
         formatdoc! {"
             {doc_comment}
             pub struct {name}{lifetimes}{block}
