@@ -44,7 +44,7 @@ impl Bindings<'_> {
 
 #[derive(Debug)]
 struct Module<'src> {
-    structs: BTreeMap<mulan_parser::Subkey, Struct<'src>>,
+    structs: BTreeMap<mulan_parser::Key, Struct<'src>>,
     submodules: BTreeMap<mulan_parser::Subkey, Self>,
 }
 
@@ -54,12 +54,12 @@ impl<'src> Module<'src> {
         let mut submodules = BTreeMap::new();
         for (key, node) in namespace.iter(None) {
             use mulan_parser::Node as N;
-            let name = key.name().clone();
             match node {
                 N::Message(msg) => {
-                    structs.insert(name, Struct::new(msg));
+                    structs.insert(key, Struct::new(msg));
                 }
                 N::Namespace(ns) => {
+                    let name = key.name().clone();
                     submodules.insert(name, Module::new(ns));
                 }
             }
@@ -100,7 +100,7 @@ impl<'src> Module<'src> {
     fn gen_structs(&self) -> String {
         self.structs
             .iter()
-            .map(|(name, structure)| structure.generate(&name.to_pascal_case()))
+            .map(|(name, structure)| structure.generate(name))
             .join("\n\n")
     }
 
@@ -126,14 +126,26 @@ impl<'src> Struct<'src> {
         }
     }
 
-    fn generate(&self, name: &str) -> String {
+    fn generate(&self, key: &mulan_parser::Key) -> String {
+        let name = &key.name().to_pascal_case();
+
+        let doc = formatdoc! {"
+            /// `{key}`
+            ///
+            /// {markdown_preview}
+            ",
+            key = key.to_kebab_case(),
+            markdown_preview = indent::indent_with(
+                "/// ",
+                self.translations.markdown_preview(),
+            ),
+        };
         formatdoc! {"
-            /// {doc}
+            {doc}
             pub struct {name}{lifetimes}{block}
 
             {impl_block}\
             ",
-            doc = indent::indent_with("/// ", self.translations.markdown_preview()),
             lifetimes = self.gen_lifetimes(),
             block = self.gen_block(),
             impl_block = self.gen_impl(name),

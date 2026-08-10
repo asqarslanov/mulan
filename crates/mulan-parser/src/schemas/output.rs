@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 
 use indoc::formatdoc;
 use mitsein::btree_set1::BTreeSet1;
-use mitsein::compact_string1::CompactString1;
-use mitsein::iter1::{Iterator1, IteratorExt};
+use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
+use mitsein::iter1::{Iterator1, IteratorExt as _};
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
@@ -77,7 +77,7 @@ impl Subkey {
 ///
 /// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
 /// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Key {
     pub(crate) segments: Vec1<Subkey>,
 }
@@ -87,6 +87,15 @@ impl Key {
     #[must_use]
     pub fn name(&self) -> &Subkey {
         self.segments.last()
+    }
+
+    /// ...
+    #[must_use]
+    pub fn to_kebab_case(&self) -> CompactString1 {
+        self.segments
+            .iter1()
+            .map(Subkey::to_kebab_case)
+            .join_compact1(".")
     }
 }
 
