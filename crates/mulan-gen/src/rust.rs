@@ -92,13 +92,7 @@ impl<'src> Module<'src> {
     fn generate(&self, name: &str) -> String {
         let mut module_contents = Vec::new();
         if !self.structs.is_empty() {
-            module_contents.push(formatdoc! {"
-                use crate::Locale;
-
-                {structs}\
-                ",
-                structs = self.gen_structs(),
-            });
+            module_contents.push(self.gen_structs());
         }
         if !self.submodules.is_empty() {
             module_contents.push(self.gen_submodules());
@@ -108,6 +102,8 @@ impl<'src> Module<'src> {
         } else {
             formatdoc! {"
                 pub mod {name} {{
+                    use super::Locale;
+
                     {}
                 }}\
                 ",
