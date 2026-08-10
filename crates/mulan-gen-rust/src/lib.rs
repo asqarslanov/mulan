@@ -6,6 +6,8 @@ use indoc::formatdoc;
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
 
+pub const INDENT: usize = 4;
+
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
     let bindings = Bindings {
         t: Module::new(&data.root),
@@ -27,7 +29,7 @@ impl Bindings<'_> {
 
             {mod_t}
             ",
-            locale_variants = indent::indent_by(4, {
+            locale_variants = indent::indent_by(INDENT, {
                 config
                     .locales
                     .iter()
@@ -68,17 +70,20 @@ impl<'src> Module<'src> {
     }
 
     fn generate(&self, name: &str) -> String {
+        let structs = formatdoc! {"
+            use crate::Locale;
+
+            {structs}\
+            ",
+            structs = self.gen_structs(),
+        };
+        let submodules = self.gen_submodules();
         formatdoc! {"
             pub mod {name} {{
-                use crate::Locale;
-
-                {structs}
-
-                {submodules}
+                {}
             }}\
             ",
-            structs = indent::indent_by(4, self.gen_structs()),
-            submodules = indent::indent_by(4, self.gen_submodules()),
+            indent::indent_by(INDENT, [structs, submodules].join("\n\n")),
         }
     }
 
@@ -155,7 +160,7 @@ impl<'src> Struct<'src> {
                 {fields}
             }}\
             ",
-            fields = indent::indent_by(4, {
+            fields = indent::indent_by(INDENT, {
                 fields
                     .iter1()
                     .map(|subkey| format_compact!(
@@ -197,7 +202,7 @@ impl<'src> Struct<'src> {
                     }}
                 }}\
                 ",
-                indent::indent_by(12, matching(false)),
+                indent::indent_by(3 * INDENT, matching(false)),
             },
             None => formatdoc! {"
                 impl {name} {{
@@ -208,7 +213,7 @@ impl<'src> Struct<'src> {
                     }}
                 }}\
                 ",
-                indent::indent_by(12, matching(true)),
+                indent::indent_by(3 * INDENT, matching(true)),
             },
         }
     }
