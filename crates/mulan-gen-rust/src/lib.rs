@@ -129,7 +129,7 @@ impl<'src> Struct<'src> {
     fn generate(&self, key: &mulan_parser::Key) -> String {
         let name = &key.name().to_pascal_case();
 
-        let doc = formatdoc! {"
+        let doc_comment = formatdoc! {"
             /// `{key}`
             ///
             /// {markdown_preview}
@@ -141,7 +141,7 @@ impl<'src> Struct<'src> {
             ),
         };
         formatdoc! {"
-            {doc}
+            {doc_comment}
             pub struct {name}{lifetimes}{block}
 
             {impl_block}\
