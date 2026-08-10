@@ -1,6 +1,7 @@
 //! See [`Template`].
 
-use compact_str::CompactString;
+use chumsky::text;
+use compact_str::{CompactString, format_compact};
 use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
@@ -26,6 +27,20 @@ pub struct Template {
 }
 
 impl Template {
+    /// ...
+    #[must_use]
+    pub(super) fn preview(&self) -> CompactString {
+        let mut buffer = CompactString::default();
+        for part in self.iter() {
+            use crate::TemplatePart as P;
+            match part {
+                P::Text(text) => buffer.push_str(text),
+                P::Placeholder(parameter) => buffer.push_str(&parameter.preview()),
+            }
+        }
+        buffer
+    }
+
     /// An iterator over all parts in order.
     pub fn iter(&self) -> impl Iterator<Item = &TemplatePart> {
         self.parts.iter()
@@ -48,6 +63,28 @@ impl Template {
             _ => None,
         }
     }
+
+    /// ...
+    #[must_use]
+    pub(super) fn max_consecutive_backticks(&self) -> usize {
+        let mut count = 0;
+        self.parts
+            .iter()
+            .filter_map(TemplatePart::try_as_text_ref)
+            .for_each(|text| {
+                let mut current_count = 0;
+                for c in text.chars() {
+                    if c == '`' {
+                        current_count += 1;
+                    } else {
+                        count = count.max(current_count);
+                        current_count = 0;
+                    }
+                }
+                count = count.max(current_count);
+            });
+        count
+    }
 }
 
 /// A part of a [`Template`].
@@ -67,6 +104,12 @@ pub struct Parameter {
 }
 
 impl Parameter {
+    pub fn preview(&self) -> CompactString1 {
+        format_compact!("{{{}}}", self.to_kebab_case())
+            .try_into()
+            .expect("not empty")
+    }
+
     /// Converts this parameter to a `kebab-case` string (e.g., `first-name`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {

@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use compact_str::CompactString;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::compact_string1::CompactString1;
 use mitsein::iter1::{Iterator1, IteratorExt};
@@ -118,6 +119,13 @@ pub struct Translations {
 
 impl Translations {
     /// ...
+    #[must_use]
+    pub fn preview(&self) -> (CompactString, usize) {
+        (self.main.preview(), self.main.max_consecutive_backticks())
+    }
+
+    /// ...
+    #[must_use]
     pub fn parameters(&self) -> Option<BTreeSet1<&Parameter>> {
         self.main
             .parameters()
