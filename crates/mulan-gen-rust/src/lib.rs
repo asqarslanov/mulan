@@ -8,6 +8,7 @@ use mitsein::btree_set1::BTreeSet1;
 
 pub const INDENT: usize = 4;
 
+#[must_use]
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
     let bindings = Bindings {
         t: Module::new(&data.root),
@@ -44,7 +45,7 @@ impl Bindings<'_> {
 #[derive(Debug)]
 struct Module<'src> {
     structs: BTreeMap<mulan_parser::Subkey, Struct<'src>>,
-    submodules: BTreeMap<mulan_parser::Subkey, Module<'src>>,
+    submodules: BTreeMap<mulan_parser::Subkey, Self>,
 }
 
 impl<'src> Module<'src> {
@@ -52,8 +53,8 @@ impl<'src> Module<'src> {
         let mut structs = BTreeMap::new();
         let mut submodules = BTreeMap::new();
         for (key, node) in namespace.iter(None) {
-            let name = key.name().clone();
             use mulan_parser::Node as N;
+            let name = key.name().clone();
             match node {
                 N::Message(msg) => {
                     structs.insert(name, Struct::new(msg));

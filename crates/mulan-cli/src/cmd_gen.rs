@@ -20,7 +20,13 @@ impl self::Args {
             .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
         let rust_bindings = mulan_gen_rust::generate(&output, &config);
-        println!("{rust_bindings}");
+        #[expect(
+            clippy::print_stdout,
+            reason = "it's the most the program can produce for now"
+        )]
+        {
+            println!("{rust_bindings}");
+        }
         Ok(ExitCode::SUCCESS)
     }
 }

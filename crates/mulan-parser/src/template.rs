@@ -40,6 +40,7 @@ impl Template {
 
     /// Returns a plain text string without dynamic parameters
     /// if this template can presented as such.
+    #[must_use]
     pub fn try_as_plain_text(&self) -> Option<&str> {
         match self.parts.as_slice() {
             [] => Some(<&str>::default()),

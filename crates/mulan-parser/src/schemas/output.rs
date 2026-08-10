@@ -83,6 +83,7 @@ pub struct Key {
 
 impl Key {
     /// ...
+    #[must_use]
     pub fn name(&self) -> &Subkey {
         self.segments.last()
     }
