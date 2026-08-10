@@ -26,11 +26,26 @@ pub struct Template {
 }
 
 impl Template {
-    /// ...
+    /// An iterator over all parts in order.
+    pub fn iter(&self) -> impl Iterator<Item = &TemplatePart> {
+        self.parts.iter()
+    }
+
+    /// An iterator over [`TemplatePart::Placeholder`] parts in order.
     pub fn parameters(&self) -> impl Iterator<Item = &Parameter> {
         self.parts
             .iter()
             .filter_map(TemplatePart::try_as_placeholder_ref)
+    }
+
+    /// Returns a plain text string without dynamic parameters
+    /// if this template can presented as such.
+    pub fn try_as_plain_text(&self) -> Option<&str> {
+        match self.parts.as_slice() {
+            [] => Some(<&str>::default()),
+            [TemplatePart::Text(text)] => Some(text),
+            _ => None,
+        }
     }
 }
 
@@ -51,10 +66,16 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    /// Converts this parameter to a kebab-case string (e.g., `first-name`).
+    /// Converts this parameter to a `kebab-case` string (e.g., `first-name`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.name.to_kebab_case()
+    }
+
+    /// Converts this parameter to a `snake_case` string (e.g., `first_name`).
+    #[must_use]
+    pub fn to_snake_case(&self) -> CompactString1 {
+        self.name.to_snake_case()
     }
 }
 

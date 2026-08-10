@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use compact_str::{CompactString, CompactStringExt as _, format_compact};
+use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::formatdoc;
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
@@ -73,6 +73,7 @@ impl Module<'_> {
 
 #[derive(Debug)]
 struct Struct<'src> {
+    translations: mulan_parser::Translations,
     fields: Option<BTreeSet1<&'src mulan_parser::Subkey>>,
 }
 
@@ -125,6 +126,18 @@ impl Struct<'_> {
     }
 
     fn gen_impl(&self, name: &str) -> String {
+        self.translations.others.iter().map(|(lang, msg)| {
+            format!(
+                "Locale::{} => {}",
+                lang.tag_pascal_case(),
+                msg.try_as_plain_text().expect("..."),
+            )
+        });
+        // self.translations
+        //     .others
+        //     .iter()
+        //     .map(|(lang, msg)| format!("Locale::{} =>", lang.tag_pascal_case()));
+
         match &self.fields {
             Some(fields) => formatdoc! {"
                 impl {name} {{
@@ -148,4 +161,33 @@ impl Struct<'_> {
             },
         }
     }
+}
+
+fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> CompactString {
+    if let Some(text) = template.try_as_plain_text() {
+        return format_compact!(
+            "\"{contents}\"{tail}",
+            contents = text.escape_debug(),
+            tail = if allow_str { "" } else { ".to_owned()" },
+        );
+    }
+    let contents = {
+        use mulan_parser::TemplatePart as P;
+        template
+            .iter()
+            .map(|part| match part {
+                P::Text(text) => text.escape_debug().to_compact_string(),
+                P::Placeholder(parameter) => {
+                    format_compact!("{{{name}}}", name = parameter.to_snake_case())
+                }
+            })
+            .collect::<CompactString>()
+    };
+    let named_parameters = {
+        template
+            .parameters()
+            .map(|param| format_compact!("{name} = self.{name}", name = param.to_snake_case()))
+            .join(", ")
+    };
+    format_compact!("format!(\"{contents}\", {named_parameters})")
 }

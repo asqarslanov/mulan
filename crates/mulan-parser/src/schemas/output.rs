@@ -102,7 +102,7 @@ pub struct Translations {
     /// Other translations of the message.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub(super) others: BTreeMap<Language, Template>,
+    pub others: BTreeMap<Language, Template>,
 }
 
 /// Defines parsers with [`mod@chumsky`].
