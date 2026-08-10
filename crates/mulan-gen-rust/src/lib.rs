@@ -70,20 +70,29 @@ impl<'src> Module<'src> {
     }
 
     fn generate(&self, name: &str) -> String {
-        let structs = formatdoc! {"
-            use crate::Locale;
+        let mut module_contents = Vec::new();
+        if !self.structs.is_empty() {
+            module_contents.push(formatdoc! {"
+                use crate::Locale;
 
-            {structs}\
-            ",
-            structs = self.gen_structs(),
-        };
-        let submodules = self.gen_submodules();
-        formatdoc! {"
-            pub mod {name} {{
-                {}
-            }}\
-            ",
-            indent::indent_by(INDENT, [structs, submodules].join("\n\n")),
+                {structs}\
+                ",
+                structs = self.gen_structs(),
+            });
+        }
+        if !self.submodules.is_empty() {
+            module_contents.push(self.gen_submodules());
+        }
+        if module_contents.is_empty() {
+            format!("pub mod {name} {{}}")
+        } else {
+            formatdoc! {"
+                pub mod {name} {{
+                    {}
+                }}\
+                ",
+                indent::indent_by(INDENT, module_contents.join("\n\n")),
+            }
         }
     }
 
