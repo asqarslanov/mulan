@@ -147,7 +147,7 @@ impl<'src> Struct<'src> {
             fields
                 .iter1()
                 .map(|subkey| format_compact!("'{name}", name = subkey.to_kebab_case()))
-                .join_compact(" "),
+                .join_compact(", "),
         )
     }
 
