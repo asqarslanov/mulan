@@ -26,6 +26,7 @@ pub struct Bindings<'src> {
 impl Bindings<'_> {
     fn generate(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
+            #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
             pub enum Locale {{
                 {variants}
             }}
@@ -36,8 +37,21 @@ impl Bindings<'_> {
                 config
                     .locales
                     .iter()
-                    .map(|lang| format_compact!("{},", lang.tag_pascal_case()))
-                    .join_compact("\n")
+                    .map(|lang| formatdoc! {"
+                        /// {tag} / {name}\
+                        {default_attr}
+                        {variant},\
+                        ",
+                        tag = lang.tag(),
+                        name = lang.name(),
+                        default_attr = if lang == &config.main_locale {
+                            "\n#[default]"
+                        } else {
+                            ""
+                        },
+                        variant = lang.tag_pascal_case(),
+                    })
+                    .join_compact("\n\n")
             }),
             mod_t = self.t.generate("t"),
         }
