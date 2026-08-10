@@ -125,11 +125,27 @@ impl Struct<'_> {
     }
 
     fn gen_impl(&self, name: &str) -> String {
-        formatdoc! {"
-            impl {name} {{
-                pub fn get_in(&self, locale: Locale) ->
-            }}\
-            ",
+        match &self.fields {
+            Some(fields) => formatdoc! {"
+                impl {name} {{
+                    pub fn get_in(&self, locale: Locale) -> String {{
+                        match locale {{
+                            _ => todo!(),
+                        }}
+                    }}
+                }}\
+                ",
+            },
+            None => formatdoc! {"
+                impl {name} {{
+                    pub fn get_in(&self, locale: Locale) -> &'static str {{
+                        match locale {{
+                            _ => todo!(),
+                        }}
+                    }}
+                }}\
+                ",
+            },
         }
     }
 }
