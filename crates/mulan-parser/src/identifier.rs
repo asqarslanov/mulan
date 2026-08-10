@@ -187,4 +187,61 @@ mod tests {
         });
         assert_eq!(actual_output, expected_output);
     }
+
+    #[rstest]
+    #[case("e", "e")]
+    #[case("foo", "foo")]
+    #[case("lorem-ipsum", "lorem-ipsum")]
+    #[case("aa-aa-aa", "aa-aa-aa")]
+    #[case("i18n", "i18n")]
+    #[case("r2-d2", "r2-d2")]
+    #[case(
+        "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
+        "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts"
+    )]
+    fn to_kebab_case(#[case] input: &str, #[case] expected_output: &str) {
+        let word_parser = Word::chumsky_parser();
+        let parser = Identifier::chumsky_parser(&word_parser);
+        let identifier = parser.mulan_parse(input).unwrap();
+        let actual_output = identifier.to_kebab_case();
+        assert_eq!(actual_output, expected_output);
+    }
+
+    #[rstest]
+    #[case("e", "E")]
+    #[case("foo", "Foo")]
+    #[case("lorem-ipsum", "LoremIpsum")]
+    #[case("aa-aa-aa", "AaAaAa")]
+    #[case("i18n", "I18n")]
+    #[case("r2-d2", "R2D2")]
+    #[case(
+        "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
+        "V3ryL0n9Str1n9OfL3tt3rsAndD1g1ts"
+    )]
+    fn to_pascal_case(#[case] input: &str, #[case] expected_output: &str) {
+        let word_parser = Word::chumsky_parser();
+        let parser = Identifier::chumsky_parser(&word_parser);
+        let identifier = parser.mulan_parse(input).unwrap();
+        let actual_output = identifier.to_pascal_case();
+        assert_eq!(actual_output, expected_output);
+    }
+
+    #[rstest]
+    #[case("e", "e")]
+    #[case("foo", "foo")]
+    #[case("lorem-ipsum", "lorem_ipsum")]
+    #[case("aa-aa-aa", "aa_aa_aa")]
+    #[case("i18n", "i18n")]
+    #[case("r2-d2", "r2_d2")]
+    #[case(
+        "v3ry-l0n9-str1n9-of-l3tt3rs-and-d1g1ts",
+        "v3ry_l0n9_str1n9_of_l3tt3rs_and_d1g1ts"
+    )]
+    fn to_snake_case(#[case] input: &str, #[case] expected_output: &str) {
+        let word_parser = Word::chumsky_parser();
+        let parser = Identifier::chumsky_parser(&word_parser);
+        let identifier = parser.mulan_parse(input).unwrap();
+        let actual_output = identifier.to_snake_case();
+        assert_eq!(actual_output, expected_output);
+    }
 }
