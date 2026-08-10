@@ -174,7 +174,7 @@ impl<'src> Struct<'src> {
                     "_ => {result},",
                     result = generate_message(&self.translations.main, allow_str),
                 )))
-                .collect()
+                .join("\n")
         };
         match &self.fields {
             Some(_) => formatdoc! {"
