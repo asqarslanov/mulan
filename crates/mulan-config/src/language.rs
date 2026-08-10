@@ -37,4 +37,14 @@ impl Language {
             Self::RuRu => str1!("ru-RU"),
         }
     }
+
+    /// ...
+    #[must_use]
+    pub const fn tag_pascal_case(&self) -> &'static Str1 {
+        match self {
+            Self::EnUs => str1!("EnUs"),
+            Self::FrCa => str1!("FrCa"),
+            Self::RuRu => str1!("RuRu"),
+        }
+    }
 }

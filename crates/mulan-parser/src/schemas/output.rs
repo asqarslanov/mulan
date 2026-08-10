@@ -50,10 +50,22 @@ pub struct Subkey {
 }
 
 impl Subkey {
-    /// Converts this subkey to a kebab-case string (e.g., `user1-settings`).
+    /// Converts this subkey to a `kebab-case` string (e.g., `user1-settings`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.value.to_kebab_case()
+    }
+
+    /// Converts this subkey to a `PascalCase` string (e.g., `User1Settings`).
+    #[must_use]
+    pub fn to_pascal_case(&self) -> CompactString1 {
+        self.value.to_pascal_case()
+    }
+
+    /// Converts this subkey to a `snake_case` string (e.g., `user1_settings`).
+    #[must_use]
+    pub fn to_snake_case(&self) -> CompactString1 {
+        self.value.to_snake_case()
     }
 }
 

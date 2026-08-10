@@ -1,5 +1,7 @@
 //! See [`Identifier`].
 
+use std::convert::identity;
+
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
 
@@ -18,7 +20,7 @@ pub struct Identifier {
 }
 
 impl Identifier {
-    /// Converts this identifier to a kebab-case string
+    /// Converts this identifier to a `kebab-case` string
     /// (e.g., `lorem02-ipsum67`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
@@ -26,6 +28,31 @@ impl Identifier {
             .iter1()
             .map(|word| &word.inner)
             .join_compact1("-")
+    }
+
+    /// Converts this identifier to a `PascalCase` string
+    /// (e.g., `Lorem02Ipsum67`).
+    #[must_use]
+    pub fn to_pascal_case(&self) -> CompactString1 {
+        self.words
+            .iter1()
+            .map(|word| {
+                word.inner
+                    .chars1()
+                    .map_first_and_then(|first| first.to_ascii_uppercase(), identity)
+                    .collect1::<CompactString1>()
+            })
+            .join_compact1("")
+    }
+
+    /// Converts this identifier to a `snake_case` string
+    /// (e.g., `lorem02_ipsum67`).
+    #[must_use]
+    pub fn to_snake_case(&self) -> CompactString1 {
+        self.words
+            .iter1()
+            .map(|word| &word.inner)
+            .join_compact1("_")
     }
 }
 

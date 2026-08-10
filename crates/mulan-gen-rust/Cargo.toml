@@ -11,6 +11,11 @@ categories.workspace = true
 publish.workspace = true
 
 [dependencies]
+compact_str = { workspace = true }
+indent = { workspace = true }
+indoc = { workspace = true }
+itertools = { workspace = true }
+mitsein = { workspace = true }
 mulan-config = { workspace = true }
 mulan-parser = { workspace = true }
 

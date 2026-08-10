@@ -655,6 +655,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
+name = "indent"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9f1a0777d972970f204fdf8ef319f1f4f8459131636d7e3c96c5d59570d0fa6"
+
+[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -912,6 +918,11 @@ dependencies = [
 name = "mulan-gen-rust"
 version = "0.0.0"
 dependencies = [
+ "compact_str",
+ "indent",
+ "indoc",
+ "itertools 0.15.0",
+ "mitsein",
  "mulan-config",
  "mulan-parser",
 ]
