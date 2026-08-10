@@ -5,7 +5,6 @@ use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, fo
 use indoc::formatdoc;
 use itertools::Itertools as _;
 use mitsein::btree_set1::BTreeSet1;
-use mulan_config::Language;
 
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
     todo!();
