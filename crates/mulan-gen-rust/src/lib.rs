@@ -128,10 +128,12 @@ impl<'src> Struct<'src> {
 
     fn generate(&self, name: &str) -> String {
         formatdoc! {"
+            /// {doc}
             pub struct {name}{lifetimes}{block}
 
             {impl_block}\
             ",
+            doc = indent::indent_with("/// ", self.translations.markdown_preview()),
             lifetimes = self.gen_lifetimes(),
             block = self.gen_block(),
             impl_block = self.gen_impl(name),
