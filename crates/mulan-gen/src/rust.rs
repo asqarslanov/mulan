@@ -21,7 +21,7 @@ pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> S
 }
 
 #[derive(Debug)]
-pub struct Bindings<'src> {
+struct Bindings<'src> {
     t: Module<'src>,
 }
 
