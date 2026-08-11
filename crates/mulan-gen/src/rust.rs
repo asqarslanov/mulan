@@ -34,6 +34,8 @@ impl Bindings<'_> {
 
             #![allow(warnings)]
 
+            #[rustfmt::skip]
+
             {enum_locale}
 
             {mod_t}
