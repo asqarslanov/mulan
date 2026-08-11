@@ -132,7 +132,7 @@ impl Translations {
     pub fn markdown_preview(&self) -> String {
         let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
         formatdoc! {"
-            {backticks}txt
+            {backticks}mulan
             {preview}
             {backticks}\
             ",
