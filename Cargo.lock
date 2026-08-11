@@ -931,6 +931,7 @@ dependencies = [
 name = "mulan-parser"
 version = "0.0.0"
 dependencies = [
+ "aho-corasick",
  "chumsky",
  "compact_str",
  "foldhash 0.2.0",

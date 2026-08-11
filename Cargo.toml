@@ -28,6 +28,7 @@ categories = [
 publish = false
 
 [workspace.dependencies]
+aho-corasick = "1.1.5"
 chumsky = "0.13.0"
 clap = "4.6.6"
 compact_str = "0.10.0"
