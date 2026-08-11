@@ -40,7 +40,7 @@ impl Bindings<'_> {
             ",
             auto_generated_comment = indent::indent_with("// ", AUTO_GENERATED_COMMENT),
             enum_locale = Self::enum_locale(config),
-            mod_t = self.t.generate("t"),
+            mod_t = self.t.generate(None),
         }
     }
 
@@ -97,7 +97,7 @@ impl Bindings<'_> {
 #[derive(Debug)]
 struct Module<'src> {
     structs: BTreeMap<mulan_parser::Key, Struct<'src>>,
-    submodules: BTreeMap<mulan_parser::Subkey, Self>,
+    submodules: BTreeMap<mulan_parser::Key, Self>,
 }
 
 impl<'src> Module<'src> {
@@ -114,8 +114,8 @@ impl<'src> Module<'src> {
                     structs.insert(key, Struct::new(msg));
                 }
                 N::Namespace(ns) => {
-                    let name = key.name().clone();
-                    submodules.insert(name, Module::new(ns, Some(&key)));
+                    let submodule = Module::new(ns, Some(&key));
+                    submodules.insert(key, submodule);
                 }
             }
         }
@@ -125,7 +125,7 @@ impl<'src> Module<'src> {
         }
     }
 
-    fn generate(&self, name: &str) -> String {
+    fn generate(&self, key: Option<&mulan_parser::Key>) -> String {
         let mut module_contents = Vec::new();
         if !self.structs.is_empty() {
             module_contents.push(self.gen_structs());
@@ -133,17 +133,33 @@ impl<'src> Module<'src> {
         if !self.submodules.is_empty() {
             module_contents.push(self.gen_submodules());
         }
+        #[expect(clippy::option_if_let_else, reason = "borrowed values")]
+        let (doc_comment, name): (&str, &str) = if let Some(key) = key {
+            (
+                &format_compact!("`{name}`", name = key.to_kebab_case()),
+                &key.name().to_snake_case(),
+            )
+        } else {
+            ("The root namespace.", "t")
+        };
         if module_contents.is_empty() {
-            format!("pub mod {name} {{}}")
+            formatdoc! {"
+                /// {doc_comment}
+                pub mod {name} {{}}\
+                ",
+                doc_comment = indent::indent_with("/// ", doc_comment),
+            }
         } else {
             formatdoc! {"
+                /// {doc_comment}
                 pub mod {name} {{
                     use super::Locale;
 
-                    {}
+                    {items}
                 }}\
                 ",
-                indent::indent_by(INDENT, module_contents.join("\n\n")),
+                doc_comment = indent::indent_with("/// ", doc_comment),
+                items = indent::indent_by(INDENT, module_contents.join("\n\n")),
             }
         }
     }
@@ -158,7 +174,7 @@ impl<'src> Module<'src> {
     fn gen_submodules(&self) -> String {
         self.submodules
             .iter()
-            .map(|(name, submodule)| submodule.generate(&name.to_snake_case()))
+            .map(|(name, submodule)| submodule.generate(Some(name)))
             .join("\n\n")
     }
 }
