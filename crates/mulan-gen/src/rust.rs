@@ -10,7 +10,7 @@ use mitsein::btree_set1::BTreeSet1;
 
 use crate::AUTO_GENERATED_COMMENT;
 
-pub const INDENT: usize = 4;
+const INDENT: usize = 4;
 
 #[must_use]
 pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
@@ -103,7 +103,7 @@ struct Module<'src> {
 }
 
 impl<'src> Module<'src> {
-    pub fn new(
+    fn new(
         namespace: &'src mulan_parser::Namespace,
         parent_key: Option<&mulan_parser::Key>,
     ) -> Self {
