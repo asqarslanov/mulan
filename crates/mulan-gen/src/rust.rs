@@ -213,18 +213,15 @@ impl<'src> Struct<'src> {
     }
 
     fn doc_comment(&self, key: &mulan_parser::Key) -> String {
-        let markdown_preview = self.translations.markdown_preview();
-        let markdown_preview = match &markdown_preview {
-            Some(preview) => preview,
-            None => "_empty message_",
-        };
+        let preview = self.translations.markdown_preview();
+        let preview = preview.as_ref().map_or("_empty message_", AsRef::as_ref);
         formatdoc! {"
             /// `{key}`
             ///
             /// {markdown_preview}\
             ",
             key = key.to_kebab_case(),
-            markdown_preview = indent::indent_with("/// ", markdown_preview),
+            markdown_preview = indent::indent_with("/// ", preview),
         }
     }
 
