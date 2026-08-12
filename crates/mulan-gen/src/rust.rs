@@ -1,3 +1,5 @@
+//! # Mulan Gen / Rust
+//!
 //! ...
 
 use std::collections::{BTreeMap, BTreeSet};
