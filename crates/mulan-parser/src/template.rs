@@ -1,5 +1,7 @@
 //! See [`Template`].
 
+use std::sync::LazyLock;
+
 use aho_corasick::AhoCorasick;
 use compact_str::{CompactString, format_compact};
 use mitsein::compact_string1::CompactString1;
@@ -29,17 +31,19 @@ pub struct Template {
 impl Template {
     /// ...
     #[must_use]
-    pub(super) fn preview(&self) -> CompactString {
+    pub(super) fn preview(&self) -> Option<CompactString1> {
+        static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
+            AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
+        });
         let mut buffer = CompactString::default();
-        let ac = AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config");
         for part in self.iter() {
             use crate::TemplatePart as P;
             match part {
-                P::Text(text) => buffer.push_str(&ac.replace_all(text, &["{{", "}}"])),
+                P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
                 P::Placeholder(parameter) => buffer.push_str(&parameter.preview()),
             }
         }
-        buffer
+        buffer.try_into().ok()
     }
 
     /// An iterator over all parts in order.

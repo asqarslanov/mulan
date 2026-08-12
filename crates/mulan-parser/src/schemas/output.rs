@@ -6,6 +6,7 @@ use indoc::formatdoc;
 use mitsein::btree_set1::BTreeSet1;
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::iter1::{Iterator1, IteratorExt as _};
+use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
@@ -129,16 +130,20 @@ pub struct Translations {
 impl Translations {
     /// ...
     #[must_use]
-    pub fn markdown_preview(&self) -> String {
+    pub fn markdown_preview(&self) -> Option<String1> {
+        let preview = self.main.preview()?;
         let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
-        formatdoc! {"
-            {backticks}mulan
-            {preview}
-            {backticks}\
-            ",
-            backticks = "`".repeat(backticks_n),
-            preview = self.main.preview(),
-        }
+        Some(
+            formatdoc! {"
+                {backticks}mulan
+                {preview}
+                {backticks}\
+                ",
+                backticks = "`".repeat(backticks_n),
+            }
+            .try_into()
+            .expect("non-empty"),
+        )
     }
 
     /// ...

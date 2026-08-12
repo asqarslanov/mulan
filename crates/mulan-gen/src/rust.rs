@@ -196,16 +196,18 @@ impl<'src> Struct<'src> {
     }
 
     fn generate(&self, key: &mulan_parser::Key) -> String {
+        let markdown_preview = self.translations.markdown_preview();
+        let markdown_preview = match &markdown_preview {
+            Some(preview) => preview,
+            None => "_empty message_",
+        };
         let doc_comment = formatdoc! {"
             /// `{key}`
             ///
             /// {markdown_preview}\
             ",
             key = key.to_kebab_case(),
-            markdown_preview = indent::indent_with(
-                "/// ",
-                self.translations.markdown_preview(),
-            ),
+            markdown_preview = indent::indent_with("/// ", markdown_preview),
         };
         let name = &key.name().to_pascal_case();
         formatdoc! {"
