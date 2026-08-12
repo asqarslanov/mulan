@@ -196,19 +196,6 @@ impl<'src> Struct<'src> {
     }
 
     fn generate(&self, key: &mulan_parser::Key) -> String {
-        let markdown_preview = self.translations.markdown_preview();
-        let markdown_preview = match &markdown_preview {
-            Some(preview) => preview,
-            None => "_empty message_",
-        };
-        let doc_comment = formatdoc! {"
-            /// `{key}`
-            ///
-            /// {markdown_preview}\
-            ",
-            key = key.to_kebab_case(),
-            markdown_preview = indent::indent_with("/// ", markdown_preview),
-        };
         let name = &key.name().to_pascal_case();
         formatdoc! {"
             {doc_comment}
@@ -216,9 +203,26 @@ impl<'src> Struct<'src> {
 
             {impl_block}\
             ",
+            doc_comment = self.doc_comment(key),
             lifetimes = self.gen_lifetimes(),
             block = self.gen_block(),
             impl_block = self.gen_impl(name),
+        }
+    }
+
+    fn doc_comment(&self, key: &mulan_parser::Key) -> String {
+        let markdown_preview = self.translations.markdown_preview();
+        let markdown_preview = match &markdown_preview {
+            Some(preview) => preview,
+            None => "_empty message_",
+        };
+        formatdoc! {"
+            /// `{key}`
+            ///
+            /// {markdown_preview}\
+            ",
+            key = key.to_kebab_case(),
+            markdown_preview = indent::indent_with("/// ", markdown_preview),
         }
     }
 
