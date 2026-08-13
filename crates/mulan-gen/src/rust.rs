@@ -15,7 +15,7 @@ use crate::AUTO_GENERATED_COMMENT;
 const INDENT: usize = 4;
 
 #[must_use]
-pub fn generate(data: &mulan_parser::Output, config: &mulan_config::Config) -> String {
+pub fn generate(config: &mulan_config::Config, data: &mulan_parser::Output) -> String {
     Bindings {
         t: Module::new(&data.root, None),
     }
