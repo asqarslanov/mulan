@@ -84,13 +84,16 @@ pub struct Key {
 }
 
 impl Key {
-    /// ...
+    /// Returns the last subkey.
+    ///
+    /// E.g., for `settings.profile.title`, this method returns `title`.
     #[must_use]
     pub fn name(&self) -> &Subkey {
         self.segments.last()
     }
 
-    /// ...
+    /// Converts this key to a dot-separated `kebab-case` string
+    /// (e.g., `profile.first-name`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.segments
@@ -148,9 +151,9 @@ impl Translations {
 
     /// ...
     #[must_use]
-    pub fn parameters(&self) -> Option<BTreeSet1<&Parameter>> {
+    pub fn parameter_set(&self) -> Option<BTreeSet1<&Parameter>> {
         self.main
-            .parameters()
+            .parameter_iter()
             .try_into_iter1()
             .ok()
             .map(Iterator1::collect1)

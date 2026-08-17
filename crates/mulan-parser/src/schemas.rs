@@ -87,7 +87,7 @@ fn translations<'input>(
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
-    let main_params: HashSet<&Parameter> = main_translation.parameters().collect();
+    let main_params: HashSet<&Parameter> = main_translation.parameter_iter().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
         let definition = {
@@ -128,7 +128,7 @@ fn translations<'input>(
                 }));
             }
         };
-        let params = template.parameters().collect::<HashSet<_>>();
+        let params = template.parameter_iter().collect::<HashSet<_>>();
         let unknown_params = params.difference(&main_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransformError::UnknownParameters(UnknownParametersError {

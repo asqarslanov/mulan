@@ -52,7 +52,7 @@ impl Template {
     }
 
     /// An iterator over [`TemplatePart::Placeholder`] parts in order.
-    pub fn parameters(&self) -> impl Iterator<Item = &Parameter> {
+    pub fn parameter_iter(&self) -> impl Iterator<Item = &Parameter> {
         self.parts
             .iter()
             .filter_map(TemplatePart::try_as_placeholder_ref)

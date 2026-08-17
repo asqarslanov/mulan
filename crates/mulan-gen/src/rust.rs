@@ -196,7 +196,7 @@ impl<'src> Struct<'src> {
     fn new(translations: &'src mulan_parser::Translations) -> Self {
         Self {
             translations,
-            fields: translations.parameters(),
+            fields: translations.parameter_set(),
         }
     }
 
@@ -341,7 +341,7 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
     };
     let named_parameters = {
         template
-            .parameters()
+            .parameter_iter()
             .collect::<BTreeSet<_>>()
             .into_iter()
             .map(|param| format_compact!("{name} = self.{name}", name = param.to_snake_case()))
