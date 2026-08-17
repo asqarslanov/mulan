@@ -1,6 +1,9 @@
 //! See [`Template`].
 
-use compact_str::CompactString;
+use std::sync::LazyLock;
+
+use aho_corasick::AhoCorasick;
+use compact_str::{CompactString, format_compact};
 use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
@@ -26,11 +29,74 @@ pub struct Template {
 }
 
 impl Template {
-    /// ...
-    pub fn parameters(&self) -> impl Iterator<Item = &Parameter> {
+    /// Returns what this message (approximately) looks like in the locale file.
+    ///
+    /// E.g., it can literally return a string such as `"Hello, {name}!"`.
+    /// Or `None`, if the template is empty.
+    #[must_use]
+    pub(super) fn preview(&self) -> Option<CompactString1> {
+        static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
+            AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
+        });
+        let mut buffer = CompactString::default();
+        for part in self.iter() {
+            use crate::TemplatePart as P;
+            match part {
+                P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
+                P::Placeholder(parameter) => buffer.push_str(&parameter.preview()),
+            }
+        }
+        buffer.try_into().ok()
+    }
+
+    /// An iterator over all parts in the order they appear in the message.
+    pub fn iter(&self) -> impl Iterator<Item = &TemplatePart> {
+        self.parts.iter()
+    }
+
+    /// An iterator over [`TemplatePart::Placeholder`] parts in the order
+    /// they appear in the message (so duplicates can be present).
+    pub fn parameter_iter(&self) -> impl Iterator<Item = &Parameter> {
         self.parts
             .iter()
             .filter_map(TemplatePart::try_as_placeholder_ref)
+    }
+
+    /// Returns a plain text string without dynamic parameters
+    /// if this template can presented as such.
+    #[must_use]
+    pub fn try_as_plain_text(&self) -> Option<&str> {
+        match self.parts.as_slice() {
+            [] => Some(<&str>::default()),
+            [TemplatePart::Text(text)] => Some(text),
+            _ => None,
+        }
+    }
+
+    /// How many consecutive backticks (`` ` ``) this template contains.
+    ///
+    /// Needed for [`crate::Translations::markdown_preview`].
+    /// If the result is more than 3, you can't simply wrap this template
+    /// in a code block with three backticks.
+    #[must_use]
+    pub(super) fn max_consecutive_backticks(&self) -> usize {
+        let mut count = 0;
+        self.parts
+            .iter()
+            .filter_map(TemplatePart::try_as_text_ref)
+            .for_each(|text| {
+                let mut current_count = 0;
+                for c in text.chars() {
+                    if c == '`' {
+                        current_count += 1;
+                    } else {
+                        count = count.max(current_count);
+                        current_count = 0;
+                    }
+                }
+                count = count.max(current_count);
+            });
+        count
     }
 }
 
@@ -51,10 +117,24 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    /// Converts this parameter to a kebab-case string (e.g., `first-name`).
+    /// Converts this parameter to a `kebab-case` string (e.g., `first-name`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.name.to_kebab_case()
+    }
+
+    /// Converts this parameter to a `snake_case` string (e.g., `first_name`).
+    #[must_use]
+    pub fn to_snake_case(&self) -> CompactString1 {
+        self.name.to_snake_case()
+    }
+
+    /// Returns the name of this parameter wrapped in `{` `}`.
+    #[must_use]
+    fn preview(&self) -> CompactString1 {
+        format_compact!("{{{}}}", self.to_kebab_case())
+            .try_into()
+            .expect("not empty")
     }
 }
 

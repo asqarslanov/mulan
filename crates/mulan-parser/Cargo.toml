@@ -11,9 +11,11 @@ categories.workspace = true
 publish.workspace = true
 
 [dependencies]
+aho-corasick = { workspace = true }
 chumsky = { workspace = true }
 compact_str = { workspace = true, features = ["serde"] }
 foldhash = { workspace = true }
+indoc = { workspace = true }
 mitsein = { workspace = true, features = ["compact-str", "serde", "smallvec"] }
 mulan-config = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

@@ -2,10 +2,15 @@
 
 use std::collections::BTreeMap;
 
-use mitsein::compact_string1::CompactString1;
+use indoc::formatdoc;
+use mitsein::btree_set1::BTreeSet1;
+use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
+use mitsein::iter1::{Iterator1, IteratorExt as _};
+use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
+use crate::Parameter;
 use crate::identifier::Identifier;
 use crate::template::Template;
 
@@ -21,7 +26,7 @@ pub struct Output {
     /// [`Output`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
     /// It is always present, even if the main locale definition is empty.
-    pub(super) root: Namespace,
+    pub root: Namespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.
@@ -44,16 +49,28 @@ pub struct Namespace {
 ///
 /// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
 /// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Subkey {
     value: Identifier,
 }
 
 impl Subkey {
-    /// Converts this subkey to a kebab-case string (e.g., `user1-settings`).
+    /// Converts this subkey to a `kebab-case` string (e.g., `user1-settings`).
     #[must_use]
     pub fn to_kebab_case(&self) -> CompactString1 {
         self.value.to_kebab_case()
+    }
+
+    /// Converts this subkey to a `PascalCase` string (e.g., `User1Settings`).
+    #[must_use]
+    pub fn to_pascal_case(&self) -> CompactString1 {
+        self.value.to_pascal_case()
+    }
+
+    /// Converts this subkey to a `snake_case` string (e.g., `user1_settings`).
+    #[must_use]
+    pub fn to_snake_case(&self) -> CompactString1 {
+        self.value.to_snake_case()
     }
 }
 
@@ -61,9 +78,29 @@ impl Subkey {
 ///
 /// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
 /// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Key {
     pub(crate) segments: Vec1<Subkey>,
+}
+
+impl Key {
+    /// Returns the last subkey.
+    ///
+    /// E.g., for `settings.profile.title`, this method returns `title`.
+    #[must_use]
+    pub fn name(&self) -> &Subkey {
+        self.segments.last()
+    }
+
+    /// Converts this key to a dot-separated `kebab-case` string
+    /// (e.g., `profile.first-name`).
+    #[must_use]
+    pub fn to_kebab_case(&self) -> CompactString1 {
+        self.segments
+            .iter1()
+            .map(Subkey::to_kebab_case)
+            .join_compact1(".")
+    }
 }
 
 /// A value in a [`Namespace`].
@@ -85,12 +122,48 @@ pub enum Node {
 #[derive(Debug)]
 pub struct Translations {
     /// The message written in the main locale.
-    pub(super) main: Template,
+    pub main: Template,
 
     /// Other translations of the message.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub(super) others: BTreeMap<Language, Template>,
+    pub others: BTreeMap<Language, Template>,
+}
+
+impl Translations {
+    /// Returns a preview of the main translation in Markdown.
+    ///
+    /// ````txt
+    /// ```mulan
+    /// Hello, {name}!
+    /// ```
+    /// ````
+    #[must_use]
+    pub fn markdown_preview(&self) -> Option<String1> {
+        let preview = self.main.preview()?;
+        let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
+        Some(
+            formatdoc! {"
+                {backticks}mulan
+                {preview}
+                {backticks}\
+                ",
+                backticks = "`".repeat(backticks_n),
+            }
+            .try_into()
+            .expect("non-empty"),
+        )
+    }
+
+    /// The set of all parameters this message requires.
+    #[must_use]
+    pub fn parameter_set(&self) -> Option<BTreeSet1<&Parameter>> {
+        self.main
+            .parameter_iter()
+            .try_into_iter1()
+            .ok()
+            .map(Iterator1::collect1)
+    }
 }
 
 /// Defines parsers with [`mod@chumsky`].
@@ -170,5 +243,21 @@ mod tests {
             Key { segments }
         });
         assert_eq!(actual_output, expected_output);
+    }
+}
+
+impl Namespace {
+    /// Returns an iterator over all nodes of this namespace with their
+    /// corresponding key.
+    ///
+    /// To return these keys, you are required to pass the key of the parent
+    /// namespace. Pass `None` if you are iterating over the root namespace.
+    pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
+        let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
+        self.map.iter().map(move |(subkey, node)| {
+            let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
+            let key = Key { segments };
+            (key, node)
+        })
     }
 }

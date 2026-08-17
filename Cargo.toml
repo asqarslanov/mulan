@@ -28,11 +28,13 @@ categories = [
 publish = false
 
 [workspace.dependencies]
+aho-corasick = "1.1.5"
 chumsky = "0.13.0"
 clap = "4.6.6"
 compact_str = "0.10.0"
 figment2 = "0.11.5"
 foldhash = "0.2.0"
+indent = "0.1.1"
 indoc = "2.0.7"
 itertools = "0.15.0"
 miette = "7.6.0"
@@ -41,12 +43,13 @@ mitsein = {
   branch = "compact-str",
 }
 mulan-config = { path = "crates/mulan-config/" }
+mulan-gen = { path = "crates/mulan-gen/" }
 mulan-parser = { path = "crates/mulan-parser/" }
 pathdiff = "0.2.3"
 relative-path = "2.0.1"
 rstest = "0.26.1"
 serde = "1.0.229"
-serde-saphyr = "1.0.1"
+serde-saphyr = "1.1.0"
 serde_with = "3.22.0"
 serdev = "0.3.2"
 smallvec = "1.15.2"

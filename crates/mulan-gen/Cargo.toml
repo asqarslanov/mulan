@@ -1,5 +1,5 @@
 [package]
-name = "mulan"
+name = "mulan-gen"
 version.workspace = true
 edition = "2024"
 description.workspace = true
@@ -11,18 +11,13 @@ categories.workspace = true
 publish.workspace = true
 
 [dependencies]
-clap = { workspace = true, features = ["cargo", "derive", "wrap_help"] }
 compact_str = { workspace = true }
-figment2 = { workspace = true }
+indent = { workspace = true }
 indoc = { workspace = true }
 itertools = { workspace = true }
-miette = { workspace = true, features = ["fancy"] }
-mitsein = { workspace = true, features = ["smallvec"] }
+mitsein = { workspace = true }
 mulan-config = { workspace = true }
-mulan-gen = { workspace = true }
 mulan-parser = { workspace = true }
-serde-saphyr = { workspace = true }
-thiserror = { workspace = true }
 
 [lints]
 workspace = true
