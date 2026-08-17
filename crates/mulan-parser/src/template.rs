@@ -46,7 +46,7 @@ impl Template {
         buffer.try_into().ok()
     }
 
-    /// An iterator over all parts in order.
+    /// An iterator over all parts in the order they appear in the message.
     pub fn iter(&self) -> impl Iterator<Item = &TemplatePart> {
         self.parts.iter()
     }
