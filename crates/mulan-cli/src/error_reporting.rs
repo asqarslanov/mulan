@@ -15,13 +15,6 @@ use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
-/// I plan to add support for different cases for identifier names
-/// (`kebab-case`, `snake_case`, `camelCase`).
-///
-/// When I do it, `() = CASE_GUARDRAIL` will fail to compile,
-/// so I can refactor these places manually.
-const CASE_GUARDRAIL: () = ();
-
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
 ///
@@ -70,7 +63,7 @@ trait Reportable {
     /// the error visually.
     ///
     /// Most often, used to show the source code.
-    fn annotation_block(&self) -> Option<self::AnnotationBlock>;
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock>;
 
     /// Additional reports displayed under this one.
     ///
@@ -145,7 +138,7 @@ enum SourceLanguage {
 
 impl<E: self::Reportable> self::ToReport for E {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
-        let (source_code, labels) = match self.annotation_block() {
+        let (source_code, labels) = match self.annotation_block(config) {
             None => (None, None),
             Some(data) => {
                 let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
@@ -338,7 +331,7 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         }
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -379,7 +372,7 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
         "})
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -410,11 +403,11 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
         )
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
-    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }
@@ -439,7 +432,7 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
         ))
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         Some(self::AnnotationBlock {
             text: self.possible_sources.iter1().into_iter().join("\n"),
             file_data: None,
@@ -513,7 +506,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
         })
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -662,7 +655,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         })
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         let span = self.inner.location()?.span();
         let offset = usize::try_from(span.offset()).ok()?;
         let len = usize::try_from(span.len()).ok()?;
@@ -719,7 +712,7 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
         Some("it should look like a variable in a programming language".to_owned())
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -748,7 +741,7 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
         None
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -781,7 +774,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
         ))
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -814,7 +807,7 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
         ))
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
@@ -848,13 +841,12 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
         })
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
-        () = CASE_GUARDRAIL;
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         Some(self::AnnotationBlock {
             text: {
                 self.parameters
                     .iter1()
-                    .map(mulan_parser::Parameter::to_kebab_case)
+                    .map(|param| param.to_compact_string1(config.key_case))
                     .into_iter()
                     .join("\n")
             },
@@ -865,7 +857,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .iter1()
                     .enumerate()
                     .map(|(i, param)| {
-                        let param = param.to_kebab_case();
+                        let param = param.to_compact_string1(config.key_case);
                         let text = match i {
                             0 => "remove this parameter",
                             1 => "and this",
@@ -905,10 +897,10 @@ impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
         self::ChumskyErrorWrapper { error, source }.help(config)
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         let error = self.errors.first();
         let source = &self.source;
-        self::ChumskyErrorWrapper { error, source }.annotation_block()
+        self::ChumskyErrorWrapper { error, source }.annotation_block(config)
     }
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
@@ -942,7 +934,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         None
     }
 
-    fn annotation_block(&self) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         Some(self::AnnotationBlock {
             text: self.source.to_owned(),
             file_data: None,

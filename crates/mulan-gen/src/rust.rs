@@ -15,6 +15,9 @@ use mitsein::btree_set1::BTreeSet1;
 use crate::AUTO_GENERATED_COMMENT;
 
 const INDENT: usize = 4;
+const VARIABLE_CASE: mulan_config::Case = mulan_config::Case::Snake;
+const MODULE_CASE: mulan_config::Case = mulan_config::Case::Snake;
+const TYPE_CASE: mulan_config::Case = mulan_config::Case::Pascal;
 
 /// Returns a Rust source code string that can be used in a standalone file.
 #[must_use]
@@ -47,7 +50,7 @@ impl Bindings<'_> {
             ",
             auto_generated_comment = indent::indent_with("// ", AUTO_GENERATED_COMMENT),
             enum_locale = Self::enum_locale(config),
-            mod_t = self.t.generate(None),
+            mod_t = self.t.generate(config, None),
         }
     }
 
@@ -132,19 +135,19 @@ impl<'src> Module<'src> {
         }
     }
 
-    fn generate(&self, key: Option<&mulan_parser::Key>) -> String {
+    fn generate(&self, config: &mulan_config::Config, key: Option<&mulan_parser::Key>) -> String {
         let mut module_contents = Vec::new();
         if !self.structs.is_empty() {
-            module_contents.push(self.gen_structs());
+            module_contents.push(self.gen_structs(config));
         }
         if !self.submodules.is_empty() {
-            module_contents.push(self.gen_submodules());
+            module_contents.push(self.gen_submodules(config));
         }
         #[expect(clippy::option_if_let_else, reason = "borrowed values")]
         let (doc_comment, name): (&str, &str) = if let Some(key) = key {
             (
-                &format_compact!("`{name}`", name = key.to_kebab_case()),
-                &key.name().to_snake_case(),
+                &format_compact!("`{name}`", name = key.to_compact_string1(config.key_case)),
+                &key.name().to_compact_string1(MODULE_CASE),
             )
         } else {
             ("The root namespace.", "t")
@@ -171,17 +174,17 @@ impl<'src> Module<'src> {
         }
     }
 
-    fn gen_structs(&self) -> String {
+    fn gen_structs(&self, config: &mulan_config::Config) -> String {
         self.structs
             .iter()
-            .map(|(name, structure)| structure.generate(name))
+            .map(|(name, structure)| structure.generate(config, name))
             .join("\n\n")
     }
 
-    fn gen_submodules(&self) -> String {
+    fn gen_submodules(&self, config: &mulan_config::Config) -> String {
         self.submodules
             .iter()
-            .map(|(name, submodule)| submodule.generate(Some(name)))
+            .map(|(name, submodule)| submodule.generate(config, Some(name)))
             .join("\n\n")
     }
 }
@@ -200,22 +203,22 @@ impl<'src> Struct<'src> {
         }
     }
 
-    fn generate(&self, key: &mulan_parser::Key) -> String {
-        let name = &key.name().to_pascal_case();
+    fn generate(&self, config: &mulan_config::Config, key: &mulan_parser::Key) -> String {
+        let name = &key.name().to_compact_string1(TYPE_CASE);
         formatdoc! {"
             {doc_comment}
             pub struct {name}{lifetimes}{block}
 
             {impl_block}\
             ",
-            doc_comment = self.doc_comment(key),
+            doc_comment = self.doc_comment(config, key),
             lifetimes = self.gen_lifetimes(),
             block = self.gen_block(),
             impl_block = self.gen_impl(name),
         }
     }
 
-    fn doc_comment(&self, key: &mulan_parser::Key) -> String {
+    fn doc_comment(&self, config: &mulan_config::Config, key: &mulan_parser::Key) -> String {
         let preview = self.translations.markdown_preview();
         let preview = preview.as_ref().map_or("_empty message_", AsRef::as_ref);
         formatdoc! {"
@@ -223,7 +226,7 @@ impl<'src> Struct<'src> {
             ///
             /// {markdown_preview}\
             ",
-            key = key.to_kebab_case(),
+            key = key.to_compact_string1(config.key_case),
             markdown_preview = indent::indent_with("/// ", preview),
         }
     }
@@ -236,7 +239,10 @@ impl<'src> Struct<'src> {
             "<{}>",
             fields
                 .iter1()
-                .map(|subkey| format_compact!("'{name}", name = subkey.to_kebab_case()))
+                .map(|subkey| format_compact!(
+                    "'{name}",
+                    name = subkey.to_compact_string1(VARIABLE_CASE),
+                ))
                 .join_compact(", "),
         )
     }
@@ -265,7 +271,7 @@ impl<'src> Struct<'src> {
                     .iter1()
                     .map(|subkey| format_compact!(
                         "pub {name}: &'{name} str,",
-                        name = subkey.to_kebab_case(),
+                        name = subkey.to_compact_string1(VARIABLE_CASE),
                     ))
                     .into_iter()
                     .join("\n")
@@ -334,7 +340,10 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
             .map(|part| match part {
                 P::Text(text) => text.escape_debug().to_compact_string(),
                 P::Tag(T::Parameter(parameter)) => {
-                    format_compact!("{{{name}}}", name = parameter.to_snake_case())
+                    format_compact!(
+                        "{{{name}}}",
+                        name = parameter.to_compact_string1(VARIABLE_CASE),
+                    )
                 }
             })
             .collect::<CompactString>()
@@ -344,7 +353,12 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
             .parameter_iter()
             .collect::<BTreeSet<_>>()
             .into_iter()
-            .map(|param| format_compact!("{name} = self.{name}", name = param.to_snake_case()))
+            .map(|param| {
+                format_compact!(
+                    "{name} = self.{name}",
+                    name = param.to_compact_string1(VARIABLE_CASE),
+                )
+            })
             .join(", ")
     };
     format_compact!("format!(\"{contents}\", {named_parameters})")

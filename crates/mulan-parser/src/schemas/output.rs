@@ -8,7 +8,7 @@ use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::iter1::{Iterator1, IteratorExt as _};
 use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
-use mulan_config::Language;
+use mulan_config::{Case, Language};
 
 use crate::Parameter;
 use crate::identifier::Identifier;
@@ -55,22 +55,9 @@ pub struct Subkey {
 }
 
 impl Subkey {
-    /// Converts this subkey to a `kebab-case` string (e.g., `user1-settings`).
     #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString1 {
-        self.value.to_kebab_case()
-    }
-
-    /// Converts this subkey to a `PascalCase` string (e.g., `User1Settings`).
-    #[must_use]
-    pub fn to_pascal_case(&self) -> CompactString1 {
-        self.value.to_pascal_case()
-    }
-
-    /// Converts this subkey to a `snake_case` string (e.g., `user1_settings`).
-    #[must_use]
-    pub fn to_snake_case(&self) -> CompactString1 {
-        self.value.to_snake_case()
+    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
+        self.value.to_compact_string1(case)
     }
 }
 
@@ -92,13 +79,12 @@ impl Key {
         self.segments.last()
     }
 
-    /// Converts this key to a dot-separated `kebab-case` string
-    /// (e.g., `profile.first-name`).
+    /// Converts this key to a dot-separated string.
     #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString1 {
+    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         self.segments
             .iter1()
-            .map(Subkey::to_kebab_case)
+            .map(|subkey| subkey.to_compact_string1(case))
             .join_compact1(".")
     }
 }

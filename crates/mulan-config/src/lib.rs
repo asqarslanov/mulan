@@ -13,6 +13,7 @@ use std::collections::BTreeSet;
 
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
+use serde::Deserialize;
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -54,6 +55,30 @@ pub struct Config {
     /// Acts as a fallback locale if a translation does not exist
     /// in another locale.
     pub main_locale: Language,
+
+    /// Your preferred convention to name keys in locale definitions.
+    ///
+    /// The default value is `"kebab-case"`.
+    #[serde(skip)]
+    pub key_case: Case,
+}
+
+/// Word case (e.g., `camelCase`, `kebab-case`, or `snake_case`).
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize)]
+pub enum Case {
+    /// Lowercase dash-separated words (`kebab-case`).
+    #[default]
+    #[serde(rename = "kebab-case")]
+    Kebab,
+
+    /// Words, each starting with a capital letter, without separators
+    /// in-between (`PascalCase`).
+    #[serde(rename = "PascalCase")]
+    Pascal,
+
+    /// Lowercase underscore-separated words (`snake_case`).
+    #[serde(rename = "snake_case")]
+    Snake,
 }
 
 impl crate::Config {
@@ -99,6 +124,7 @@ impl crate::Config {
             meta: ConfigMeta::default(),
             locales: BTreeSet::default(),
             main_locale: Language::EnUs,
+            key_case: Case::Kebab,
         }
     }
 
@@ -132,6 +158,7 @@ mod tests {
             meta: ConfigMeta::default(),
             locales: [Language::EnUs].iter().copied().collect(),
             main_locale: Language::EnUs,
+            key_case: Case::Kebab,
         }),
     )]
     #[case(
@@ -150,6 +177,7 @@ mod tests {
             meta: ConfigMeta::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             main_locale: Language::RuRu,
+            key_case: Case::Kebab,
         }),
     )]
     #[case(

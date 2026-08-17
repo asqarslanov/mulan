@@ -243,6 +243,7 @@ mod tests {
     use foldhash::HashMap;
     use indoc::indoc;
     use mitsein::str1;
+    use mulan_config::Case;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
@@ -409,7 +410,12 @@ mod tests {
             Definition::read(file.path().into()).unwrap()
         };
         let key = RawKey {
-            segments: key.segments.iter1().map(Subkey::to_kebab_case).collect1(),
+            segments: {
+                key.segments
+                    .iter1()
+                    .map(|subkey| subkey.to_compact_string1(Case::Kebab))
+                    .collect1()
+            },
         };
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
