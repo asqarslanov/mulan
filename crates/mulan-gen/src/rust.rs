@@ -1,6 +1,8 @@
 //! # Mulan Gen / Rust
 //!
-//! ...
+//! Generates bindings for the Rust programming language.
+//!
+//! See [`generate`].
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::iter;
@@ -14,6 +16,7 @@ use crate::AUTO_GENERATED_COMMENT;
 
 const INDENT: usize = 4;
 
+/// Returns a Rust source code string that can be used in a standalone file.
 #[must_use]
 pub fn generate(config: &mulan_config::Config, data: &mulan_parser::Output) -> String {
     Bindings {

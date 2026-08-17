@@ -1,6 +1,8 @@
 //! # Mulan Gen
 //!
-//! ...
+//! Generates bindings for various platforms.
+//!
+//! For now, only [`mod@rust`] is supported.
 
 use indoc::indoc;
 
