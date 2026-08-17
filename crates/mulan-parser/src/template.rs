@@ -29,7 +29,10 @@ pub struct Template {
 }
 
 impl Template {
-    /// ...
+    /// Returns what this message (approximately) looks like in the locale file.
+    ///
+    /// E.g., it can literally return a string such as `"Hello, {name}!"`.
+    /// Or `None`, if the template is empty.
     #[must_use]
     pub(super) fn preview(&self) -> Option<CompactString1> {
         static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
@@ -126,7 +129,7 @@ impl Parameter {
         self.name.to_snake_case()
     }
 
-    /// ...
+    /// Returns the name of this parameter wrapped in `{` `}`.
     #[must_use]
     fn preview(&self) -> CompactString1 {
         format_compact!("{{{}}}", self.to_kebab_case())
