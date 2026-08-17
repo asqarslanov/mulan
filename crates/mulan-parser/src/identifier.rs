@@ -4,6 +4,7 @@ use std::convert::identity;
 
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
+use mulan_config::Case;
 
 /// A generic name that can be converted to an
 /// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
@@ -20,10 +21,19 @@ pub struct Identifier {
 }
 
 impl Identifier {
+    /// ...
+    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
+        use Case as C;
+        match case {
+            C::Kebab => self.to_kebab_case(),
+            C::Pascal => self.to_pascal_case(),
+            C::Snake => self.to_snake_case(),
+        }
+    }
+
     /// Converts this identifier to a `kebab-case` string
     /// (e.g., `lorem02-ipsum67`).
-    #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString1 {
+    fn to_kebab_case(&self) -> CompactString1 {
         self.words
             .iter1()
             .map(|word| &word.inner)
@@ -32,8 +42,7 @@ impl Identifier {
 
     /// Converts this identifier to a `PascalCase` string
     /// (e.g., `Lorem02Ipsum67`).
-    #[must_use]
-    pub fn to_pascal_case(&self) -> CompactString1 {
+    fn to_pascal_case(&self) -> CompactString1 {
         self.words
             .iter1()
             .map(|word| {
@@ -47,8 +56,7 @@ impl Identifier {
 
     /// Converts this identifier to a `snake_case` string
     /// (e.g., `lorem02_ipsum67`).
-    #[must_use]
-    pub fn to_snake_case(&self) -> CompactString1 {
+    fn to_snake_case(&self) -> CompactString1 {
         self.words
             .iter1()
             .map(|word| &word.inner)

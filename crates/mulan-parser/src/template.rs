@@ -5,6 +5,7 @@ use std::sync::LazyLock;
 use aho_corasick::AhoCorasick;
 use compact_str::{CompactString, format_compact};
 use mitsein::compact_string1::CompactString1;
+use mulan_config::Case;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
 
@@ -125,22 +126,16 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    /// Converts this parameter to a `kebab-case` string (e.g., `first-name`).
+    /// ...
     #[must_use]
-    pub fn to_kebab_case(&self) -> CompactString1 {
-        self.name.to_kebab_case()
-    }
-
-    /// Converts this parameter to a `snake_case` string (e.g., `first_name`).
-    #[must_use]
-    pub fn to_snake_case(&self) -> CompactString1 {
-        self.name.to_snake_case()
+    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
+        self.name.to_compact_string1(case)
     }
 
     /// Returns the name of this parameter wrapped in `{` `}`.
     #[must_use]
     fn preview(&self) -> CompactString1 {
-        format_compact!("{{{}}}", self.to_kebab_case())
+        format_compact!("{{{}}}", self.to_compact_string1(Case::Kebab))
             .try_into()
             .expect("not empty")
     }

@@ -854,7 +854,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
             text: {
                 self.parameters
                     .iter1()
-                    .map(mulan_parser::Parameter::to_kebab_case)
+                    .map(|param| param.to_compact_string1(mulan_config::Case::Kebab))
                     .into_iter()
                     .join("\n")
             },
@@ -865,7 +865,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .iter1()
                     .enumerate()
                     .map(|(i, param)| {
-                        let param = param.to_kebab_case();
+                        let param = param.to_compact_string1(mulan_config::Case::Kebab);
                         let text = match i {
                             0 => "remove this parameter",
                             1 => "and this",
