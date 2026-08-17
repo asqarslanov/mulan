@@ -131,7 +131,13 @@ pub struct Translations {
 }
 
 impl Translations {
-    /// ...
+    /// Returns a preview of the main translation in Markdown.
+    ///
+    /// ````txt
+    /// ```mulan
+    /// Hello, {name}!
+    /// ```
+    /// ````
     #[must_use]
     pub fn markdown_preview(&self) -> Option<String1> {
         let preview = self.main.preview()?;
@@ -149,7 +155,7 @@ impl Translations {
         )
     }
 
-    /// ...
+    /// The set of all parameters this message requires.
     #[must_use]
     pub fn parameter_set(&self) -> Option<BTreeSet1<&Parameter>> {
         self.main
