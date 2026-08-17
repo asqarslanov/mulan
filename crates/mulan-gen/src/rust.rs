@@ -328,12 +328,12 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
         );
     }
     let contents = {
-        use mulan_parser::TemplatePart as P;
+        use mulan_parser::{Tag as T, TemplatePart as P};
         template
             .iter()
             .map(|part| match part {
                 P::Text(text) => text.escape_debug().to_compact_string(),
-                P::Placeholder(parameter) => {
+                P::Tag(T::Parameter(parameter)) => {
                     format_compact!("{{{name}}}", name = parameter.to_snake_case())
                 }
             })

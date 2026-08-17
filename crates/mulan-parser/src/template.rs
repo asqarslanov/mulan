@@ -43,7 +43,7 @@ impl Template {
             use crate::TemplatePart as P;
             match part {
                 P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
-                P::Placeholder(parameter) => buffer.push_str(&parameter.preview()),
+                P::Tag(Tag::Parameter(parameter)) => buffer.push_str(&parameter.preview()),
             }
         }
         buffer.try_into().ok()
@@ -59,7 +59,8 @@ impl Template {
     pub fn parameter_iter(&self) -> impl Iterator<Item = &Parameter> {
         self.parts
             .iter()
-            .filter_map(TemplatePart::try_as_placeholder_ref)
+            .filter_map(TemplatePart::try_as_tag_ref)
+            .filter_map(Tag::try_as_parameter_ref)
     }
 
     /// Returns a plain text string without dynamic parameters
@@ -106,11 +107,18 @@ pub enum TemplatePart {
     /// Plain text to be used verbatim.
     Text(CompactString),
 
-    /// A stand-in for a variable (`{foo}`).
-    Placeholder(Parameter),
+    /// See [`Tag`].
+    Tag(Tag),
 }
 
-/// A variable placeholder in a [`Template`] (`{foo}`).
+/// A special expression enclosed in `{` `}` (e.g., a [`Parameter`]).
+#[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
+pub enum Tag {
+    /// A stand-in for a variable (`{foo}`).
+    Parameter(Parameter),
+}
+
+/// A variable placeholder in a message template (e.g., `{foo}`).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Parameter {
     name: Identifier,
@@ -142,7 +150,7 @@ impl Parameter {
 mod parser {
     use chumsky::prelude::*;
 
-    use super::{Parameter, Template, TemplatePart};
+    use super::{Parameter, Tag, Template, TemplatePart};
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
@@ -160,7 +168,7 @@ mod parser {
         /// Differentiates between different template part types.
         #[must_use]
         pub fn chumsky_parser<'src>(
-            param_parser: &impl ChumskyParser<'src, Parameter>,
+            tag_parser: &impl ChumskyParser<'src, Tag>,
         ) -> impl ChumskyParser<'src, Self> {
             let text = {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
@@ -169,21 +177,32 @@ mod parser {
                     .collect()
                     .map(Self::Text)
             };
-            let placeholder = param_parser.map(Self::Placeholder);
+            let placeholder = tag_parser.map(Self::Tag);
             choice((text, placeholder))
         }
     }
 
+    impl Tag {
+        /// Extracts `x` from `{x}` and dfferentiates between different
+        /// tag types.
+        #[must_use]
+        pub fn chumsky_parser<'src>(
+            param_parser: &impl ChumskyParser<'src, Parameter>,
+        ) -> impl ChumskyParser<'src, Self> {
+            param_parser
+                .padded()
+                .delimited_by(just('{'), just('}'))
+                .map(Self::Parameter)
+        }
+    }
+
     impl Parameter {
-        /// Extracts `x` from `{x}`.
+        /// Reuses the identifier parser.
         #[must_use]
         pub fn chumsky_parser<'src>(
             ident_parser: &impl ChumskyParser<'src, Identifier>,
         ) -> impl ChumskyParser<'src, Self> {
-            ident_parser
-                .padded()
-                .delimited_by(just('{'), just('}'))
-                .map(|name| Self { name })
+            ident_parser.map(|name| Self { name })
         }
     }
 }
@@ -245,7 +264,8 @@ mod tests {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
         let param_parser = Parameter::chumsky_parser(&ident_parser);
-        let msg_part_parser = TemplatePart::chumsky_parser(&param_parser);
+        let tag_parser = Tag::chumsky_parser(&param_parser);
+        let msg_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let msg_parser = Template::chumsky_parser(&msg_part_parser);
         let actual_output = msg_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_parts| Template {
@@ -254,9 +274,9 @@ mod tests {
                     .iter()
                     .map(|part| match part {
                         Txt(it) => TemplatePart::Text(CompactString::new(it)),
-                        Var(it) => TemplatePart::Placeholder(Parameter {
+                        Var(it) => TemplatePart::Tag(Tag::Parameter(Parameter {
                             name: ident_parser.mulan_parse(it).unwrap(),
-                        }),
+                        })),
                     })
                     .collect()
             },
