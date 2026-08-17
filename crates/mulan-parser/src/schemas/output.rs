@@ -241,7 +241,11 @@ mod tests {
 }
 
 impl Namespace {
-    /// ...
+    /// Returns an iterator over all nodes of this namespace with their
+    /// corresponding key.
+    ///
+    /// To return these keys, you are required to pass the key of the parent
+    /// namespace. Pass `None` if you are iterating over the root namespace.
     pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
         let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
         self.map.iter().map(move |(subkey, node)| {
