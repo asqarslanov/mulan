@@ -21,7 +21,6 @@ pub struct Identifier {
 }
 
 impl Identifier {
-    /// ...
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         use Case as C;
         match case {

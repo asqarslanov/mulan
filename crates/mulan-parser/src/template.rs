@@ -126,7 +126,6 @@ pub struct Parameter {
 }
 
 impl Parameter {
-    /// ...
     #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         self.name.to_compact_string1(case)

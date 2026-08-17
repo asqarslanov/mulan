@@ -55,7 +55,6 @@ pub struct Subkey {
 }
 
 impl Subkey {
-    /// ...
     #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         self.value.to_compact_string1(case)
@@ -80,7 +79,7 @@ impl Key {
         self.segments.last()
     }
 
-    /// ...
+    /// Converts this key to a dot-separated string.
     #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         self.segments
