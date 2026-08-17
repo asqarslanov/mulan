@@ -70,7 +70,11 @@ impl Template {
         }
     }
 
-    /// ...
+    /// How many consecutive backticks (`` ` ``) this template contains.
+    ///
+    /// Needed for [`crate::Translations::markdown_preview`].
+    /// If the result is more than 3, you can't simply wrap this template
+    /// in a code block with three backticks.
     #[must_use]
     pub(super) fn max_consecutive_backticks(&self) -> usize {
         let mut count = 0;
