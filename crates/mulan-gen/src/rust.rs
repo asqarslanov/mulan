@@ -6,7 +6,9 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::iter;
+use std::sync::LazyLock;
 
+use aho_corasick::AhoCorasick;
 use compact_str::{CompactString, CompactStringExt as _, ToCompactString as _, format_compact};
 use indoc::formatdoc;
 use itertools::Itertools as _;
@@ -207,6 +209,7 @@ impl<'src> Struct<'src> {
         let name = &key.name().to_compact_string1(TYPE_CASE);
         formatdoc! {"
             {doc_comment}
+            #[must_use]
             pub struct {name}{lifetimes}{block}
 
             {impl_block}\
@@ -301,6 +304,7 @@ impl<'src> Struct<'src> {
         match &self.fields {
             Some(_) => formatdoc! {"
                 impl {name}{lifetime_placeholders} {{
+                    #[must_use]
                     pub fn get_in(&self, locale: Locale) -> String {{
                         match locale {{
                             {}
@@ -312,7 +316,8 @@ impl<'src> Struct<'src> {
             },
             None => formatdoc! {"
                 impl {name} {{
-                    pub fn get_in(&self, locale: Locale) -> &'static str {{
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {{
                         match locale {{
                             {}
                         }}
@@ -335,10 +340,16 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
     }
     let contents = {
         use mulan_parser::{Tag as T, TemplatePart as P};
+        static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
+            AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
+        });
         template
             .iter()
             .map(|part| match part {
-                P::Text(text) => text.escape_debug().to_compact_string(),
+                P::Text(text) => AC
+                    .replace_all(text, &["{{", "}}"])
+                    .escape_debug()
+                    .to_compact_string(),
                 P::Tag(T::Parameter(parameter)) => {
                     format_compact!(
                         "{{{name}}}",
