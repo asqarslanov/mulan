@@ -5,6 +5,7 @@ default-members = ["crates/mulan-cli/"]
 
 [workspace.package]
 version = "0.0.0"
+rust-version = "1.96.1"
 description = "A multi-language i18n framework"
 readme = true
 repository = "https://github.com/asqarslanov/mulan"
