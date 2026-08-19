@@ -145,6 +145,8 @@ mod tests {
     use indoc::{formatdoc, indoc};
     use rstest::rstest;
 
+    use std::iter;
+
     use super::*;
 
     #[rstest]
@@ -156,7 +158,7 @@ mod tests {
         "#},
         Some(crate::Config {
             meta: ConfigMeta::default(),
-            locales: [Language::EnUs].iter().copied().collect(),
+            locales: iter::once(Language::EnUs).collect(),
             main_locale: Language::EnUs,
             key_case: Case::Kebab,
         }),
@@ -216,21 +218,24 @@ mod tests {
         None,
     )]
     fn read(#[case] input: &str, #[case] expected_output: Option<crate::Config>) {
-        figment2::Jail::expect_with(|jail| {
-            jail.create_file("mulan.toml", input)?;
-            let mut actual_output = crate::Config::locate_and_read().ok();
-            if let Some(config) = &mut actual_output {
-                config.meta = ConfigMeta::default();
-            }
-            if actual_output != expected_output {
-                return Err(formatdoc! {"
+        figment2::Jail::expect_with(
+            #[expect(clippy::result_large_err, reason = "done by the book")]
+            |jail| {
+                jail.create_file("mulan.toml", input)?;
+                let mut actual_output = crate::Config::locate_and_read().ok();
+                if let Some(config) = &mut actual_output {
+                    config.meta = ConfigMeta::default();
+                }
+                if actual_output != expected_output {
+                    return Err(formatdoc! {"
                     assertion `left == right` failed
                       left: {actual_output:?}
                      right: {expected_output:?}\
-                "}
-                .into());
-            }
-            Ok(())
-        });
+                    "}
+                    .into());
+                }
+                Ok(())
+            },
+        );
     }
 }

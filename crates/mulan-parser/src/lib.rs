@@ -10,6 +10,14 @@
 //!
 //! See the [`compose`] function.
 
+#![cfg_attr(
+    test,
+    allow(
+        clippy::unwrap_used,
+        reason = "panicking tests don't produce silent bugs"
+    )
+)]
+
 use self::identifier::{Identifier, Word};
 use self::schemas::input::Input;
 pub use self::schemas::input::RawKey;

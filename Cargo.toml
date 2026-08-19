@@ -65,7 +65,6 @@ allow_attributes_without_reason = "warn"
 dbg_macro = "warn"
 missing-errors-doc = { level = "allow", priority = 1 }
 missing-panics-doc = { level = "allow", priority = 1 }
-non_ascii_literal = "warn"
 nursery = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 print_stderr = "warn"
