@@ -10,6 +10,14 @@
 //!
 //! See the [`compose`] function.
 
+#![cfg_attr(
+    test,
+    allow(
+        clippy::unwrap_used,
+        reason = "panicking tests don't produce silent bugs"
+    )
+)]
+
 use self::identifier::{Identifier, Word};
 use self::schemas::input::Input;
 pub use self::schemas::input::RawKey;
@@ -36,6 +44,7 @@ pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
     let subkey_parser = Subkey::chumsky_parser(&ident_parser);
+    let _key_parser = Key::chumsky_parser(&subkey_parser);
     let param_parser = Parameter::chumsky_parser(&ident_parser);
     let tag_parser = Tag::chumsky_parser(&param_parser);
     let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
