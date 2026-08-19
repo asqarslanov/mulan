@@ -18,7 +18,7 @@ use crate::template::Template;
 /// organized. The final parsing result used to generate locale bindings.
 /// Its structure is based on the main locale.
 ///
-/// Use [`.iter()`](Self::iter) to traverse through [`Node`]s.
+/// Use [`.root.iter()`](Namespace::iter) to traverse through [`Node`]s.
 /// Message nodes store all translations alongside each other.
 /// Data is stored alphabetically to ensure deterministic output.
 #[derive(Debug)]

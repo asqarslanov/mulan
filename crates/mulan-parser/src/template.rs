@@ -55,8 +55,8 @@ impl Template {
         self.parts.iter()
     }
 
-    /// An iterator over [`TemplatePart::Placeholder`] parts in the order
-    /// they appear in the message (so duplicates can be present).
+    /// An iterator over [`TemplatePart::Tag`]/[`Tag::Parameter`] parts
+    /// in the order they appear in the message (so duplicates can be present).
     pub fn parameter_iter(&self) -> impl Iterator<Item = &Parameter> {
         self.parts
             .iter()

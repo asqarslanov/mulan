@@ -38,7 +38,7 @@ pub struct ReadFileError {
     pub error: io::Error,
 }
 
-/// See [`InputError::Format`].
+/// See [`InputError::Yaml`].
 #[derive(Debug)]
 pub struct YamlError {
     pub inner: Box<serde_saphyr::Error>,
