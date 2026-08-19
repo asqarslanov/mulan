@@ -142,10 +142,10 @@ impl crate::Config {
 
 #[cfg(test)]
 mod tests {
+    use std::iter;
+
     use indoc::{formatdoc, indoc};
     use rstest::rstest;
-
-    use std::iter;
 
     use super::*;
 
