@@ -71,6 +71,9 @@ print_stderr = "warn"
 print_stdout = "warn"
 unwrap_used = "warn"
 
+[workspace.lints.rustdoc]
+private_intra_doc_links = "allow"
+
 [profile.release]
 opt-level = "z"
 strip = true
