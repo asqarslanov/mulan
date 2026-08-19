@@ -45,6 +45,22 @@ pub struct Namespace {
     pub(super) map: BTreeMap<Subkey, Node>,
 }
 
+impl Namespace {
+    /// Returns an iterator over all nodes of this namespace with their
+    /// corresponding key.
+    ///
+    /// To return these keys, you are required to pass the key of the parent
+    /// namespace. Pass `None` if you are iterating over the root namespace.
+    pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
+        let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
+        self.map.iter().map(move |(subkey, node)| {
+            let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
+            let key = Key { segments };
+            (key, node)
+        })
+    }
+}
+
 /// A single segment of a message [`Key`].
 ///
 /// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
@@ -229,21 +245,5 @@ mod tests {
             Key { segments }
         });
         assert_eq!(actual_output, expected_output);
-    }
-}
-
-impl Namespace {
-    /// Returns an iterator over all nodes of this namespace with their
-    /// corresponding key.
-    ///
-    /// To return these keys, you are required to pass the key of the parent
-    /// namespace. Pass `None` if you are iterating over the root namespace.
-    pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
-        let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
-        self.map.iter().map(move |(subkey, node)| {
-            let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
-            let key = Key { segments };
-            (key, node)
-        })
     }
 }
