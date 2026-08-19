@@ -14,6 +14,7 @@ use std::collections::BTreeSet;
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
 use mitsein::small_vec1::SmallVec1;
+use relative_path::RelativePathBuf;
 use serde::Deserialize;
 use serde_with::{SetPreventDuplicates, serde_as};
 
@@ -67,12 +68,19 @@ pub struct Config {
     pub key_case: Case,
 }
 
-/// See [crate::Config::targets].
+/// See [`crate::Config::targets`].
 #[derive(Debug, PartialEq, Eq, Deserialize)]
 #[serde(tag = "target")]
 pub enum Target {
     /// ...
-    Rust,
+    Rust(RustTarget),
+}
+
+/// See [`Target::Rust`].
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+pub struct RustTarget {
+    /// ...
+    pub file: RelativePathBuf,
 }
 
 /// Word case (e.g., `camelCase`, `kebab-case`, or `snake_case`).

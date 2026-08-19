@@ -16,7 +16,7 @@ figment2 = { workspace = true, features = ["test", "toml"] }
 itertools = { workspace = true }
 mitsein = { workspace = true }
 pathdiff = { workspace = true }
-relative-path = { workspace = true }
+relative-path = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 serdev = { workspace = true }
