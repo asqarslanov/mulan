@@ -926,6 +926,7 @@ dependencies = [
  "mitsein",
  "mulan-config",
  "mulan-parser",
+ "relative-path 2.0.1",
 ]
 
 [[package]]
