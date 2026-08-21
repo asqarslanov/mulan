@@ -203,7 +203,6 @@ mod parser {
 
 #[cfg(test)]
 mod tests {
-    use mitsein::iter1::IteratorExt as _;
     use rstest::rstest;
 
     use super::*;
