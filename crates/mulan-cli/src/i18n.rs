@@ -540,6 +540,53 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.parser.validate.not-a-namespace`
+                pub mod not_a_namespace {
+                    use super::Locale;
+
+                    /// `errors.parser.validate.not-a-namespace.help`
+                    ///
+                    /// ```mulan
+                    /// see how `{key}` is defined in {main-locale}
+                    /// ```
+                    #[must_use]
+                    pub struct Help<'key, 'main_locale> {
+                        pub key: &'key str,
+                        pub main_locale: &'main_locale str,
+                    }
+
+                    impl Help<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("see how `{key}` is defined in {main_locale}", key = self.key, main_locale = self.main_locale),
+                            }
+                        }
+                    }
+
+                    /// `errors.parser.validate.not-a-namespace.message`
+                    ///
+                    /// ```mulan
+                    /// expected a namespace, found a message
+                    ///   locale: {locale}
+                    ///   key: `{key}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'key, 'locale> {
+                        pub key: &'key str,
+                        pub locale: &'locale str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("expected a namespace, found a message\n  locale: {locale}\n  key: `{key}`", key = self.key, locale = self.locale),
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -80,3 +80,10 @@ errors:
           found invalid message
             locale: {locale}
             key: `{key}`
+
+      not-a-namespace:
+        message: |-
+          expected a namespace, found a message
+            locale: {locale}
+            key: `{key}`
+        help: "see how `{key}` is defined in {main-locale}"

@@ -734,14 +734,10 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
 
 impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            expected a namespace, found a message
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::not_a_namespace::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -749,11 +745,10 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        Some(format!(
-            "see how `{}` is defined in {}",
-            self.key.to_compact_string1(),
-            config.main_locale.tag(),
-        ))
+        let key = &self.key.to_compact_string1();
+        let main_locale = config.main_locale.tag();
+        let message = t::errors::parser::validate::not_a_namespace::Help { key, main_locale };
+        Some(message.get_in(Locale::default()).to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
