@@ -5,4 +5,5 @@ use std::io;
 #[derive(Debug)]
 pub enum WriteError {
     CreateDir(io::Error),
+    WriteFile(io::Error),
 }
