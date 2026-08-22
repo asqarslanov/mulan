@@ -107,3 +107,6 @@ errors:
           first-label: "remove this parameter"
           second-label: "and this"
           other-labels: "and also this"
+    syntax:
+      annotation-block:
+        here: "here"

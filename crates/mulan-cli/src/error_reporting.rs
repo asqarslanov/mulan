@@ -905,7 +905,9 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
             text: self.source.to_owned(),
             file_data: None,
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: "here".to_owned(),
+                text: t::errors::parser::syntax::annotation_block::Here
+                    .get_in(Locale::default())
+                    .to_owned(),
                 span: self::SpanKind::Range(self.error.span),
             }),
         })

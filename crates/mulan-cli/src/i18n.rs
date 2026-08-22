@@ -466,6 +466,33 @@ pub mod t {
                 }
             }
 
+            /// `errors.parser.syntax`
+            pub mod syntax {
+                use super::Locale;
+
+                /// `errors.parser.syntax.annotation-block`
+                pub mod annotation_block {
+                    use super::Locale;
+
+                    /// `errors.parser.syntax.annotation-block.here`
+                    ///
+                    /// ```mulan
+                    /// here
+                    /// ```
+                    #[must_use]
+                    pub struct Here;
+
+                    impl Here {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "here",
+                            }
+                        }
+                    }
+                }
+            }
+
             /// `errors.parser.validate`
             pub mod validate {
                 use super::Locale;
