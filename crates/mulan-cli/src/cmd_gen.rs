@@ -23,17 +23,16 @@ impl self::Args {
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
         mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config))?;
         let targets = config.generate.expect("mulan-gen verified they exist");
-        for target in targets {
+        for target in &targets {
             let log = match target {
                 mulan_config::Target::Rust(target_conf) => t::Log {
                     path: target_conf.file.as_str(),
                     target: "Rust",
-                }
-                .get_in(Locale::default()),
+                },
             };
             #[expect(clippy::print_stdout, reason = "useful logging")]
             {
-                println!("{log}");
+                println!("{}", log.get_in(Locale::default()));
             }
         }
         Ok(ExitCode::SUCCESS)
