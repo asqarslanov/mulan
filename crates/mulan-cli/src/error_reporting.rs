@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use std::range::Range;
 
 use compact_str::{CompactStringExt as _, ToCompactString as _, format_compact};
-use indoc::{formatdoc, indoc};
+use indoc::formatdoc;
 use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
@@ -379,7 +379,8 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
 
 impl self::Reportable for mulan_config::errors::SourceNotFoundError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        "Mulan config not found in any parent dirctory".to_owned()
+        let message = t::errors::config::not_found::Message.get_in(Locale::default());
+        message.to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -387,16 +388,8 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(
-            indoc! {"
-                make sure you're inside your project that uses Mulan
-                or run `mulan init` to get started
-
-                Mulan is an i18n framework
-                more info: <https://github.com/asqarslanov/mulan>\
-            "}
-            .to_owned(),
-        )
+        let message = t::errors::config::not_found::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {

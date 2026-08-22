@@ -29,3 +29,12 @@ errors:
         make sure that
         - the current working directory exists
         - you have permissions to access it
+
+    not-found:
+      message: "Mulan config not found in any parent dirctory"
+      help: |-
+        make sure you're inside your project that uses Mulan
+        or run `mulan init` to get started
+
+        Mulan is an i18n framework
+        more info: <https://github.com/asqarslanov/mulan>

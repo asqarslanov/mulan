@@ -97,6 +97,49 @@ pub mod t {
                 }
             }
 
+            /// `errors.config.not-found`
+            pub mod not_found {
+                use super::Locale;
+
+                /// `errors.config.not-found.help`
+                ///
+                /// ```mulan
+                /// make sure you're inside your project that uses Mulan
+                /// or run `mulan init` to get started
+
+                /// Mulan is an i18n framework
+                /// more info: <https://github.com/asqarslanov/mulan>
+                /// ```
+                #[must_use]
+                pub struct Help;
+
+                impl Help {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "make sure you\'re inside your project that uses Mulan\nor run `mulan init` to get started\n\nMulan is an i18n framework\nmore info: <https://github.com/asqarslanov/mulan>",
+                        }
+                    }
+                }
+
+                /// `errors.config.not-found.message`
+                ///
+                /// ```mulan
+                /// Mulan config not found in any parent dirctory
+                /// ```
+                #[must_use]
+                pub struct Message;
+
+                impl Message {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "Mulan config not found in any parent dirctory",
+                        }
+                    }
+                }
+            }
+
             /// `errors.config.parse`
             pub mod parse {
                 use super::Locale;
