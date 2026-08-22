@@ -24,7 +24,7 @@ pub fn write_files(
     for target in targets {
         use mulan_config::Target as T;
         let (path, contents) = match target {
-            T::Rust(path) => (&path.file, self::rust::generate(&config, &output)),
+            T::Rust(target_conf) => (&target_conf.file, self::rust::generate(&config, &output)),
         };
         if let Some(parent) = path.parent() {
             let file_parent_dir_path = parent.to_path(config.meta.root_dir.as_str());
