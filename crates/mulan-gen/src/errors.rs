@@ -1,6 +1,7 @@
 //! Error types.
 
 use std::io;
+use std::path::PathBuf;
 
 /// Errors of [`crate::write_files`].
 #[derive(Debug)]
@@ -22,11 +23,13 @@ pub struct NoTargetsError;
 /// ...
 #[derive(Debug)]
 pub struct CreateDirError {
-    pub inner: io::Error,
+    pub error: io::Error,
+    pub path: PathBuf,
 }
 
 /// ...
 #[derive(Debug)]
 pub struct WriteFileError {
-    pub inner: io::Error,
+    pub error: io::Error,
+    pub path: PathBuf,
 }

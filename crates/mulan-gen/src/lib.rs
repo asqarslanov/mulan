@@ -23,19 +23,26 @@ pub fn write_files(
     };
     for target in targets {
         use mulan_config::Target as T;
-        let (path, contents) = match target {
+        let (relative_path, contents) = match target {
             T::Rust(target_conf) => (&target_conf.file, self::rust::generate(&config, &output)),
         };
-        if let Some(parent) = path.parent() {
+        if let Some(parent) = relative_path.parent() {
             let file_parent_dir_path = parent.to_path(config.meta.root_dir.as_str());
-            fs::create_dir_all(file_parent_dir_path)
-                .map_err(|inner| GenError::CreateDir(CreateDirError { inner }))?;
+            fs::create_dir_all(&file_parent_dir_path).map_err(|error| {
+                GenError::CreateDir(CreateDirError {
+                    error,
+                    path: file_parent_dir_path,
+                })
+            })?;
         }
-        let file_path = path.to_path(config.meta.root_dir.as_str());
-        fs::write(file_path, &contents)
-            .map_err(|inner| GenError::WriteFile(WriteFileError { inner }))?;
+        let file_path = relative_path.to_path(config.meta.root_dir.as_str());
+        fs::write(&file_path, &contents).map_err(|error| {
+            GenError::WriteFile(WriteFileError {
+                error,
+                path: file_path,
+            })
+        })?;
     }
-
     Ok(())
 }
 
