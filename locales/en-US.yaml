@@ -107,6 +107,12 @@ errors:
           first-label: "remove this parameter"
           second-label: "and this"
           other-labels: "and also this"
+
     syntax:
       annotation-block:
         here: "here"
+
+  generate:
+    no-targets:
+      message: "can't use `mulan gen` without specified generation targets"
+      help: "add a `generate` section to `mulan.toml`"

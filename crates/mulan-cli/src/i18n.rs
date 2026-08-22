@@ -341,6 +341,50 @@ pub mod t {
             }
         }
 
+        /// `errors.generate`
+        pub mod generate {
+            use super::Locale;
+
+            /// `errors.generate.no-targets`
+            pub mod no_targets {
+                use super::Locale;
+
+                /// `errors.generate.no-targets.help`
+                ///
+                /// ```mulan
+                /// add a `generate` section to `mulan.toml`
+                /// ```
+                #[must_use]
+                pub struct Help;
+
+                impl Help {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "add a `generate` section to `mulan.toml`",
+                        }
+                    }
+                }
+
+                /// `errors.generate.no-targets.message`
+                ///
+                /// ```mulan
+                /// can't use `mulan gen` without specified generation targets
+                /// ```
+                #[must_use]
+                pub struct Message;
+
+                impl Message {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "can\'t use `mulan gen` without specified generation targets",
+                        }
+                    }
+                }
+            }
+        }
+
         /// `errors.parser`
         pub mod parser {
             use super::Locale;

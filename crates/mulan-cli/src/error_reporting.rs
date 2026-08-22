@@ -930,7 +930,9 @@ impl self::ToReport for mulan_gen::errors::GenError {
 
 impl self::Reportable for mulan_gen::errors::NoTargetsError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        "can't use `mulan gen` without specified generation targets".to_owned()
+        t::errors::generate::no_targets::Message
+            .get_in(Locale::default())
+            .to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -938,7 +940,8 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some("add a `generate` section to `mulan.toml`".to_owned())
+        let message = t::errors::generate::no_targets::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
