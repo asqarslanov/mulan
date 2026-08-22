@@ -85,6 +85,35 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.config.parse.unknown-variant`
+                pub mod unknown_variant {
+                    use super::Locale;
+
+                    /// `errors.config.parse.unknown-variant.message`
+                    ///
+                    /// ```mulan
+                    /// unknown variant
+                    ///   key `{key}`
+                    ///   is{actual}
+                    ///   but is expected to be one of: {expected}
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'actual, 'expected, 'key> {
+                        pub actual: &'actual str,
+                        pub expected: &'expected str,
+                        pub key: &'key str,
+                    }
+
+                    impl Message<'_, '_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("unknown variant\n  key `{key}`\n  is{actual}\n  but is expected to be one of: {expected}", actual = self.actual, expected = self.expected, key = self.key),
+                            }
+                        }
+                    }
+                }
             }
         }
     }

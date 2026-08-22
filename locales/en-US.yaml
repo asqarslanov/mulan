@@ -10,3 +10,9 @@ errors:
             key `{key}`
             is expected to be `{expected}`
             but actually has type `{actual}`
+      unknown-variant:
+        message: |-
+          unknown variant
+            key `{key}`
+            is{actual}
+            but is expected to be one of: {expected}

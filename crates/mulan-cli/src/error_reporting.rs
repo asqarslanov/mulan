@@ -283,23 +283,23 @@ impl self::Reportable for mulan_config::errors::FigmentError {
                 key: &(&self.inner.path).join_compact("."),
             }
             .get_in(Locale::default()),
-            K::UnknownVariant(actual, expected) => formatdoc! {"
-                unknown variant
-                  key `{}`
-                  is{}
-                  but is expected to be one of: {}\
-                ",
-                (&self.inner.path).join_compact("."),
-                if actual.is_empty() {
-                    " an empty string".to_compact_string()
-                } else {
-                    format_compact!(": `{actual}`")
-                },
-                expected
-                    .iter()
-                    .map(|variant| format_compact!("`{variant}`"))
-                    .join_compact(", "),
-            },
+            K::UnknownVariant(actual, expected) => {
+                t::errors::config::parse::unknown_variant::Message {
+                    actual: &if actual.is_empty() {
+                        " an empty string".to_compact_string()
+                    } else {
+                        format_compact!(": `{actual}`")
+                    },
+                    expected: &{
+                        expected
+                            .iter()
+                            .map(|variant| format_compact!("`{variant}`"))
+                            .join_compact(", ")
+                    },
+                    key: &(&self.inner.path).join_compact("."),
+                }
+                .get_in(Locale::default())
+            }
             K::UnknownField(actual, _) => format!("unknown field: `{actual}`"),
             _ => self.inner.to_string(),
         }
