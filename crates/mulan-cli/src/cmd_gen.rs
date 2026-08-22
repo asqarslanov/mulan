@@ -26,14 +26,14 @@ impl self::Args {
         for target in targets {
             #[expect(clippy::print_stdout, reason = "useful logging")]
             match target {
-                mulan_config::Target::Rust(target_conf) => println!(
-                    "{}",
-                    t::Log {
+                mulan_config::Target::Rust(target_conf) => {
+                    let log = t::Log {
                         path: target_conf.file.as_str(),
                         target: "Rust",
                     }
-                    .get_in(Locale::default()),
-                ),
+                    .get_in(Locale::default());
+                    println!("{log}")
+                }
             }
         }
         Ok(ExitCode::SUCCESS)
