@@ -401,9 +401,48 @@ pub mod t {
                 pub mod yaml {
                     use super::Locale;
 
+                    /// `errors.parser.read.yaml.annotation-block`
+                    pub mod annotation_block {
+                        use super::Locale;
+
+                        /// `errors.parser.read.yaml.annotation-block.here`
+                        ///
+                        /// ```mulan
+                        /// here
+                        /// ```
+                        #[must_use]
+                        pub struct Here;
+
+                        impl Here {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "here",
+                                }
+                            }
+                        }
+                    }
+
                     /// `errors.parser.read.yaml.duplicate-mapping-key`
                     pub mod duplicate_mapping_key {
                         use super::Locale;
+
+                        /// `errors.parser.read.yaml.duplicate-mapping-key.help`
+                        ///
+                        /// ```mulan
+                        /// remove duplicates to make all keys in the same namespace unique
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "remove duplicates to make all keys in the same namespace unique",
+                                }
+                            }
+                        }
 
                         /// `errors.parser.read.yaml.duplicate-mapping-key.message`
                         ///

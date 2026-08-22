@@ -63,3 +63,6 @@ errors:
       yaml:
         duplicate-mapping-key:
           message: "duplicate mapping key{key}"
+          help: "remove duplicates to make all keys in the same namespace unique"
+        annotation-block:
+          here: "here"

@@ -634,7 +634,9 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         use serde_saphyr::Error as E;
         Some(match self.inner.without_snippet() {
             E::DuplicateMappingKey { .. } => {
-                "remove duplicates to make all keys in the same namespace unique".to_owned()
+                t::errors::parser::read::yaml::duplicate_mapping_key::Help
+                    .get_in(Locale::default())
+                    .to_owned()
             }
             _ => return None,
         })
@@ -651,7 +653,9 @@ impl self::Reportable for mulan_parser::errors::YamlError {
                 language: self::SourceLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: "here".to_owned(),
+                text: t::errors::parser::read::yaml::annotation_block::Here
+                    .get_in(Locale::default())
+                    .to_owned(),
                 span: SpanKind::OffsetLen(offset, len),
             }),
         })
