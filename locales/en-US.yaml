@@ -43,3 +43,7 @@ errors:
     ambiguous-source:
       message: "multiple possible config locations"
       help: "only choose one config to remain, and delete the other{plural-ending}"
+      annotation-block:
+        first-label: "maybe this?"
+        second-label: "or maybe this?"
+        other-labels: "or maybe even this?"

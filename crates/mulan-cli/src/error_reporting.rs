@@ -434,9 +434,12 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
                     .enumerate()
                     .map(|(i, path)| {
                         let text = match i {
-                            0 => "maybe this?",
-                            1 => "or maybe this?",
-                            _ => "or maybe even this?",
+                            0 => t::errors::config::ambiguous_source::annotation_block::FirstLabel
+                                .get_in(Locale::default()),
+                            1 => t::errors::config::ambiguous_source::annotation_block::SecondLabel
+                                .get_in(Locale::default()),
+                            _ => t::errors::config::ambiguous_source::annotation_block::OtherLabels
+                                .get_in(Locale::default()),
                         }
                         .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, path.as_str().len());

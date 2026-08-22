@@ -92,6 +92,62 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.config.ambiguous-source.annotation-block`
+                pub mod annotation_block {
+                    use super::Locale;
+
+                    /// `errors.config.ambiguous-source.annotation-block.first-label`
+                    ///
+                    /// ```mulan
+                    /// maybe this?
+                    /// ```
+                    #[must_use]
+                    pub struct FirstLabel;
+
+                    impl FirstLabel {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "maybe this?",
+                            }
+                        }
+                    }
+
+                    /// `errors.config.ambiguous-source.annotation-block.other-labels`
+                    ///
+                    /// ```mulan
+                    /// or maybe even this?
+                    /// ```
+                    #[must_use]
+                    pub struct OtherLabels;
+
+                    impl OtherLabels {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "or maybe even this?",
+                            }
+                        }
+                    }
+
+                    /// `errors.config.ambiguous-source.annotation-block.second-label`
+                    ///
+                    /// ```mulan
+                    /// or maybe this?
+                    /// ```
+                    #[must_use]
+                    pub struct SecondLabel;
+
+                    impl SecondLabel {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "or maybe this?",
+                            }
+                        }
+                    }
+                }
             }
 
             /// `errors.config.current-dir`
