@@ -8,7 +8,7 @@ impl self::Args {
     /// Executes the subcommand:
     ///
     /// ```sh
-    /// $ mulan gen ...
+    /// $ mulan init ...
     /// ```
     #[expect(
         clippy::unused_self,
