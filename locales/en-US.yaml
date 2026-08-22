@@ -47,3 +47,15 @@ errors:
         first-label: "maybe this?"
         second-label: "or maybe this?"
         other-labels: "or maybe even this?"
+
+  parser:
+    read:
+      fs:
+        message: |-
+          failed to read {path}
+          OS error: {os-error}
+        help: |-
+          make sure that
+          - {path} exists
+          - it contains valid UTF-8
+          - you have permissions to read it

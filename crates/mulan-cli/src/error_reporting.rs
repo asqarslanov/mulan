@@ -476,13 +476,9 @@ impl self::ToReport for mulan_parser::errors::InputError {
 
 impl self::Reportable for mulan_parser::errors::ReadFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to read {}
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::parser::read::fs::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -490,14 +486,8 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - {} exists
-            - it contains valid UTF-8
-            - you have permissions to read it\
-            ",
-            self.path.display(),
-        })
+        let path = &self.path.to_string_lossy();
+        Some(t::errors::parser::read::fs::Help { path }.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {

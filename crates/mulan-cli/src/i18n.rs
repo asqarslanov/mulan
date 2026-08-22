@@ -340,5 +340,63 @@ pub mod t {
                 }
             }
         }
+
+        /// `errors.parser`
+        pub mod parser {
+            use super::Locale;
+
+            /// `errors.parser.read`
+            pub mod read {
+                use super::Locale;
+
+                /// `errors.parser.read.fs`
+                pub mod fs {
+                    use super::Locale;
+
+                    /// `errors.parser.read.fs.help`
+                    ///
+                    /// ```mulan
+                    /// make sure that
+                    /// - {path} exists
+                    /// - it contains valid UTF-8
+                    /// - you have permissions to read it
+                    /// ```
+                    #[must_use]
+                    pub struct Help<'path> {
+                        pub path: &'path str,
+                    }
+
+                    impl Help<'_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("make sure that\n- {path} exists\n- it contains valid UTF-8\n- you have permissions to read it", path = self.path),
+                            }
+                        }
+                    }
+
+                    /// `errors.parser.read.fs.message`
+                    ///
+                    /// ```mulan
+                    /// failed to read {path}
+                    /// OS error: {os-error}
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("failed to read {path}\nOS error: {os_error}", os_error = self.os_error, path = self.path),
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
