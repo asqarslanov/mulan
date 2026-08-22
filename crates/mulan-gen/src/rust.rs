@@ -60,7 +60,7 @@ impl Bindings<'_> {
         let doc_comment = indent::indent_all_with(
             "/// - ",
             formatdoc! {"
-                [`{main}`](Self::{main}) (main)
+                [`{main}`](Self::{main}) (main)\
                 {other}\
                 ",
                 main = config.main_locale.tag_pascal_case(),
@@ -68,10 +68,10 @@ impl Bindings<'_> {
                     config
                         .locales_except_main()
                         .map(|lang| format_compact!(
-                            "[`{variant}`](Self::{variant})",
+                            "\n[`{variant}`](Self::{variant})",
                             variant = lang.tag_pascal_case(),
                         ))
-                        .join_compact("\n")
+                        .concat_compact()
                 },
             },
         );
