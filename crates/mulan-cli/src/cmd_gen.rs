@@ -3,6 +3,7 @@ use std::process::ExitCode;
 use crate::error_reporting::ToReport as _;
 use crate::i18n::{Locale, t};
 
+/// See [`crate::Command::Gen`].
 #[derive(clap::Args)]
 pub struct Args;
 
