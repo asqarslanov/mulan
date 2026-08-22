@@ -30,7 +30,7 @@ impl self::Args {
                     target: "Rust",
                 },
             };
-            #[expect(clippy::print_stdout, reason = "useful logging")]
+            #[expect(clippy::print_stdout, reason = "deliberate logging")]
             {
                 println!("{}", log.get_in(Locale::default()));
             }
