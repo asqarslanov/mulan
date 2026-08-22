@@ -39,11 +39,7 @@ pub mod t {
             #[must_use]
             pub fn get_in(&self, locale: Locale) -> String {
                 match locale {
-                    _ => format!(
-                        "Generated {target} bindings in `{path}`",
-                        path = self.path,
-                        target = self.target
-                    ),
+                    _ => format!("Generated {target} bindings in `{path}`", path = self.path, target = self.target),
                 }
             }
         }
