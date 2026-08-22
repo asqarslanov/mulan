@@ -72,14 +72,14 @@ pub struct Config {
 #[derive(Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case", tag = "target")]
 pub enum Target {
-    /// ...
+    /// The Rust programming language.
     Rust(RustTarget),
 }
 
 /// See [`Target::Rust`].
 #[derive(Debug, PartialEq, Eq, Deserialize)]
 pub struct RustTarget {
-    /// ...
+    /// Where to generate a Rust module with i18n bindings.
     pub file: RelativePathBuf,
 }
 
