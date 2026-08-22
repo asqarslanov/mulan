@@ -10,7 +10,6 @@ use std::path::PathBuf;
 use std::range::Range;
 
 use compact_str::{CompactStringExt as _, ToCompactString as _, format_compact};
-use indoc::formatdoc;
 use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
@@ -955,13 +954,9 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
 
 impl self::Reportable for mulan_gen::errors::CreateDirError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to create {}/
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::generate::create_dir::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -969,11 +964,8 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the path is correct
-            - you have permissions\
-        "})
+        let message = t::errors::generate::create_dir::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -987,13 +979,9 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
 
 impl self::Reportable for mulan_gen::errors::WriteFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to write {}
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::generate::write_file::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -1001,11 +989,8 @@ impl self::Reportable for mulan_gen::errors::WriteFileError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the path is correct
-            - you have permissions\
-        "})
+        let message = t::errors::generate::write_file::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {

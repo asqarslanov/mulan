@@ -345,6 +345,51 @@ pub mod t {
         pub mod generate {
             use super::Locale;
 
+            /// `errors.generate.create-dir`
+            pub mod create_dir {
+                use super::Locale;
+
+                /// `errors.generate.create-dir.help`
+                ///
+                /// ```mulan
+                /// make sure that
+                /// - the path is correct
+                /// - you have permissions
+                /// ```
+                #[must_use]
+                pub struct Help;
+
+                impl Help {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "make sure that\n- the path is correct\n- you have permissions",
+                        }
+                    }
+                }
+
+                /// `errors.generate.create-dir.message`
+                ///
+                /// ```mulan
+                /// failed to create {path}/
+                /// OS error: {os-error}
+                /// ```
+                #[must_use]
+                pub struct Message<'os_error, 'path> {
+                    pub os_error: &'os_error str,
+                    pub path: &'path str,
+                }
+
+                impl Message<'_, '_> {
+                    #[must_use]
+                    pub fn get_in(&self, locale: Locale) -> String {
+                        match locale {
+                            _ => format!("failed to create {path}/\nOS error: {os_error}", os_error = self.os_error, path = self.path),
+                        }
+                    }
+                }
+            }
+
             /// `errors.generate.no-targets`
             pub mod no_targets {
                 use super::Locale;
@@ -379,6 +424,51 @@ pub mod t {
                     pub const fn get_in(&self, locale: Locale) -> &'static str {
                         match locale {
                             _ => "can\'t use `mulan gen` without specified generation targets",
+                        }
+                    }
+                }
+            }
+
+            /// `errors.generate.write-file`
+            pub mod write_file {
+                use super::Locale;
+
+                /// `errors.generate.write-file.help`
+                ///
+                /// ```mulan
+                /// make sure that
+                /// - the path is correct
+                /// - you have permissions
+                /// ```
+                #[must_use]
+                pub struct Help;
+
+                impl Help {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "make sure that\n- the path is correct\n- you have permissions",
+                        }
+                    }
+                }
+
+                /// `errors.generate.write-file.message`
+                ///
+                /// ```mulan
+                /// failed to write to {path}
+                /// OS error: {os-error}
+                /// ```
+                #[must_use]
+                pub struct Message<'os_error, 'path> {
+                    pub os_error: &'os_error str,
+                    pub path: &'path str,
+                }
+
+                impl Message<'_, '_> {
+                    #[must_use]
+                    pub fn get_in(&self, locale: Locale) -> String {
+                        match locale {
+                            _ => format!("failed to write to {path}\nOS error: {os_error}", os_error = self.os_error, path = self.path),
                         }
                     }
                 }

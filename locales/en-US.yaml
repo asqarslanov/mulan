@@ -116,3 +116,21 @@ errors:
     no-targets:
       message: "can't use `mulan gen` without specified generation targets"
       help: "add a `generate` section to `mulan.toml`"
+
+    create-dir:
+      message: |-
+        failed to create {path}/
+        OS error: {os-error}
+      help: |-
+        make sure that
+        - the path is correct
+        - you have permissions
+
+    write-file:
+      message: |-
+        failed to write to {path}
+        OS error: {os-error}
+      help: |-
+        make sure that
+        - the path is correct
+        - you have permissions
