@@ -22,6 +22,7 @@ impl self::Args {
         mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config))?;
         let targets = config.generate.expect("mulan-gen verified they exist");
         for target in targets {
+            #[expect(clippy::print_stdout, reason = "useful logging")]
             match target {
                 mulan_config::Target::Rust(target_conf) => {
                     println!("Generated Rust bindings in {path}", path = target_conf.file);
