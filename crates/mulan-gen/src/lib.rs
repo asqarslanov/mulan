@@ -1,6 +1,6 @@
 //! # Mulan Gen
 //!
-//! Generates bindings for various platforms.
+//! Generates i18n bindings for various targets.
 //!
 //! See the [`write_files`] function.
 
@@ -13,7 +13,8 @@ use crate::errors::{CreateDirError, GenError, NoTargetsError, WriteFileError};
 pub mod errors;
 mod rust;
 
-///
+/// Generates i18n bindings for all platforms specified in the config
+/// and writes them to their corresponding files.
 pub fn write_files(
     config: &mulan_config::Config,
     output: &mulan_parser::Output,
