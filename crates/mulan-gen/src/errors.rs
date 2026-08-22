@@ -6,7 +6,7 @@ use std::io;
 #[derive(Debug)]
 pub enum GenError {
     /// ...
-    NoTargets,
+    NoTargets(NoTargetsError),
 
     /// ...
     CreateDir(CreateDirError),
@@ -14,6 +14,10 @@ pub enum GenError {
     /// ...
     WriteFile(WriteFileError),
 }
+
+/// ...
+#[derive(Debug)]
+pub struct NoTargetsError;
 
 /// ...
 #[derive(Debug)]

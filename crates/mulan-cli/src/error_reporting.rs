@@ -950,13 +950,67 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
     }
 }
 
-impl self::Reportable for mulan_gen::errors::GenError {
+impl self::ToReport for mulan_gen::errors::GenError {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::NoTargets(e) => e.to_report(config),
+            Self::CreateDir(e) => e.to_report(config),
+            Self::WriteFile(e) => e.to_report(config),
+        }
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::NoTargetsError {
     fn message(&self, config: &mulan_config::Config) -> String {
         todo!()
     }
 
     fn code(&self) -> &'static str {
+        "gen::no_targets"
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
         todo!()
+    }
+
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        todo!()
+    }
+
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::CreateDirError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        "gen::create_dir"
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        todo!()
+    }
+
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::WriteFileError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        "gen::write_file"
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {

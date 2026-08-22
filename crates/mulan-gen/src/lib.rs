@@ -8,7 +8,7 @@ use std::fs;
 
 use indoc::indoc;
 
-use crate::errors::{CreateDirError, GenError, WriteFileError};
+use crate::errors::{CreateDirError, GenError, NoTargetsError, WriteFileError};
 
 pub mod errors;
 pub mod rust;
@@ -19,7 +19,7 @@ pub fn write_files(
     output: &mulan_parser::Output,
 ) -> Result<(), GenError> {
     let Some(targets) = &config.generate else {
-        return Err(GenError::NoTargets);
+        return Err(GenError::NoTargets(NoTargetsError));
     };
     for target in targets {
         use mulan_config::Target as T;
