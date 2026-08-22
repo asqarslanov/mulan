@@ -8,7 +8,7 @@ use std::fs;
 
 use indoc::indoc;
 
-use crate::errors::GenError;
+use crate::errors::{CreateDirError, GenError, WriteFileError};
 
 pub mod errors;
 pub mod rust;
@@ -17,7 +17,6 @@ pub mod rust;
 pub fn write_files(
     config: &mulan_config::Config,
     output: &mulan_parser::Output,
-    // files_data: &[FileData],
 ) -> Result<(), GenError> {
     let Some(targets) = &config.generate else {
         return Err(GenError::NoTargets);
@@ -29,10 +28,12 @@ pub fn write_files(
         };
         if let Some(parent) = path.parent() {
             let file_parent_dir_path = parent.to_path(config.meta.root_dir.as_str());
-            fs::create_dir_all(file_parent_dir_path).map_err(GenError::CreateDir)?;
+            fs::create_dir_all(file_parent_dir_path)
+                .map_err(|inner| GenError::CreateDir(CreateDirError { inner }))?;
         }
         let file_path = path.to_path(config.meta.root_dir.as_str());
-        fs::write(file_path, &contents).map_err(GenError::WriteFile)?;
+        fs::write(file_path, &contents)
+            .map_err(|inner| GenError::WriteFile(WriteFileError { inner }))?;
     }
 
     Ok(())

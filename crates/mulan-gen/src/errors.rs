@@ -9,8 +9,20 @@ pub enum GenError {
     NoTargets,
 
     /// ...
-    CreateDir(io::Error),
+    CreateDir(CreateDirError),
 
     /// ...
-    WriteFile(io::Error),
+    WriteFile(WriteFileError),
+}
+
+/// ...
+#[derive(Debug)]
+pub struct CreateDirError {
+    pub inner: io::Error,
+}
+
+/// ...
+#[derive(Debug)]
+pub struct WriteFileError {
+    pub inner: io::Error,
 }

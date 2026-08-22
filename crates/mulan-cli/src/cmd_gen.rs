@@ -19,7 +19,7 @@ impl self::Args {
         let config = mulan_config::Config::locate_and_read()
             .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
-        mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config));
+        mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config))?;
         Ok(ExitCode::SUCCESS)
     }
 }
