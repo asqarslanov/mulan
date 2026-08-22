@@ -497,7 +497,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
         Some(formatdoc! {"
-            make sure
+            make sure that
             - {} exists
             - it contains valid UTF-8
             - you have permissions to read it\
@@ -943,6 +943,102 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
                 span: self::SpanKind::Range(self.error.span),
             }),
         })
+    }
+
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::ToReport for mulan_gen::errors::GenError {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::NoTargets(e) => e.to_report(config),
+            Self::CreateDir(e) => e.to_report(config),
+            Self::WriteFile(e) => e.to_report(config),
+        }
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::NoTargetsError {
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        "can't use `mulan gen` without specified generation targets".to_owned()
+    }
+
+    fn code(&self) -> &'static str {
+        "gen::no_targets"
+    }
+
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some("add a `generate` section to `mulan.toml`".to_owned())
+    }
+
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::CreateDirError {
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            failed to create {}/
+            OS error: {}\
+            ",
+            self.path.display(),
+            self.error,
+        }
+    }
+
+    fn code(&self) -> &'static str {
+        "gen::create_dir"
+    }
+
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some(formatdoc! {"
+            make sure that
+            - the path is correct
+            - you have permissions\
+        "})
+    }
+
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for mulan_gen::errors::WriteFileError {
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            failed to write {}
+            OS error: {}\
+            ",
+            self.path.display(),
+            self.error,
+        }
+    }
+
+    fn code(&self) -> &'static str {
+        "gen::write_file"
+    }
+
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some(formatdoc! {"
+            make sure that
+            - the path is correct
+            - you have permissions\
+        "})
+    }
+
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {

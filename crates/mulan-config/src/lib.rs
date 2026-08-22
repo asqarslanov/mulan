@@ -13,6 +13,8 @@ use std::collections::BTreeSet;
 
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
+use mitsein::small_vec1::SmallVec1;
+use relative_path::RelativePathBuf;
 use serde::Deserialize;
 use serde_with::{SetPreventDuplicates, serde_as};
 
@@ -56,11 +58,30 @@ pub struct Config {
     /// in another locale.
     pub main_locale: Language,
 
+    /// The list of targets (i.e., programming languages) for which
+    /// i18n bindings should be generated.
+    pub generate: Option<SmallVec1<[Target; 1]>>,
+
     /// Your preferred convention to name keys in locale definitions.
     ///
     /// The default value is `"kebab-case"`.
     #[serde(skip)]
     pub key_case: Case,
+}
+
+/// See [`crate::Config::generate`].
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case", tag = "target")]
+pub enum Target {
+    /// The Rust programming language.
+    Rust(RustTarget),
+}
+
+/// See [`Target::Rust`].
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+pub struct RustTarget {
+    /// Where to generate a Rust module with i18n bindings.
+    pub file: RelativePathBuf,
 }
 
 /// Word case (e.g., `camelCase`, `kebab-case`, or `snake_case`).
@@ -124,6 +145,7 @@ impl crate::Config {
             meta: ConfigMeta::default(),
             locales: BTreeSet::default(),
             main_locale: Language::EnUs,
+            generate: None,
             key_case: Case::Kebab,
         }
     }
@@ -160,6 +182,7 @@ mod tests {
             meta: ConfigMeta::default(),
             locales: iter::once(Language::EnUs).collect(),
             main_locale: Language::EnUs,
+            generate: None,
             key_case: Case::Kebab,
         }),
     )]
@@ -179,6 +202,7 @@ mod tests {
             meta: ConfigMeta::default(),
             locales: [Language::EnUs, Language::RuRu].iter().copied().collect(),
             main_locale: Language::RuRu,
+            generate: None,
             key_case: Case::Kebab,
         }),
     )]

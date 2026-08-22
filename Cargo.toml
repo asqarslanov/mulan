@@ -69,6 +69,8 @@ nursery = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 print_stderr = "warn"
 print_stdout = "warn"
+todo = { level = "warn", priority = -1 }
+unimplemented = { level = "warn", priority = -1 }
 unwrap_used = "warn"
 
 [workspace.lints.rustdoc]

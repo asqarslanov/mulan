@@ -19,13 +19,15 @@ impl self::Args {
         let config = mulan_config::Config::locate_and_read()
             .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
-        let rust_bindings = mulan_gen::rust::generate(&config, &output);
-        #[expect(
-            clippy::print_stdout,
-            reason = "it's the most the program can produce for now"
-        )]
-        {
-            println!("{rust_bindings}");
+        mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config))?;
+        let targets = config.generate.expect("mulan-gen verified they exist");
+        for target in targets {
+            #[expect(clippy::print_stdout, reason = "useful logging")]
+            match target {
+                mulan_config::Target::Rust(target_conf) => {
+                    println!("Generated Rust bindings in {path}", path = target_conf.file);
+                }
+            }
         }
         Ok(ExitCode::SUCCESS)
     }
