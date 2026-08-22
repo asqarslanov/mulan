@@ -69,7 +69,7 @@ pub struct Config {
     pub key_case: Case,
 }
 
-/// See [`crate::Config::targets`].
+/// See [`crate::Config::generate`].
 #[derive(Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case", tag = "target")]
 pub enum Target {
