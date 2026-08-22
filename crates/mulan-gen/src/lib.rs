@@ -2,7 +2,7 @@
 //!
 //! Generates bindings for various platforms.
 //!
-//! For now, only [`mod@rust`] is supported.
+//! See the [`write_files`] function.
 
 use std::fs;
 
@@ -11,9 +11,9 @@ use indoc::indoc;
 use crate::errors::{CreateDirError, GenError, NoTargetsError, WriteFileError};
 
 pub mod errors;
-pub mod rust;
+mod rust;
 
-/// ...
+///
 pub fn write_files(
     config: &mulan_config::Config,
     output: &mulan_parser::Output,
