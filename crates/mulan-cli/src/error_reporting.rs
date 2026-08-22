@@ -985,7 +985,7 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
 impl self::Reportable for mulan_gen::errors::CreateDirError {
     fn message(&self, config: &mulan_config::Config) -> String {
         formatdoc! {"
-            failed to create {}
+            failed to create {}/
             OS error: {}\
             ",
             self.path.display(),
