@@ -74,3 +74,9 @@ errors:
             locale: {locale}
             {parent-key}
         help: "it should look like a variable in a programming language"
+
+      invalid-template:
+        message: |-
+          found invalid message
+            locale: {locale}
+            key: `{key}`

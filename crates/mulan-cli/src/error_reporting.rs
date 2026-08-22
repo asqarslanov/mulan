@@ -683,7 +683,7 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
         let locale = self.locale.tag();
         let parent_key = &self.parent_key.as_ref().map_or_else(
             || "root namespace".to_compact_string(),
-            |key| format_compact!("namespace `{}`", key.to_compact_string1()),
+            |key| format_compact!("namespace: `{}`", key.to_compact_string1()),
         );
         t::errors::parser::validate::invalid_key::Message { locale, parent_key }
             .get_in(Locale::default())
@@ -709,14 +709,10 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
 
 impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            found invalid message
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::invalid_template::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {

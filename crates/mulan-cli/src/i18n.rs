@@ -513,6 +513,33 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.parser.validate.invalid-template`
+                pub mod invalid_template {
+                    use super::Locale;
+
+                    /// `errors.parser.validate.invalid-template.message`
+                    ///
+                    /// ```mulan
+                    /// found invalid message
+                    ///   locale: {locale}
+                    ///   key: `{key}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'key, 'locale> {
+                        pub key: &'key str,
+                        pub locale: &'locale str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("found invalid message\n  locale: {locale}\n  key: `{key}`", key = self.key, locale = self.locale),
+                            }
+                        }
+                    }
+                }
             }
         }
     }
