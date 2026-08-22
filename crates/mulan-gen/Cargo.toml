@@ -20,7 +20,6 @@ itertools = { workspace = true }
 mitsein = { workspace = true }
 mulan-config = { workspace = true }
 mulan-parser = { workspace = true }
-relative-path = { workspace = true }
 
 [lints]
 workspace = true
