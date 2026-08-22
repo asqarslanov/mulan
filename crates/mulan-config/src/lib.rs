@@ -58,7 +58,7 @@ pub struct Config {
     /// in another locale.
     pub main_locale: Language,
 
-    /// A list of targets for which i18n bindings should be generated.
+    /// The list of targets for which i18n bindings should be generated.
     pub generate: Option<SmallVec1<[Target; 1]>>,
 
     /// Your preferred convention to name keys in locale definitions.
