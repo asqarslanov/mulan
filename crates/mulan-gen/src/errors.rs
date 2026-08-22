@@ -6,13 +6,13 @@ use std::path::PathBuf;
 /// Errors of [`crate::write_files`].
 #[derive(Debug)]
 pub enum GenError {
-    /// ...
+    /// The `generate` list in the config is not specified.
     NoTargets(NoTargetsError),
 
-    /// ...
+    /// Failed to create a directory.
     CreateDir(CreateDirError),
 
-    /// ...
+    /// Failed to write to a file.
     WriteFile(WriteFileError),
 }
 
