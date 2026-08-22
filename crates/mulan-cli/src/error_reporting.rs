@@ -983,7 +983,7 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
 }
 
 impl self::Reportable for mulan_gen::errors::CreateDirError {
-    fn message(&self, config: &mulan_config::Config) -> String {
+    fn message(&self, _config: &mulan_config::Config) -> String {
         formatdoc! {"
             failed to create {}/
             OS error: {}\
@@ -1001,18 +1001,24 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
         todo!()
     }
 
-    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
         None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }
 
 impl self::Reportable for mulan_gen::errors::WriteFileError {
-    fn message(&self, config: &mulan_config::Config) -> String {
-        todo!()
+    fn message(&self, _config: &mulan_config::Config) -> String {
+        formatdoc! {"
+            failed to write {}
+            OS error: {}\
+            ",
+            self.path.display(),
+            self.error,
+        }
     }
 
     fn code(&self) -> &'static str {
@@ -1023,11 +1029,11 @@ impl self::Reportable for mulan_gen::errors::WriteFileError {
         todo!()
     }
 
-    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
-        todo!()
+    fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
     }
 
-    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+    fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }
