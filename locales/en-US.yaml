@@ -1,0 +1,136 @@
+cmd-gen:
+  log: "Generated {target} bindings in `{path}`"
+
+errors:
+  config:
+    parse:
+      invalid-type:
+        message: |-
+          invalid type
+            key `{key}`
+            is expected to be `{expected}`
+            but actually has type `{actual}`
+
+      unknown-variant:
+        message: |-
+          unknown variant
+            key `{key}`
+            is{actual}
+            but is expected to be one of: {expected}
+
+      unknown-field:
+        message: "unknown field: `{actual}`"
+        help: "maybe, you mistyped it?"
+
+    current-dir:
+      message: |-
+        failed to get current working directory
+        - OS error: {os-error}
+      help: |-
+        make sure that
+        - the current working directory exists
+        - you have permissions to access it
+
+    not-found:
+      message: "Mulan config not found in any parent dirctory"
+      help: |-
+        make sure you're inside your project that uses Mulan
+        or run `mulan init` to get started
+
+        Mulan is an i18n framework
+        more info: <https://github.com/asqarslanov/mulan>
+
+    ambiguous-source:
+      message: "multiple possible config locations"
+      help: "only choose one config to remain, and delete the other{plural-ending}"
+      annotation-block:
+        first-label: "maybe this?"
+        second-label: "or maybe this?"
+        other-labels: "or maybe even this?"
+
+  parser:
+    read:
+      fs:
+        message: |-
+          failed to read {path}
+          OS error: {os-error}
+        help: |-
+          make sure that
+          - {path} exists
+          - it contains valid UTF-8
+          - you have permissions to read it
+
+      yaml:
+        duplicate-mapping-key:
+          message: "duplicate mapping key{key}"
+          help: "remove duplicates to make all keys in the same namespace unique"
+        annotation-block:
+          here: "here"
+
+    validate:
+      invalid-key:
+        message: |-
+          found invalid key
+            locale: {locale}
+            {parent-key}
+        help: "it should look like a variable in a programming language"
+
+      invalid-template:
+        message: |-
+          found invalid message
+            locale: {locale}
+            key: `{key}`
+
+      not-a-namespace:
+        message: |-
+          expected a namespace, found a message
+            locale: {locale}
+            key: `{key}`
+        help: "see how `{key}` is defined in {main-locale}"
+
+      not-a-message:
+        message: |-
+          expected a message, found a namespace
+            locale: {locale}
+            key: `{key}`
+        help: "see how `{key}` is defined in {main-locale}"
+
+      unknown-parameters:
+        message: |-
+          unknown parameters
+            locale: {locale}
+            key: `{key}`
+        help: >-
+          a translation of a message is allowed to have less parameters
+          than the original ({main-locale}), but never more
+        annotation-block:
+          first-label: "remove this parameter"
+          second-label: "and this"
+          other-labels: "and also this"
+
+    syntax:
+      annotation-block:
+        here: "here"
+
+  generate:
+    no-targets:
+      message: "can't use `mulan gen` without specified generation targets"
+      help: "add a `generate` section to `mulan.toml`"
+
+    create-dir:
+      message: |-
+        failed to create {path}/
+        OS error: {os-error}
+      help: |-
+        make sure that
+        - the path is correct
+        - you have permissions
+
+    write-file:
+      message: |-
+        failed to write to {path}
+        OS error: {os-error}
+      help: |-
+        make sure that
+        - the path is correct
+        - you have permissions

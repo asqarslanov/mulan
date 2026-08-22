@@ -10,10 +10,11 @@ use std::path::PathBuf;
 use std::range::Range;
 
 use compact_str::{CompactStringExt as _, ToCompactString as _, format_compact};
-use indoc::{formatdoc, indoc};
 use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
+
+use crate::i18n::{Locale, t};
 
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
@@ -275,32 +276,33 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         use figment2::error::Kind as K;
         match &self.inner.kind {
             K::Message(msg) => msg.trim_end().to_owned(),
-            K::InvalidType(actual, expected) => formatdoc! {"
-                invalid type
-                  key `{}`
-                  is expected to be `{expected}`
-                  but actually has type `{actual}`\
-                ",
-                (&self.inner.path).join_compact("."),
-            },
-            K::UnknownVariant(actual, expected) => formatdoc! {"
-                unknown variant
-                  key `{}`
-                  is{}
-                  but is expected to be one of: {}\
-                ",
-                (&self.inner.path).join_compact("."),
-                if actual.is_empty() {
-                    " an empty string".to_compact_string()
-                } else {
-                    format_compact!(": `{actual}`")
-                },
-                expected
-                    .iter()
-                    .map(|variant| format_compact!("`{variant}`"))
-                    .join_compact(", "),
-            },
-            K::UnknownField(actual, _) => format!("unknown field: `{actual}`"),
+            K::InvalidType(actual, expected) => t::errors::config::parse::invalid_type::Message {
+                actual: &actual.to_compact_string(),
+                expected,
+                key: &(&self.inner.path).join_compact("."),
+            }
+            .get_in(Locale::default()),
+            K::UnknownVariant(actual, expected) => {
+                t::errors::config::parse::unknown_variant::Message {
+                    actual: &if actual.is_empty() {
+                        " an empty string".to_compact_string()
+                    } else {
+                        format_compact!(": `{actual}`")
+                    },
+                    expected: &{
+                        expected
+                            .iter()
+                            .map(|variant| format_compact!("`{variant}`"))
+                            .join_compact(", ")
+                    },
+                    key: &(&self.inner.path).join_compact("."),
+                }
+                .get_in(Locale::default())
+            }
+            K::UnknownField(actual, _) => {
+                t::errors::config::parse::unknown_field::Message { actual }
+                    .get_in(Locale::default())
+            }
             _ => self.inner.to_string(),
         }
     }
@@ -326,7 +328,10 @@ impl self::Reportable for mulan_config::errors::FigmentError {
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
         use figment2::error::Kind as K;
         match self.inner.kind {
-            K::UnknownField(_, _) => Some("maybe, you mistyped it?".to_owned()),
+            K::UnknownField(_, _) => {
+                let msg = t::errors::config::parse::unknown_field::Help.get_in(Locale::default());
+                Some(msg.to_owned())
+            }
             _ => None,
         }
     }
@@ -352,12 +357,8 @@ impl self::ToReport for mulan_config::errors::MetaError {
 
 impl self::Reportable for mulan_config::errors::CurrentDirError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to get current working directory
-            - OS error: {}\
-            ",
-            self.inner,
-        }
+        let os_error = &self.inner.to_compact_string();
+        t::errors::config::current_dir::Message { os_error }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -365,11 +366,8 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the current working directory exists
-            - you have permissions to access it\
-        "})
+        let message = t::errors::config::current_dir::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -383,7 +381,8 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
 
 impl self::Reportable for mulan_config::errors::SourceNotFoundError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        "Mulan config not found in any parent dirctory".to_owned()
+        let message = t::errors::config::not_found::Message.get_in(Locale::default());
+        message.to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -391,16 +390,8 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(
-            indoc! {"
-                make sure you're inside your project that uses Mulan
-                or run `mulan init` to get started
-
-                Mulan is an i18n framework
-                more info: <https://github.com/asqarslanov/mulan>\
-            "}
-            .to_owned(),
-        )
+        let message = t::errors::config::not_found::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -414,7 +405,8 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
 
 impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        "multiple possible config locations".to_owned()
+        let message = t::errors::config::ambiguous_source::Message.get_in(Locale::default());
+        message.to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -422,14 +414,12 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(format!(
-            "only choose one config to remain, and delete the other{}",
-            if self.possible_sources.len().get() == 2 {
-                ""
-            } else {
-                "s"
-            },
-        ))
+        let plural_ending = if self.possible_sources.len().get() == 2 {
+            ""
+        } else {
+            "s"
+        };
+        Some(t::errors::config::ambiguous_source::Help { plural_ending }.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -443,9 +433,12 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
                     .enumerate()
                     .map(|(i, path)| {
                         let text = match i {
-                            0 => "maybe this?",
-                            1 => "or maybe this?",
-                            _ => "or maybe even this?",
+                            0 => t::errors::config::ambiguous_source::annotation_block::FirstLabel
+                                .get_in(Locale::default()),
+                            1 => t::errors::config::ambiguous_source::annotation_block::SecondLabel
+                                .get_in(Locale::default()),
+                            _ => t::errors::config::ambiguous_source::annotation_block::OtherLabels
+                                .get_in(Locale::default()),
                         }
                         .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, path.as_str().len());
@@ -482,13 +475,9 @@ impl self::ToReport for mulan_parser::errors::InputError {
 
 impl self::Reportable for mulan_parser::errors::ReadFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to read {}
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::parser::read::fs::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -496,14 +485,8 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - {} exists
-            - it contains valid UTF-8
-            - you have permissions to read it\
-            ",
-            self.path.display(),
-        })
+        let path = &self.path.to_string_lossy();
+        Some(t::errors::parser::read::fs::Help { path }.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -520,11 +503,12 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
             E::DuplicateMappingKey { key, location: _ } => {
-                format!(
-                    "duplicate mapping key{}",
+                let key = &{
                     key.as_ref()
-                        .map_or_else(String::default, |k| format!(": `{k}`")),
-                )
+                        .map_or_else(String::default, |k| format!(": `{k}`"))
+                };
+                t::errors::parser::read::yaml::duplicate_mapping_key::Message { key }
+                    .get_in(Locale::default())
             }
             e => e.render(),
         }
@@ -649,7 +633,9 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         use serde_saphyr::Error as E;
         Some(match self.inner.without_snippet() {
             E::DuplicateMappingKey { .. } => {
-                "remove duplicates to make all keys in the same namespace unique".to_owned()
+                t::errors::parser::read::yaml::duplicate_mapping_key::Help
+                    .get_in(Locale::default())
+                    .to_owned()
             }
             _ => return None,
         })
@@ -666,7 +652,9 @@ impl self::Reportable for mulan_parser::errors::YamlError {
                 language: self::SourceLanguage::Yaml,
             }),
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: "here".to_owned(),
+                text: t::errors::parser::read::yaml::annotation_block::Here
+                    .get_in(Locale::default())
+                    .to_owned(),
                 span: SpanKind::OffsetLen(offset, len),
             }),
         })
@@ -691,17 +679,13 @@ impl self::ToReport for mulan_parser::errors::TransformError {
 
 impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            found invalid key
-              locale: {}
-              {}\
-            ",
-            self.locale.tag(),
-            self.parent_key.as_ref().map_or_else(
-                || "root namespace".to_compact_string(),
-                |key| format_compact!("namespace `{}`", key.to_compact_string1()),
-            ),
-        }
+        let locale = self.locale.tag();
+        let parent_key = &self.parent_key.as_ref().map_or_else(
+            || "root namespace".to_compact_string(),
+            |key| format_compact!("namespace: `{}`", key.to_compact_string1()),
+        );
+        t::errors::parser::validate::invalid_key::Message { locale, parent_key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -709,7 +693,8 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some("it should look like a variable in a programming language".to_owned())
+        let message = t::errors::parser::validate::invalid_key::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -723,14 +708,10 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
 
 impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            found invalid message
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::invalid_template::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -752,14 +733,10 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
 
 impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            expected a namespace, found a message
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::not_a_namespace::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -767,11 +744,10 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        Some(format!(
-            "see how `{}` is defined in {}",
-            self.key.to_compact_string1(),
-            config.main_locale.tag(),
-        ))
+        let key = &self.key.to_compact_string1();
+        let main_locale = config.main_locale.tag();
+        let message = t::errors::parser::validate::not_a_namespace::Help { key, main_locale };
+        Some(message.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -785,14 +761,10 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
 
 impl self::Reportable for mulan_parser::errors::NotAMessageError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            expected a message, found a namespace
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::not_a_message::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -800,11 +772,10 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        Some(format!(
-            "see how `{}` is defined in {}",
-            self.key.to_compact_string1(),
-            config.main_locale.tag(),
-        ))
+        let key = &self.key.to_compact_string1();
+        let main_locale = config.main_locale.tag();
+        let message = t::errors::parser::validate::not_a_message::Help { key, main_locale };
+        Some(message.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -818,14 +789,10 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
 
 impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            unknown parameters
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::unknown_parameters::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -833,15 +800,13 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            a translation of a message is allowed to have less parameters than the original ({}), \
-            but never more\
-            ",
-            config.main_locale.tag(),
-        })
+        let main_locale = config.main_locale.tag();
+        let message = t::errors::parser::validate::unknown_parameters::Help { main_locale };
+        Some(message.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        use t::errors::parser::validate::unknown_parameters::annotation_block as tt;
         Some(self::AnnotationBlock {
             text: {
                 self.parameters
@@ -859,9 +824,9 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .map(|(i, param)| {
                         let param = param.to_compact_string1(config.key_case);
                         let text = match i {
-                            0 => "remove this parameter",
-                            1 => "and this",
-                            _ => "and also this",
+                            0 => tt::FirstLabel.get_in(Locale::default()),
+                            1 => tt::SecondLabel.get_in(Locale::default()),
+                            _ => tt::OtherLabels.get_in(Locale::default()),
                         }
                         .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, param.len().get());
@@ -939,7 +904,9 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
             text: self.source.to_owned(),
             file_data: None,
             labels: SmallVec1::from_one(self::SourceLabel {
-                text: "here".to_owned(),
+                text: t::errors::parser::syntax::annotation_block::Here
+                    .get_in(Locale::default())
+                    .to_owned(),
                 span: self::SpanKind::Range(self.error.span),
             }),
         })
@@ -962,7 +929,9 @@ impl self::ToReport for mulan_gen::errors::GenError {
 
 impl self::Reportable for mulan_gen::errors::NoTargetsError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        "can't use `mulan gen` without specified generation targets".to_owned()
+        t::errors::generate::no_targets::Message
+            .get_in(Locale::default())
+            .to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -970,7 +939,8 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some("add a `generate` section to `mulan.toml`".to_owned())
+        let message = t::errors::generate::no_targets::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -984,13 +954,9 @@ impl self::Reportable for mulan_gen::errors::NoTargetsError {
 
 impl self::Reportable for mulan_gen::errors::CreateDirError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to create {}/
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::generate::create_dir::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -998,11 +964,8 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the path is correct
-            - you have permissions\
-        "})
+        let message = t::errors::generate::create_dir::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -1016,13 +979,9 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
 
 impl self::Reportable for mulan_gen::errors::WriteFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to write {}
-            OS error: {}\
-            ",
-            self.path.display(),
-            self.error,
-        }
+        let os_error = &self.error.to_compact_string();
+        let path = &self.path.to_string_lossy();
+        t::errors::generate::write_file::Message { os_error, path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -1030,11 +989,8 @@ impl self::Reportable for mulan_gen::errors::WriteFileError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the path is correct
-            - you have permissions\
-        "})
+        let message = t::errors::generate::write_file::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
