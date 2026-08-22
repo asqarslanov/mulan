@@ -10,11 +10,22 @@ errors:
             key `{key}`
             is expected to be `{expected}`
             but actually has type `{actual}`
+
       unknown-variant:
         message: |-
           unknown variant
             key `{key}`
             is{actual}
             but is expected to be one of: {expected}
+
       unknown-field:
         message: "unknown field: `{actual}`"
+
+    current-dir:
+      message: |-
+        failed to get current working directory
+        - OS error: {os-error}
+      help: |-
+        make sure that
+        - the current working directory exists
+        - you have permissions to access it

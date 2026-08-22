@@ -53,6 +53,50 @@ pub mod t {
         pub mod config {
             use super::Locale;
 
+            /// `errors.config.current-dir`
+            pub mod current_dir {
+                use super::Locale;
+
+                /// `errors.config.current-dir.help`
+                ///
+                /// ```mulan
+                /// make sure that
+                /// - the current working directory exists
+                /// - you have permissions to access it
+                /// ```
+                #[must_use]
+                pub struct Help;
+
+                impl Help {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "make sure that\n- the current working directory exists\n- you have permissions to access it",
+                        }
+                    }
+                }
+
+                /// `errors.config.current-dir.message`
+                ///
+                /// ```mulan
+                /// failed to get current working directory
+                /// - OS error: {os-error}
+                /// ```
+                #[must_use]
+                pub struct Message<'os_error> {
+                    pub os_error: &'os_error str,
+                }
+
+                impl Message<'_> {
+                    #[must_use]
+                    pub fn get_in(&self, locale: Locale) -> String {
+                        match locale {
+                            _ => format!("failed to get current working directory\n- OS error: {os_error}", os_error = self.os_error),
+                        }
+                    }
+                }
+            }
+
             /// `errors.config.parse`
             pub mod parse {
                 use super::Locale;

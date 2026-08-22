@@ -355,12 +355,8 @@ impl self::ToReport for mulan_config::errors::MetaError {
 
 impl self::Reportable for mulan_config::errors::CurrentDirError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        formatdoc! {"
-            failed to get current working directory
-            - OS error: {}\
-            ",
-            self.inner,
-        }
+        let os_error = &self.inner.to_compact_string();
+        t::errors::config::current_dir::Message { os_error }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -368,11 +364,8 @@ impl self::Reportable for mulan_config::errors::CurrentDirError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            make sure that
-            - the current working directory exists
-            - you have permissions to access it\
-        "})
+        let message = t::errors::config::current_dir::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
