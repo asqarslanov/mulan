@@ -1,6 +1,8 @@
 use std::process::ExitCode;
 
 use crate::error_reporting::ToReport as _;
+use crate::i18n::Locale;
+use crate::i18n::t::cmd_gen as t;
 
 #[derive(clap::Args)]
 pub struct Args;
@@ -24,9 +26,14 @@ impl self::Args {
         for target in targets {
             #[expect(clippy::print_stdout, reason = "useful logging")]
             match target {
-                mulan_config::Target::Rust(target_conf) => {
-                    println!("Generated Rust bindings in {path}", path = target_conf.file);
-                }
+                mulan_config::Target::Rust(target_conf) => println!(
+                    "{}",
+                    t::Log {
+                        path: target_conf.file.as_str(),
+                        target: "Rust",
+                    }
+                    .get_in(Locale::default()),
+                ),
             }
         }
         Ok(ExitCode::SUCCESS)

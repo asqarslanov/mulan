@@ -1,0 +1,2 @@
+cmd-gen:
+  log: "Generated {target} bindings in `{path}`"

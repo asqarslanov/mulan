@@ -17,4 +17,35 @@ pub enum Locale {
 }
 
 /// The root namespace.
-pub mod t {}
+pub mod t {
+    use super::Locale;
+
+    /// `cmd-gen`
+    pub mod cmd_gen {
+        use super::Locale;
+
+        /// `cmd-gen.log`
+        ///
+        /// ```mulan
+        /// Generated {target} bindings in `{path}`
+        /// ```
+        #[must_use]
+        pub struct Log<'path, 'target> {
+            pub path: &'path str,
+            pub target: &'target str,
+        }
+
+        impl Log<'_, '_> {
+            #[must_use]
+            pub fn get_in(&self, locale: Locale) -> String {
+                match locale {
+                    _ => format!(
+                        "Generated {target} bindings in `{path}`",
+                        path = self.path,
+                        target = self.target
+                    ),
+                }
+            }
+        }
+    }
+}
