@@ -748,7 +748,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
         let key = &self.key.to_compact_string1();
         let main_locale = config.main_locale.tag();
         let message = t::errors::parser::validate::not_a_namespace::Help { key, main_locale };
-        Some(message.get_in(Locale::default()).to_owned())
+        Some(message.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
