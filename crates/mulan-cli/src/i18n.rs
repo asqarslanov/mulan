@@ -53,6 +53,47 @@ pub mod t {
         pub mod config {
             use super::Locale;
 
+            /// `errors.config.ambiguous-source`
+            pub mod ambiguous_source {
+                use super::Locale;
+
+                /// `errors.config.ambiguous-source.help`
+                ///
+                /// ```mulan
+                /// only choose one config to remain, and delete the other{plural-ending}
+                /// ```
+                #[must_use]
+                pub struct Help<'plural_ending> {
+                    pub plural_ending: &'plural_ending str,
+                }
+
+                impl Help<'_> {
+                    #[must_use]
+                    pub fn get_in(&self, locale: Locale) -> String {
+                        match locale {
+                            _ => format!("only choose one config to remain, and delete the other{plural_ending}", plural_ending = self.plural_ending),
+                        }
+                    }
+                }
+
+                /// `errors.config.ambiguous-source.message`
+                ///
+                /// ```mulan
+                /// multiple possible config locations
+                /// ```
+                #[must_use]
+                pub struct Message;
+
+                impl Message {
+                    #[must_use]
+                    pub const fn get_in(&self, locale: Locale) -> &'static str {
+                        match locale {
+                            _ => "multiple possible config locations",
+                        }
+                    }
+                }
+            }
+
             /// `errors.config.current-dir`
             pub mod current_dir {
                 use super::Locale;

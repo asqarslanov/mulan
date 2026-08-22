@@ -406,7 +406,8 @@ impl self::Reportable for mulan_config::errors::SourceNotFoundError {
 
 impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     fn message(&self, _: &mulan_config::Config) -> String {
-        "multiple possible config locations".to_owned()
+        let message = t::errors::config::ambiguous_source::Message.get_in(Locale::default());
+        message.to_owned()
     }
 
     fn code(&self) -> &'static str {
@@ -414,14 +415,12 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        Some(format!(
-            "only choose one config to remain, and delete the other{}",
-            if self.possible_sources.len().get() == 2 {
-                ""
-            } else {
-                "s"
-            },
-        ))
+        let plural_ending = if self.possible_sources.len().get() == 2 {
+            ""
+        } else {
+            "s"
+        };
+        Some(t::errors::config::ambiguous_source::Help { plural_ending }.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {

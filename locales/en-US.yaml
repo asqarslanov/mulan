@@ -39,3 +39,7 @@ errors:
 
         Mulan is an i18n framework
         more info: <https://github.com/asqarslanov/mulan>
+
+    ambiguous-source:
+      message: "multiple possible config locations"
+      help: "only choose one config to remain, and delete the other{plural-ending}"
