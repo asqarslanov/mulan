@@ -70,7 +70,7 @@ pub struct Config {
 
 /// See [`crate::Config::targets`].
 #[derive(Debug, PartialEq, Eq, Deserialize)]
-#[serde(tag = "target")]
+#[serde(rename_all = "kebab-case", tag = "target")]
 pub enum Target {
     /// ...
     Rust(RustTarget),
