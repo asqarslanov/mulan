@@ -3,7 +3,8 @@
 use std::io;
 
 #[derive(Debug)]
-pub enum WriteError {
+pub enum GenError {
+    NoTargets,
     CreateDir(io::Error),
     WriteFile(io::Error),
 }

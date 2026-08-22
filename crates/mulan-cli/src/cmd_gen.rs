@@ -18,19 +18,8 @@ impl self::Args {
     pub fn execute(self) -> miette::Result<ExitCode> {
         let config = mulan_config::Config::locate_and_read()
             .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
-        let Some(targets) = &config.generate else {
-            todo!();
-        };
         let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
-        for target in targets {
-            use mulan_config::Target as T;
-            match target {
-                T::Rust(_target_config) => {
-                    let rust_bindings = mulan_gen::rust::generate(&config, &output);
-                    println!("{rust_bindings}");
-                }
-            }
-        }
+        mulan_gen::write_files(&config, &output).map_err(|err| err.to_report(&config));
         Ok(ExitCode::SUCCESS)
     }
 }

@@ -949,3 +949,25 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         iter::empty()
     }
 }
+
+impl self::Reportable for mulan_gen::errors::GenError {
+    fn message(&self, config: &mulan_config::Config) -> String {
+        todo!()
+    }
+
+    fn code(&self) -> &'static str {
+        todo!()
+    }
+
+    fn help(&self, config: &mulan_config::Config) -> Option<String> {
+        todo!()
+    }
+
+    fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        todo!()
+    }
+
+    fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
