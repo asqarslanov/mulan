@@ -59,3 +59,7 @@ errors:
           - {path} exists
           - it contains valid UTF-8
           - you have permissions to read it
+
+      yaml:
+        duplicate-mapping-key:
+          message: "duplicate mapping key{key}"

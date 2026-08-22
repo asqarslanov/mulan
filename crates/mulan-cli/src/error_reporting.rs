@@ -504,11 +504,12 @@ impl self::Reportable for mulan_parser::errors::YamlError {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
             E::DuplicateMappingKey { key, location: _ } => {
-                format!(
-                    "duplicate mapping key{}",
+                let key = &{
                     key.as_ref()
-                        .map_or_else(String::default, |k| format!(": `{k}`")),
-                )
+                        .map_or_else(String::default, |k| format!(": `{k}`"))
+                };
+                t::errors::parser::read::yaml::duplicate_mapping_key::Message { key }
+                    .get_in(Locale::default())
             }
             e => e.render(),
         }

@@ -396,6 +396,35 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.parser.read.yaml`
+                pub mod yaml {
+                    use super::Locale;
+
+                    /// `errors.parser.read.yaml.duplicate-mapping-key`
+                    pub mod duplicate_mapping_key {
+                        use super::Locale;
+
+                        /// `errors.parser.read.yaml.duplicate-mapping-key.message`
+                        ///
+                        /// ```mulan
+                        /// duplicate mapping key{key}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'key> {
+                            pub key: &'key str,
+                        }
+
+                        impl Message<'_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("duplicate mapping key{key}", key = self.key),
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
