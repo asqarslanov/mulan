@@ -20,6 +20,7 @@ errors:
 
       unknown-field:
         message: "unknown field: `{actual}`"
+        help: "maybe, you mistyped it?"
 
     current-dir:
       message: |-

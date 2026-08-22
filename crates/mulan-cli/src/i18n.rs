@@ -177,6 +177,23 @@ pub mod t {
                 pub mod unknown_field {
                     use super::Locale;
 
+                    /// `errors.config.parse.unknown-field.help`
+                    ///
+                    /// ```mulan
+                    /// maybe, you mistyped it?
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "maybe, you mistyped it?",
+                            }
+                        }
+                    }
+
                     /// `errors.config.parse.unknown-field.message`
                     ///
                     /// ```mulan

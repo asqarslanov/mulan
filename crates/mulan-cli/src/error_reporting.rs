@@ -329,7 +329,10 @@ impl self::Reportable for mulan_config::errors::FigmentError {
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
         use figment2::error::Kind as K;
         match self.inner.kind {
-            K::UnknownField(_, _) => Some("maybe, you mistyped it?".to_owned()),
+            K::UnknownField(_, _) => {
+                let msg = t::errors::config::parse::unknown_field::Help.get_in(Locale::default());
+                Some(msg.to_owned())
+            }
             _ => None,
         }
     }
