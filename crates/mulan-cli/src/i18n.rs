@@ -634,6 +634,52 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.parser.validate.unknown-parameters`
+                pub mod unknown_parameters {
+                    use super::Locale;
+
+                    /// `errors.parser.validate.unknown-parameters.help`
+                    ///
+                    /// ```mulan
+                    /// a translation of a message is allowed to have less parameters than the original ({main-locale}), but never more
+                    /// ```
+                    #[must_use]
+                    pub struct Help<'main_locale> {
+                        pub main_locale: &'main_locale str,
+                    }
+
+                    impl Help<'_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("a translation of a message is allowed to have less parameters than the original ({main_locale}), but never more", main_locale = self.main_locale),
+                            }
+                        }
+                    }
+
+                    /// `errors.parser.validate.unknown-parameters.message`
+                    ///
+                    /// ```mulan
+                    /// unknown parameters
+                    ///   locale: {locale}
+                    ///   key: `{key}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'key, 'locale> {
+                        pub key: &'key str,
+                        pub locale: &'locale str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("unknown parameters\n  locale: {locale}\n  key: `{key}`", key = self.key, locale = self.locale),
+                            }
+                        }
+                    }
+                }
             }
         }
     }

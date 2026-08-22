@@ -790,14 +790,10 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
 
 impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            unknown parameters
-              locale: {}
-              key: `{}`\
-            ",
-            self.locale.tag(),
-            self.key.to_compact_string1(),
-        }
+        let locale = self.locale.tag();
+        let key = &self.key.to_compact_string1();
+        t::errors::parser::validate::unknown_parameters::Message { locale, key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -805,12 +801,9 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        Some(formatdoc! {"
-            a translation of a message is allowed to have less parameters than the original ({}), \
-            but never more\
-            ",
-            config.main_locale.tag(),
-        })
+        let main_locale = config.main_locale.tag();
+        let message = t::errors::parser::validate::unknown_parameters::Help { main_locale };
+        Some(message.get_in(Locale::default()))
     }
 
     fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {

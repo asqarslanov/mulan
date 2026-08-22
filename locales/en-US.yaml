@@ -94,3 +94,12 @@ errors:
             locale: {locale}
             key: `{key}`
         help: "see how `{key}` is defined in {main-locale}"
+
+      unknown-parameters:
+        message: |-
+          unknown parameters
+            locale: {locale}
+            key: `{key}`
+        help: >-
+          a translation of a message is allowed to have less parameters
+          than the original ({main-locale}), but never more
