@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use crate::error_reporting::ToReport as _;
 use crate::i18n::Locale;
-use crate::i18n::t::cmd_gen as t;
+use crate::i18n::t;
 
 #[derive(clap::Args)]
 pub struct Args;
@@ -25,7 +25,7 @@ impl self::Args {
         let targets = config.generate.expect("mulan-gen verified they exist");
         for target in &targets {
             let log = match target {
-                mulan_config::Target::Rust(target_conf) => t::Log {
+                mulan_config::Target::Rust(target_conf) => t::cmd_gen::Log {
                     path: target_conf.file.as_str(),
                     target: "Rust",
                 },
