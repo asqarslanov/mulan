@@ -680,17 +680,13 @@ impl self::ToReport for mulan_parser::errors::TransformError {
 
 impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
-        formatdoc! {"
-            found invalid key
-              locale: {}
-              {}\
-            ",
-            self.locale.tag(),
-            self.parent_key.as_ref().map_or_else(
-                || "root namespace".to_compact_string(),
-                |key| format_compact!("namespace `{}`", key.to_compact_string1()),
-            ),
-        }
+        let locale = self.locale.tag();
+        let parent_key = &self.parent_key.as_ref().map_or_else(
+            || "root namespace".to_compact_string(),
+            |key| format_compact!("namespace `{}`", key.to_compact_string1()),
+        );
+        t::errors::parser::validate::invalid_key::Message { locale, parent_key }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -698,7 +694,8 @@ impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
     }
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
-        Some("it should look like a variable in a programming language".to_owned())
+        let message = t::errors::parser::validate::invalid_key::Help.get_in(Locale::default());
+        Some(message.to_owned())
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {

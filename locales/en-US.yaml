@@ -66,3 +66,11 @@ errors:
           help: "remove duplicates to make all keys in the same namespace unique"
         annotation-block:
           here: "here"
+
+    validate:
+      invalid-key:
+        message: |-
+          found invalid key
+            locale: {locale}
+            {parent-key}
+        help: "it should look like a variable in a programming language"

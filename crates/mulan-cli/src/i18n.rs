@@ -465,6 +465,55 @@ pub mod t {
                     }
                 }
             }
+
+            /// `errors.parser.validate`
+            pub mod validate {
+                use super::Locale;
+
+                /// `errors.parser.validate.invalid-key`
+                pub mod invalid_key {
+                    use super::Locale;
+
+                    /// `errors.parser.validate.invalid-key.help`
+                    ///
+                    /// ```mulan
+                    /// it should look like a variable in a programming language
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "it should look like a variable in a programming language",
+                            }
+                        }
+                    }
+
+                    /// `errors.parser.validate.invalid-key.message`
+                    ///
+                    /// ```mulan
+                    /// found invalid key
+                    ///   locale: {locale}
+                    ///   {parent-key}
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'locale, 'parent_key> {
+                        pub locale: &'locale str,
+                        pub parent_key: &'parent_key str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("found invalid key\n  locale: {locale}\n  {parent_key}", locale = self.locale, parent_key = self.parent_key),
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
