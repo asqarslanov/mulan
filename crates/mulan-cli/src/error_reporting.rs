@@ -497,7 +497,7 @@ impl self::Reportable for mulan_parser::errors::ReadFileError {
 
     fn help(&self, _config: &mulan_config::Config) -> Option<String> {
         Some(formatdoc! {"
-            make sure
+            make sure that
             - {} exists
             - it contains valid UTF-8
             - you have permissions to read it\
@@ -997,8 +997,12 @@ impl self::Reportable for mulan_gen::errors::CreateDirError {
         "gen::create_dir"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some(formatdoc! {"
+            make sure that
+            - the path is correct
+            - you have permissions\
+        "})
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
@@ -1025,8 +1029,12 @@ impl self::Reportable for mulan_gen::errors::WriteFileError {
         "gen::write_file"
     }
 
-    fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        todo!()
+    fn help(&self, _config: &mulan_config::Config) -> Option<String> {
+        Some(formatdoc! {"
+            make sure that
+            - the path is correct
+            - you have permissions\
+        "})
     }
 
     fn annotation_block(&self, _config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
