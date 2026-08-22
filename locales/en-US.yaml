@@ -87,3 +87,10 @@ errors:
             locale: {locale}
             key: `{key}`
         help: "see how `{key}` is defined in {main-locale}"
+
+      not-a-message:
+        message: |-
+          expected a message, found a namespace
+            locale: {locale}
+            key: `{key}`
+        help: "see how `{key}` is defined in {main-locale}"
