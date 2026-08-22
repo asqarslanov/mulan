@@ -1,2 +1,12 @@
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"
+
+errors:
+  config:
+    parse:
+      invalid-type:
+        message: |-
+          invalid type
+            key `{key}`
+            is expected to be `{expected}`
+            but actually has type `{actual}`

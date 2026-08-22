@@ -44,4 +44,48 @@ pub mod t {
             }
         }
     }
+
+    /// `errors`
+    pub mod errors {
+        use super::Locale;
+
+        /// `errors.config`
+        pub mod config {
+            use super::Locale;
+
+            /// `errors.config.parse`
+            pub mod parse {
+                use super::Locale;
+
+                /// `errors.config.parse.invalid-type`
+                pub mod invalid_type {
+                    use super::Locale;
+
+                    /// `errors.config.parse.invalid-type.message`
+                    ///
+                    /// ```mulan
+                    /// invalid type
+                    ///   key `{key}`
+                    ///   is expected to be `{expected}`
+                    ///   but actually has type `{actual}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'actual, 'expected, 'key> {
+                        pub actual: &'actual str,
+                        pub expected: &'expected str,
+                        pub key: &'key str,
+                    }
+
+                    impl Message<'_, '_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("invalid type\n  key `{key}`\n  is expected to be `{expected}`\n  but actually has type `{actual}`", actual = self.actual, expected = self.expected, key = self.key),
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

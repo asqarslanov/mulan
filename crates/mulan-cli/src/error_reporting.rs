@@ -15,6 +15,8 @@ use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
 use mitsein::small_vec1::SmallVec1;
 
+use crate::i18n::{Locale, t};
+
 /// A trait to converting strongly typed errors to human-readable
 /// [`miette::Report`]s with [`ToReport::to_report`].
 ///
@@ -275,14 +277,12 @@ impl self::Reportable for mulan_config::errors::FigmentError {
         use figment2::error::Kind as K;
         match &self.inner.kind {
             K::Message(msg) => msg.trim_end().to_owned(),
-            K::InvalidType(actual, expected) => formatdoc! {"
-                invalid type
-                  key `{}`
-                  is expected to be `{expected}`
-                  but actually has type `{actual}`\
-                ",
-                (&self.inner.path).join_compact("."),
-            },
+            K::InvalidType(actual, expected) => t::errors::config::parse::invalid_type::Message {
+                actual: &actual.to_compact_string(),
+                expected,
+                key: &(&self.inner.path).join_compact("."),
+            }
+            .get_in(Locale::default()),
             K::UnknownVariant(actual, expected) => formatdoc! {"
                 unknown variant
                   key `{}`
