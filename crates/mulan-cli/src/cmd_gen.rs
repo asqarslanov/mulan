@@ -1,8 +1,7 @@
 use std::process::ExitCode;
 
 use crate::error_reporting::ToReport as _;
-use crate::i18n::Locale;
-use crate::i18n::t;
+use crate::i18n::{Locale, t};
 
 #[derive(clap::Args)]
 pub struct Args;
