@@ -807,6 +807,7 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     }
 
     fn annotation_block(&self, config: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        use t::errors::parser::validate::unknown_parameters::annotation_block as tt;
         Some(self::AnnotationBlock {
             text: {
                 self.parameters
@@ -822,7 +823,6 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .iter1()
                     .enumerate()
                     .map(|(i, param)| {
-                        use t::errors::parser::validate::unknown_parameters::annotation_block as tt;
                         let param = param.to_compact_string1(config.key_case);
                         let text = match i {
                             0 => tt::FirstLabel.get_in(Locale::default()),
