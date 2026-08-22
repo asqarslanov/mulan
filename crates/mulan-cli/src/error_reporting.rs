@@ -822,11 +822,12 @@ impl self::Reportable for mulan_parser::errors::UnknownParametersError {
                     .iter1()
                     .enumerate()
                     .map(|(i, param)| {
+                        use t::errors::parser::validate::unknown_parameters::annotation_block as tt;
                         let param = param.to_compact_string1(config.key_case);
                         let text = match i {
-                            0 => "remove this parameter",
-                            1 => "and this",
-                            _ => "and also this",
+                            0 => tt::FirstLabel.get_in(Locale::default()),
+                            1 => tt::SecondLabel.get_in(Locale::default()),
+                            _ => tt::OtherLabels.get_in(Locale::default()),
                         }
                         .to_owned();
                         let span = self::SpanKind::OffsetLen(line_i_start, param.len().get());

@@ -679,6 +679,62 @@ pub mod t {
                             }
                         }
                     }
+
+                    /// `errors.parser.validate.unknown-parameters.annotation-block`
+                    pub mod annotation_block {
+                        use super::Locale;
+
+                        /// `errors.parser.validate.unknown-parameters.annotation-block.first-label`
+                        ///
+                        /// ```mulan
+                        /// remove this parameter
+                        /// ```
+                        #[must_use]
+                        pub struct FirstLabel;
+
+                        impl FirstLabel {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "remove this parameter",
+                                }
+                            }
+                        }
+
+                        /// `errors.parser.validate.unknown-parameters.annotation-block.other-labels`
+                        ///
+                        /// ```mulan
+                        /// and also this
+                        /// ```
+                        #[must_use]
+                        pub struct OtherLabels;
+
+                        impl OtherLabels {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "and also this",
+                                }
+                            }
+                        }
+
+                        /// `errors.parser.validate.unknown-parameters.annotation-block.second-label`
+                        ///
+                        /// ```mulan
+                        /// and this
+                        /// ```
+                        #[must_use]
+                        pub struct SecondLabel;
+
+                        impl SecondLabel {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "and this",
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -103,3 +103,7 @@ errors:
         help: >-
           a translation of a message is allowed to have less parameters
           than the original ({main-locale}), but never more
+        annotation-block:
+          first-label: "remove this parameter"
+          second-label: "and this"
+          other-labels: "and also this"
