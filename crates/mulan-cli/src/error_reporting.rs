@@ -300,7 +300,10 @@ impl self::Reportable for mulan_config::errors::FigmentError {
                 }
                 .get_in(Locale::default())
             }
-            K::UnknownField(actual, _) => format!("unknown field: `{actual}`"),
+            K::UnknownField(actual, _) => {
+                t::errors::config::parse::unknown_field::Message { actual }
+                    .get_in(Locale::default())
+            }
             _ => self.inner.to_string(),
         }
     }

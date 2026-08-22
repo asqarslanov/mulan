@@ -86,6 +86,30 @@ pub mod t {
                     }
                 }
 
+                /// `errors.config.parse.unknown-field`
+                pub mod unknown_field {
+                    use super::Locale;
+
+                    /// `errors.config.parse.unknown-field.message`
+                    ///
+                    /// ```mulan
+                    /// unknown field: `{actual}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'actual> {
+                        pub actual: &'actual str,
+                    }
+
+                    impl Message<'_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("unknown field: `{actual}`", actual = self.actual),
+                            }
+                        }
+                    }
+                }
+
                 /// `errors.config.parse.unknown-variant`
                 pub mod unknown_variant {
                     use super::Locale;

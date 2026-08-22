@@ -16,3 +16,5 @@ errors:
             key `{key}`
             is{actual}
             but is expected to be one of: {expected}
+      unknown-field:
+        message: "unknown field: `{actual}`"
