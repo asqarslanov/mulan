@@ -69,7 +69,10 @@ enum MietteOrIoError {
     Io(io::Error),
 }
 
+///
 fn do_it() -> Result<(), MietteOrIoError> {
+    todo!("rename the function");
+    todo!("use mulan");
     cliclack::intro("Mulan").map_err(MietteOrIoError::Io)?;
     let user_choice = UserChoice::interactive_prompt().map_err(MietteOrIoError::Io)?;
     user_choice
