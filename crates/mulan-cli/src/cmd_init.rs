@@ -166,17 +166,23 @@ impl UserChoice {
 
 ///
 fn create_locale_files(locales: &[Language]) -> io::Result<()> {
+    #[derive(Serialize)]
+    struct ExampleLocale {
+        greeting: &'static str,
+    }
+
     let dir_path = RelativePathBuf::from("locales");
     fs::create_dir(dir_path.as_str());
     for locale in locales {
-        let contents = match locale {
-            Language::RuRu => indoc! {r#"
-                greeting: "Привет, {name}!"
-            "#},
-            _ => indoc! {r#"
-                greeting: "Hello, {name}!"
-            "#},
-        };
+        let contents = serde_saphyr::to_string(&match locale {
+            Language::RuRu => ExampleLocale {
+                greeting: "Привет, {name}!",
+            },
+            _ => ExampleLocale {
+                greeting: "Hello, {name}!",
+            },
+        })
+        .expect("should never fail");
         let path = dir_path.join(locale.tag().as_str()).with_extension("yaml");
         let mut file = fs::File::create_new(path.as_str()).unwrap();
         file.write_all(contents.as_bytes());
