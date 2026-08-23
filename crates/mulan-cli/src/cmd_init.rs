@@ -4,7 +4,6 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use indoc::indoc;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
