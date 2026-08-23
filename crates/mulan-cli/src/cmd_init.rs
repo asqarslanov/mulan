@@ -25,7 +25,7 @@ pub fn execute() -> miette::Result<ExitCode> {
     match interactive_prompt() {
         Ok(()) => Ok(ExitCode::SUCCESS),
         Err(err) if matches!(err.kind(), io::ErrorKind::Interrupted) => Ok(ExitCode::from(SIGINT)),
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{err}"),
     }
 }
 
@@ -36,7 +36,7 @@ pub struct ConfigExistsError {
 
 fn interactive_prompt() -> io::Result<()> {
     cliclack::intro("Mulan")?;
-    let a: String = cliclack::input("test").interact()?;
+    let _: String = cliclack::input("test").interact()?;
     cliclack::outro("You're all set")?;
     Ok(())
 }
