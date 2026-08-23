@@ -1,3 +1,4 @@
+use std::fs;
 use std::io;
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -6,6 +7,7 @@ use itertools::Itertools as _;
 use mulan_config::errors::{LocateError, NotFoundError};
 use mulan_config::{Language, RustTarget, Target};
 use relative_path::RelativePathBuf;
+use serde::Serialize;
 
 use crate::error_reporting::ToReport as _;
 
@@ -39,7 +41,11 @@ pub fn execute() -> miette::Result<ExitCode> {
             panic!("{err}");
         }
     };
-    todo!("create mulan.toml and locales/");
+    user_choice
+        .write_to_file()
+        .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
+    todo!("locales/");
+    Ok(ExitCode::SUCCESS)
 }
 
 ///
@@ -51,6 +57,15 @@ pub struct ConfigExistsError {
 
 ///
 #[derive(Debug)]
+pub struct CreateConfigError {
+    pub error: io::Error,
+
+    ///
+    pub path: RelativePathBuf,
+}
+
+///
+#[derive(Debug, Serialize)]
 struct UserChoice {
     ///
     locales: Vec<Language>,
@@ -75,6 +90,13 @@ impl UserChoice {
             main_locale,
             generate,
         })
+    }
+
+    fn write_to_file(&self) -> Result<(), CreateConfigError> {
+        let path = RelativePathBuf::from("mulan.toml");
+        let contents = toml::to_string_pretty(self).expect("should never fail");
+        fs::write(path.as_str(), contents).map_err(|error| CreateConfigError { error, path })?;
+        Ok(())
     }
 
     ///

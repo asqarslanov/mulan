@@ -15,7 +15,7 @@ use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
 use mitsein::small_vec1::SmallVec1;
 use relative_path::RelativePathBuf;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
@@ -70,7 +70,7 @@ pub struct Config {
 }
 
 /// See [`crate::Config::generate`].
-#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", tag = "target")]
 pub enum Target {
     /// The Rust programming language.
@@ -78,7 +78,7 @@ pub enum Target {
 }
 
 /// See [`Target::Rust`].
-#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RustTarget {
     /// Where to generate a Rust module with i18n bindings.
     pub file: RelativePathBuf,

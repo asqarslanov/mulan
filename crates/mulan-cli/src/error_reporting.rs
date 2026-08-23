@@ -285,6 +285,28 @@ impl self::Reportable for crate::cmd_init::ConfigExistsError {
     }
 }
 
+impl self::Reportable for crate::cmd_init::CreateConfigError {
+    fn message(&self, _: &mulan_config::Config) -> String {
+        todo!();
+    }
+
+    fn code(&self) -> &'static str {
+        "cli::init::create_config"
+    }
+
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
+        todo!();
+    }
+
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
 impl self::ToReport for mulan_config::errors::ConfigError {
     fn to_report(&self, dummy_config: &mulan_config::Config) -> miette::Report {
         match self {
