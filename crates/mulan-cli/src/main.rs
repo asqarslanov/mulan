@@ -12,7 +12,7 @@ fn main() -> miette::Result<ExitCode> {
     let cli = <self::Cli as clap::Parser>::parse();
     match cli.command {
         Command::Gen(args) => args.execute(),
-        Command::Init(args) => args.execute(),
+        Command::Init => self::cmd_init::execute(),
     }
 }
 
@@ -26,7 +26,7 @@ struct Cli {
 #[derive(clap::Subcommand)]
 enum Command {
     /// ...
-    Init(self::cmd_gen::Args),
+    Init,
 
     /// Generate i18n bindings for your targets
     Gen(self::cmd_gen::Args),
