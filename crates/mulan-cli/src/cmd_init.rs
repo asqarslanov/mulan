@@ -28,25 +28,21 @@ pub fn execute() -> miette::Result<ExitCode> {
         Err(LocateError::Io(e)) => return Err(e.to_report(&mulan_config::Config::dummy())),
         Err(LocateError::NotFound(NotFoundError)) => (),
     }
-    let user_choice = match UserChoice::interactive_prompt() {
-        Ok(data) => data,
-        Err(err) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
+    match do_it() {
+        Ok(()) => Ok(ExitCode::SUCCESS),
+        Err(MietteOrIoError::Miette(err)) => Err(err),
+        Err(MietteOrIoError::Io(err)) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
             // Ctrl+C interrupt.
-            return Ok(ExitCode::from(SIGINT));
+            Ok(ExitCode::from(SIGINT))
         }
-        Err(err) => {
+        Err(MietteOrIoError::Io(err)) => {
             // A `cliclack` error indicates that we couldn't print to the console.
             // There's no meaningful recovery strategy, so we just `panic!`.
             // There's no point in creating rich Miette reports---
             // we won't probably be able to print them anyway.
             panic!("{err}");
         }
-    };
-    user_choice
-        .write_to_file()
-        .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
-    todo!("locales/");
-    Ok(ExitCode::SUCCESS)
+    }
 }
 
 ///
@@ -63,6 +59,24 @@ pub struct CreateConfigError {
 
     ///
     pub path: RelativePathBuf,
+}
+
+#[derive(Debug)]
+enum MietteOrIoError {
+    Miette(miette::Report),
+    Io(io::Error),
+}
+
+fn do_it() -> Result<(), MietteOrIoError> {
+    cliclack::intro("Mulan").map_err(MietteOrIoError::Io)?;
+    let user_choice = UserChoice::interactive_prompt().map_err(MietteOrIoError::Io)?;
+    user_choice
+        .write_to_file()
+        .map_err(|err| err.to_report(&mulan_config::Config::dummy()))
+        .map_err(MietteOrIoError::Miette)?;
+    todo!("locales/");
+    cliclack::outro("You're all set").map_err(MietteOrIoError::Io)?;
+    Ok(())
 }
 
 ///
@@ -82,11 +96,9 @@ struct UserChoice {
 impl UserChoice {
     ///
     fn interactive_prompt() -> io::Result<Self> {
-        cliclack::intro("Mulan")?;
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
         let generate = Self::prompt_generate()?.map(SmallVec1::from_one);
-        cliclack::outro("You're all set")?;
         Ok(UserChoice {
             locales,
             main_locale,
