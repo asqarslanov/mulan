@@ -933,6 +933,7 @@ dependencies = [
  "cliclack",
  "compact_str",
  "figment2",
+ "indoc",
  "itertools 0.15.0",
  "miette",
  "mitsein",

@@ -1,8 +1,10 @@
 use std::fs;
 use std::io;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use indoc::indoc;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
@@ -75,7 +77,7 @@ fn do_it() -> Result<(), MietteOrIoError> {
         .write_to_file()
         .map_err(|err| err.to_report(&mulan_config::Config::dummy()))
         .map_err(MietteOrIoError::Miette)?;
-    todo!("locales/");
+    create_locale_files(&user_choice.locales);
     cliclack::outro("You're all set").map_err(MietteOrIoError::Io)?;
     Ok(())
 }
@@ -160,4 +162,24 @@ impl UserChoice {
         let file = RelativePathBuf::from_path(path).expect("validated above");
         Ok(Some(Target::Rust(RustTarget { file })))
     }
+}
+
+///
+fn create_locale_files(locales: &[Language]) -> io::Result<()> {
+    let dir_path = RelativePathBuf::from("locales");
+    fs::create_dir(dir_path.as_str());
+    for locale in locales {
+        let contents = match locale {
+            Language::RuRu => indoc! {r#"
+                greeting: "Привет, {name}!"
+            "#},
+            _ => indoc! {r#"
+                greeting: "Hello, {name}!"
+            "#},
+        };
+        let path = dir_path.join(locale.tag().as_str()).with_extension("yaml");
+        let mut file = fs::File::create_new(path.as_str()).unwrap();
+        file.write_all(contents.as_bytes());
+    }
+    Ok(())
 }
