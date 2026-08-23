@@ -107,6 +107,7 @@ impl UserChoice {
         })
     }
 
+    ///
     fn write_to_file(&self) -> Result<(), CreateConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
