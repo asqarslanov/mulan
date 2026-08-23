@@ -117,7 +117,7 @@ impl UserChoice {
 
     ///
     fn prompt_locales(all_possible_locales: &[Language]) -> io::Result<Vec<Language>> {
-        cliclack::multiselect("locales")
+        cliclack::multiselect("Select locales you want to support")
             .items(
                 &all_possible_locales
                     .iter()
@@ -135,14 +135,16 @@ impl UserChoice {
                 .map(|&lang| (lang, lang.tag(), lang.name()))
                 .collect_vec()
         };
-        cliclack::select("main locale").items(&items).interact()
+        cliclack::select("Choose the main locale")
+            .items(&items)
+            .interact()
     }
 
     ///
     fn prompt_generate() -> io::Result<Option<Target>> {
-        let yes_hint = "you will need to specify a path where Rust bindings should be generated";
-        let no_hint = "you can always add it later in `mulan.toml`";
-        let add = cliclack::select("add a Rust codegen target?")
+        let yes_hint = "you will need to specify a path to where bindings should be generated";
+        let no_hint = "you can always add it later";
+        let add = cliclack::select("Add a Rust codegen target?")
             .item(true, "Yes", yes_hint)
             .item(false, "No", no_hint)
             .interact()?;
