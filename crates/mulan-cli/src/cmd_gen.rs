@@ -8,10 +8,6 @@ use crate::i18n::{Locale, t};
 /// ```sh
 /// $ mulan gen ...
 /// ```
-#[expect(
-    clippy::unused_self,
-    reason = "to consistently use args.execute() in main"
-)]
 pub fn execute() -> miette::Result<ExitCode> {
     let config = mulan_config::Config::locate_and_read()
         .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
