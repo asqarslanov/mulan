@@ -126,7 +126,7 @@ impl crate::Config {
         config
     }
 
-    /// ...
+    ///
     pub fn locate_without_parents() -> Result<RelativePathBuf, LocateError> {
         let path = RelativePathBuf::from("mulan.toml");
         let exists = match path.to_path("").try_exists() {
