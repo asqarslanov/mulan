@@ -2,6 +2,11 @@ cmd-gen:
   log: "Generated {target} bindings in `{path}`"
 
 errors:
+  cli:
+    init:
+      config-exists:
+        message: "config already exists at `{path}`"
+
   config:
     parse:
       invalid-type:
@@ -47,6 +52,13 @@ errors:
         first-label: "maybe this?"
         second-label: "or maybe this?"
         other-labels: "or maybe even this?"
+
+    locate:
+      io:
+        message: |-
+          failed to check if {path} exists
+          OS error: {os-error}
+        help: "make sure that you have listing permissions"
 
   parser:
     read:

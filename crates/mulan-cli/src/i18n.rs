@@ -48,6 +48,40 @@ pub mod t {
     pub mod errors {
         use super::Locale;
 
+        /// `errors.cli`
+        pub mod cli {
+            use super::Locale;
+
+            /// `errors.cli.init`
+            pub mod init {
+                use super::Locale;
+
+                /// `errors.cli.init.config-exists`
+                pub mod config_exists {
+                    use super::Locale;
+
+                    /// `errors.cli.init.config-exists.message`
+                    ///
+                    /// ```mulan
+                    /// config already exists at `{path}`
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'path> {
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("config already exists at `{path}`", path = self.path),
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /// `errors.config`
         pub mod config {
             use super::Locale;
@@ -188,6 +222,54 @@ pub mod t {
                     pub fn get_in(&self, locale: Locale) -> String {
                         match locale {
                             _ => format!("failed to get current working directory\n- OS error: {os_error}", os_error = self.os_error),
+                        }
+                    }
+                }
+            }
+
+            /// `errors.config.locate`
+            pub mod locate {
+                use super::Locale;
+
+                /// `errors.config.locate.io`
+                pub mod io {
+                    use super::Locale;
+
+                    /// `errors.config.locate.io.help`
+                    ///
+                    /// ```mulan
+                    /// make sure that you have listing permissions
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "make sure that you have listing permissions",
+                            }
+                        }
+                    }
+
+                    /// `errors.config.locate.io.message`
+                    ///
+                    /// ```mulan
+                    /// failed to check if {path} exists
+                    /// OS error: {os-error}
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("failed to check if {path} exists\nOS error: {os_error}", os_error = self.os_error, path = self.path),
+                            }
                         }
                     }
                 }

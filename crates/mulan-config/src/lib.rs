@@ -20,7 +20,7 @@ use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
 pub use self::meta::ConfigMeta;
-use crate::errors::{ConfigError, FigmentError};
+use crate::errors::{ConfigError, FigmentError, LocateError, LocateIoError, NotFoundError};
 
 pub mod errors;
 mod language;
@@ -124,6 +124,20 @@ impl crate::Config {
             config.meta = meta;
         }
         config
+    }
+
+    /// ...
+    pub fn locate_without_parents() -> Result<RelativePathBuf, LocateError> {
+        let path = RelativePathBuf::from("mulan.toml");
+        let exists = match path.to_path("").try_exists() {
+            Ok(exists) => exists,
+            Err(error) => return Err(LocateError::Io(LocateIoError { path, error })),
+        };
+        if exists {
+            Ok(path)
+        } else {
+            Err(LocateError::NotFound(NotFoundError))
+        }
     }
 
     /// Returns an iterator over [`Self::locales`]

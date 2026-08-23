@@ -262,6 +262,29 @@ impl miette::Diagnostic for self::ReportData {
     }
 }
 
+impl self::Reportable for crate::cmd_init::ConfigExistsError {
+    fn message(&self, _: &mulan_config::Config) -> String {
+        let path = self.path.as_str();
+        t::errors::cli::init::config_exists::Message { path }.get_in(Locale::default())
+    }
+
+    fn code(&self) -> &'static str {
+        "cli::init::config_exists"
+    }
+
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
+        None
+    }
+
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
 impl self::ToReport for mulan_config::errors::ConfigError {
     fn to_report(&self, dummy_config: &mulan_config::Config) -> miette::Report {
         match self {
@@ -451,6 +474,31 @@ impl self::Reportable for mulan_config::errors::AmbiguousSourceError {
     }
 
     fn related(&self, _config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for mulan_config::errors::LocateIoError {
+    fn message(&self, _: &mulan_config::Config) -> String {
+        let os_error = &self.error.to_compact_string();
+        let path = self.path.as_str();
+        t::errors::config::locate::io::Message { os_error, path }.get_in(Locale::default())
+    }
+
+    fn code(&self) -> &'static str {
+        "config::locate::io"
+    }
+
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
+        let message = t::errors::config::locate::io::Help.get_in(Locale::default());
+        Some(message.to_owned())
+    }
+
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::empty()
     }
 }

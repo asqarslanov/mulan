@@ -49,3 +49,26 @@ pub struct SourceNotFoundError;
 pub struct AmbiguousSourceError {
     pub possible_sources: BTreeSet1<RelativePathBuf>,
 }
+
+/// Errors of [`crate::Config::locate_without_parents`].
+#[derive(Debug)]
+pub enum LocateError {
+    /// ...
+    NotFound(NotFoundError),
+
+    /// ...
+    Io(LocateIoError),
+}
+
+/// See [`LocateError::NotFound`].
+#[derive(Debug)]
+pub struct NotFoundError;
+
+/// See [`LocateError::Io`].
+#[derive(Debug)]
+pub struct LocateIoError {
+    /// The path we were trying to check the existence of.
+    pub path: RelativePathBuf,
+
+    pub error: io::Error,
+}

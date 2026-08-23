@@ -22,6 +22,7 @@ mitsein = { workspace = true, features = ["smallvec"] }
 mulan-config = { workspace = true }
 mulan-gen = { workspace = true }
 mulan-parser = { workspace = true }
+relative-path = { workspace = true }
 serde-saphyr = { workspace = true }
 thiserror = { workspace = true }
 

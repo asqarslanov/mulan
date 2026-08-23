@@ -939,6 +939,7 @@ dependencies = [
  "mulan-config",
  "mulan-gen",
  "mulan-parser",
+ "relative-path 2.0.1",
  "serde-saphyr",
  "thiserror",
 ]
