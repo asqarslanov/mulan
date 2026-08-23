@@ -9,12 +9,13 @@ use std::process::ExitCode;
     clippy::unwrap_used,
     reason = "
         A `cliclack` error indicates that we can't print to the console.
-        There's no meaningful strategy to recover from this.
-        Also, there's no point in creating Miette reports---
+        There's no meaningful recovery strategy, so we just use `.unwrap()`.
+        Also, there's no point in creating rich Miette reports---
         we won't probably be able to print them anyway.
     "
 )]
 pub fn execute() -> miette::Result<ExitCode> {
-    cliclack::intro("Hello").unwrap();
-    todo!();
+    cliclack::intro("Mulan").unwrap();
+    cliclack::outro("You're all set").unwrap();
+    Ok(ExitCode::SUCCESS)
 }
