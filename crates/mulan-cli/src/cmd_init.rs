@@ -67,16 +67,41 @@ impl UserChoice {
     fn interactive_prompt() -> io::Result<Self> {
         cliclack::intro("Mulan")?;
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
-        let main_locale = *{
-            cliclack::select("main locale")
-                .items(
-                    &locales
-                        .iter()
-                        .map(|lang| (lang, lang.tag(), lang.name()))
-                        .collect_vec(),
-                )
-                .interact()?
+        let main_locale = Self::prompt_main_locale(&locales)?;
+        let generate = Self::prompt_generate()?;
+        cliclack::outro("You're all set")?;
+        Ok(UserChoice {
+            locales,
+            main_locale,
+            generate,
+        })
+    }
+
+    ///
+    fn prompt_locales(all_possible_locales: &[Language]) -> io::Result<Vec<Language>> {
+        cliclack::multiselect("locales")
+            .items(
+                &all_possible_locales
+                    .iter()
+                    .map(|&lang| (lang, lang.tag(), lang.name()))
+                    .collect_vec(),
+            )
+            .interact()
+    }
+
+    ///
+    fn prompt_main_locale(locales: &[Language]) -> io::Result<Language> {
+        let items = {
+            locales
+                .iter()
+                .map(|&lang| (lang, lang.tag(), lang.name()))
+                .collect_vec()
         };
+        cliclack::select("main locale").items(&items).interact()
+    }
+
+    ///
+    fn prompt_generate() -> io::Result<Vec<Target>> {
         let mut generate = Vec::new();
         loop {
             let add = cliclack::select("add a generation target")
@@ -93,22 +118,6 @@ impl UserChoice {
                 file: RelativePathBuf::from_path(path).unwrap(),
             }));
         }
-        cliclack::outro("You're all set")?;
-        Ok(UserChoice {
-            locales,
-            main_locale,
-            generate,
-        })
-    }
-
-    fn prompt_locales(all_possible_locales: &[Language]) -> io::Result<Vec<Language>> {
-        cliclack::multiselect("locales")
-            .items(
-                &all_possible_locales
-                    .iter()
-                    .map(|&lang| (lang, lang.tag(), lang.name()))
-                    .collect_vec(),
-            )
-            .interact()
+        todo!();
     }
 }
