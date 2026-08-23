@@ -22,7 +22,6 @@ pub fn execute() -> miette::Result<ExitCode> {
         Err(LocateError::Io(e)) => return Err(e.to_report(&mulan_config::Config::dummy())),
         Err(LocateError::NotFound(NotFoundError)) => (),
     }
-
     match interactive_prompt() {
         Ok(()) => Ok(ExitCode::SUCCESS),
         Err(err) if matches!(err.kind(), io::ErrorKind::Interrupted) => Ok(ExitCode::from(SIGINT)),
