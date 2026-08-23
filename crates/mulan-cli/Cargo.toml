@@ -23,6 +23,7 @@ mulan-config = { workspace = true }
 mulan-gen = { workspace = true }
 mulan-parser = { workspace = true }
 relative-path = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde-saphyr = { workspace = true }
 thiserror = { workspace = true }
 

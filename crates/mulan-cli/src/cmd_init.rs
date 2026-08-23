@@ -111,13 +111,17 @@ impl UserChoice {
             if !add {
                 break;
             }
-            let path: PathBuf = cliclack::input("path")
-                .default_input("src/mulan.rs")
-                .interact()?;
-            generate.push(Target::Rust(RustTarget {
-                file: RelativePathBuf::from_path(path).unwrap(),
-            }));
+            let path: PathBuf = {
+                cliclack::input("path")
+                    .default_input("src/mulan.rs")
+                    .validate_on_enter(|input: &String| {
+                        RelativePathBuf::from_path(input).map(|_| ())
+                    })
+                    .interact()?
+            };
+            let file = RelativePathBuf::from_path(path).expect("validated above");
+            generate.push(Target::Rust(RustTarget { file }));
         }
-        todo!();
+        Ok(generate)
     }
 }
