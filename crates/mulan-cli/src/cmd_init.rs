@@ -61,6 +61,7 @@ pub struct CreateConfigError {
     pub path: RelativePathBuf,
 }
 
+///
 #[derive(Debug)]
 enum MietteOrIoError {
     Miette(miette::Report),
