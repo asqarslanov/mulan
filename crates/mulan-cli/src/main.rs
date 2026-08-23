@@ -11,7 +11,7 @@ mod i18n;
 fn main() -> miette::Result<ExitCode> {
     let cli = <self::Cli as clap::Parser>::parse();
     match cli.command {
-        Command::Gen => self::cmd_gen::execute(),
+        Command::Gen => self::cmd_gen::execute().map(|()| ExitCode::SUCCESS),
         Command::Init => self::cmd_init::execute(),
     }
 }

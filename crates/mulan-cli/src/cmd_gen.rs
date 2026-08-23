@@ -1,5 +1,3 @@
-use std::process::ExitCode;
-
 use crate::error_reporting::ToReport as _;
 use crate::i18n::{Locale, t};
 
@@ -8,7 +6,7 @@ use crate::i18n::{Locale, t};
 /// ```sh
 /// $ mulan gen ...
 /// ```
-pub fn execute() -> miette::Result<ExitCode> {
+pub fn execute() -> miette::Result<()> {
     let config = mulan_config::Config::locate_and_read()
         .map_err(|err| err.to_report(&mulan_config::Config::dummy()))?;
     let output = mulan_parser::compose(&config).map_err(|err| err.to_report(&config))?;
@@ -26,5 +24,5 @@ pub fn execute() -> miette::Result<ExitCode> {
             println!("{}", log.get_in(Locale::default()));
         }
     }
-    Ok(ExitCode::SUCCESS)
+    Ok(())
 }
