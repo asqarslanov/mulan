@@ -53,10 +53,10 @@ pub struct AmbiguousSourceError {
 /// Errors of [`crate::Config::locate_without_parents`].
 #[derive(Debug)]
 pub enum LocateError {
-    /// ...
+    ///
     NotFound(NotFoundError),
 
-    /// ...
+    ///
     Io(LocateIoError),
 }
 

@@ -29,11 +29,14 @@ pub fn execute() -> miette::Result<ExitCode> {
     }
 }
 
+///
 #[derive(Debug)]
 pub struct ConfigExistsError {
+    ///
     pub path: RelativePathBuf,
 }
 
+///
 fn interactive_prompt() -> io::Result<()> {
     cliclack::intro("Mulan")?;
     let _: String = cliclack::input("test").interact()?;

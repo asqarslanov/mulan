@@ -25,7 +25,7 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Command {
-    /// ...
+    ///
     Init,
 
     /// Generate i18n bindings for your targets
