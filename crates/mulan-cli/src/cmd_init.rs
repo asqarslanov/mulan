@@ -140,13 +140,11 @@ impl UserChoice {
 
     ///
     fn prompt_generate() -> io::Result<Option<Target>> {
-        let add = cliclack::select("add a Rust codegen target")
-            .item(
-                true,
-                "Yes",
-                "you will need to specify a path where Rust bindings should be generated",
-            )
-            .item(false, "No", "you can always add it later in `mulan.toml`")
+        let yes_hint = "you will need to specify a path where Rust bindings should be generated";
+        let no_hint = "you can always add it later in `mulan.toml`";
+        let add = cliclack::select("add a Rust codegen target?")
+            .item(true, "Yes", yes_hint)
+            .item(false, "No", no_hint)
             .interact()?;
         if !add {
             return Ok(None);
