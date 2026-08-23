@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use itertools::Itertools as _;
+use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
 use mulan_config::{Language, RustTarget, Target};
 use relative_path::RelativePathBuf;
@@ -66,6 +67,7 @@ pub struct CreateConfigError {
 
 ///
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "kebab-case")]
 struct UserChoice {
     ///
     locales: Vec<Language>,
@@ -74,7 +76,7 @@ struct UserChoice {
     main_locale: Language,
 
     ///
-    generate: Vec<Target>,
+    generate: Option<SmallVec1<[Target; 1]>>,
 }
 
 impl UserChoice {
@@ -83,7 +85,7 @@ impl UserChoice {
         cliclack::intro("Mulan")?;
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
-        let generate = Self::prompt_generate()?;
+        let generate = Self::prompt_generate()?.map(SmallVec1::from_one);
         cliclack::outro("You're all set")?;
         Ok(UserChoice {
             locales,
@@ -123,27 +125,21 @@ impl UserChoice {
     }
 
     ///
-    fn prompt_generate() -> io::Result<Vec<Target>> {
-        let mut generate = Vec::new();
-        loop {
-            let add = cliclack::select("add a generation target")
-                .item(false, "no", "don't")
-                .item(true, "yes", "add")
-                .interact()?;
-            if !add {
-                break;
-            }
-            let path: PathBuf = {
-                cliclack::input("path")
-                    .default_input("src/mulan.rs")
-                    .validate_on_enter(|input: &String| {
-                        RelativePathBuf::from_path(input).map(|_| ())
-                    })
-                    .interact()?
-            };
-            let file = RelativePathBuf::from_path(path).expect("validated above");
-            generate.push(Target::Rust(RustTarget { file }));
+    fn prompt_generate() -> io::Result<Option<Target>> {
+        let add = cliclack::select("add a Rust codegen target")
+            .item(true, "Yes", "You will need to specify a path")
+            .item(false, "No", "You can do it later")
+            .interact()?;
+        if !add {
+            return Ok(None);
         }
-        Ok(generate)
+        let path: PathBuf = {
+            cliclack::input("path")
+                .default_input("src/mulan.rs")
+                .validate_on_enter(|input: &String| RelativePathBuf::from_path(input).map(|_| ()))
+                .interact()?
+        };
+        let file = RelativePathBuf::from_path(path).expect("validated above");
+        Ok(Some(Target::Rust(RustTarget { file })))
     }
 }
