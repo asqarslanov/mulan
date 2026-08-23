@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use mulan_config::errors::{LocateError, NotFoundError};
 use relative_path::RelativePathBuf;
 
-use crate::error_reporting::ToReport;
+use crate::error_reporting::ToReport as _;
 
 /// Ctrl+C interruption exit code.
 const SIGINT: u8 = 128 + 2;
