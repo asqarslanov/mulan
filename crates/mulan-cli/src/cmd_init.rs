@@ -96,7 +96,7 @@ impl UserChoice {
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
         let generate = Self::prompt_generate()?.map(SmallVec1::from_one);
-        Ok(UserChoice {
+        Ok(Self {
             locales,
             main_locale,
             generate,
