@@ -1,5 +1,6 @@
 use std::fs::{self, File};
 use std::io::{self, Write};
+use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -22,13 +23,7 @@ const SIGINT: u8 = 128 + 2;
 /// $ mulan init ...
 /// ```
 pub fn execute() -> miette::Result<ExitCode> {
-    match mulan_config::Config::locate_without_parents() {
-        Ok(path) => {
-            return Err(ConfigExistsError { path }.to_report(&mulan_config::Config::dummy()));
-        }
-        Err(LocateError::Io(e)) => return Err(e.to_report(&mulan_config::Config::dummy())),
-        Err(LocateError::NotFound(NotFoundError)) => (),
-    }
+    verify_no_config_exists().continue_ok()?;
     match prompt_and_init() {
         Ok(()) => Ok(ExitCode::SUCCESS),
         Err(PromptAndInitError::Cancel) => {
@@ -57,6 +52,25 @@ pub fn execute() -> miette::Result<ExitCode> {
 pub struct ConfigExistsError {
     /// The path of the existing Mulan config.
     pub path: RelativePathBuf,
+}
+
+/// Used in the [`execute`] function to know whether we should
+/// proceed (no config exists) or abort (a config exists).
+fn verify_no_config_exists() -> ControlFlow<miette::Report> {
+    match mulan_config::Config::locate_without_parents() {
+        Ok(path) => {
+            // If a config exists, we shouldn't try to initialize a new one.
+            ControlFlow::Break(ConfigExistsError { path }.to_report(&mulan_config::Config::dummy()))
+        }
+        Err(LocateError::Io(e)) => {
+            // If we can't know whether a config exists, it's another beast of an error.
+            ControlFlow::Break(e.to_report(&mulan_config::Config::dummy()))
+        }
+        Err(LocateError::NotFound(NotFoundError)) => {
+            // Only when a config doesn't exist can we go next.
+            ControlFlow::Continue(())
+        }
+    }
 }
 
 /// Errors of [`prompt_and_init`].
