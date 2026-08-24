@@ -1,5 +1,5 @@
 cmd-init:
-  intro: "Mulan"
+  intro: "Mulan / Setup Wizard"
   locales: "Select locales you want to support"
   main-locale: "Choose the main locale"
   generate:

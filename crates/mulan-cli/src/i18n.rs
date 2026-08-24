@@ -104,7 +104,7 @@ pub mod t {
         /// `cmd-init.intro`
         ///
         /// ```mulan
-        /// Mulan
+        /// Mulan / Setup Wizard
         /// ```
         #[must_use]
         pub struct Intro;
@@ -113,7 +113,7 @@ pub mod t {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "Mulan",
+                    _ => "Mulan / Setup Wizard",
                 }
             }
         }
