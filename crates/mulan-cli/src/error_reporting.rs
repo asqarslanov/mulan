@@ -330,11 +330,11 @@ impl self::Reportable for crate::cmd_init::CreateLocalesDirError {
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
-        todo!()
+        None
     }
 
     fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        todo!()
+        iter::empty()
     }
 }
 
@@ -352,11 +352,11 @@ impl self::Reportable for crate::cmd_init::CreateLocaleFileError {
     }
 
     fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
-        todo!()
+        None
     }
 
     fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
-        todo!()
+        iter::empty()
     }
 }
 
