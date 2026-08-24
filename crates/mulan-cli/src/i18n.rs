@@ -154,6 +154,23 @@ pub mod t {
                 }
             }
 
+            /// `cmd-init.generate.path`
+            ///
+            /// ```mulan
+            /// Enter the file path where Rust bindings should be generated
+            /// ```
+            #[must_use]
+            pub struct Path;
+
+            impl Path {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Enter the file path where Rust bindings should be generated",
+                    }
+                }
+            }
+
             /// `cmd-init.generate.prompt`
             ///
             /// ```mulan

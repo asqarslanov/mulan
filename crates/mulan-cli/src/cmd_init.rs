@@ -188,7 +188,7 @@ impl InitConfig {
             return Ok(None);
         }
         let path: PathBuf = {
-            cliclack::input("path")
+            cliclack::input(t::cmd_init::generate::Path.get_in(Locale::default()))
                 .default_input("src/mulan.rs")
                 .validate_on_enter(|input: &String| RelativePathBuf::from_path(input).map(|_| ()))
                 .interact()?

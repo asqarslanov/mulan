@@ -4,6 +4,7 @@ cmd-init:
   main-locale: "Choose the main locale"
   generate:
     prompt: "Add a Rust codegen target?"
+    path: "Enter the file path where Rust bindings should be generated"
     yes-label: "Yes"
     yes-hint: "you will need to specify a path to where bindings should be generated"
     no-label: "No"
