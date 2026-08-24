@@ -87,7 +87,7 @@ pub struct WriteConfigError {
 /// Errors of [`prompt_and_init`].
 #[derive(Debug)]
 enum PromptAndInitError {
-    /// Initialization manually not confirmed by the user.
+    /// The user manually didn't confirm initialization.
     Cancel,
 
     /// A [`mod@cliclack`] error (e.g., Ctrl+C or couldn't print to the console).
