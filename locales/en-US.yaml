@@ -1,3 +1,7 @@
+cmd-init:
+  intro: "Mulan"
+  outro: "You're all set"
+
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"
 

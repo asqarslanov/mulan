@@ -44,6 +44,45 @@ pub mod t {
         }
     }
 
+    /// `cmd-init`
+    pub mod cmd_init {
+        use super::Locale;
+
+        /// `cmd-init.intro`
+        ///
+        /// ```mulan
+        /// Mulan
+        /// ```
+        #[must_use]
+        pub struct Intro;
+
+        impl Intro {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Mulan",
+                }
+            }
+        }
+
+        /// `cmd-init.outro`
+        ///
+        /// ```mulan
+        /// You're all set
+        /// ```
+        #[must_use]
+        pub struct Outro;
+
+        impl Outro {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "You\'re all set",
+                }
+            }
+        }
+    }
+
     /// `errors`
     pub mod errors {
         use super::Locale;

@@ -12,6 +12,7 @@ use relative_path::RelativePathBuf;
 use serde::Serialize;
 
 use crate::error_reporting::ToReport as _;
+use crate::i18n::{Locale, t};
 
 /// Ctrl+C interruption exit code.
 const SIGINT: u8 = 128 + 2;
@@ -65,14 +66,14 @@ pub struct CreateConfigError {
 ///
 fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     todo!("use mulan");
-    cliclack::intro("Mulan").map_err(Either::Left)?;
+    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
     let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
     user_choice
         .write_to_file()
         .map_err(|err| err.to_report(&mulan_config::Config::dummy()))
         .map_err(Either::Right)?;
     create_locale_files(&user_choice.locales);
-    cliclack::outro("You're all set").map_err(Either::Left)?;
+    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(Either::Left)?;
     Ok(())
 }
 
