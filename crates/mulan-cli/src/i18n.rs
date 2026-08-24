@@ -48,10 +48,63 @@ pub mod t {
     pub mod cmd_init {
         use super::Locale;
 
+        /// `cmd-init.canceled`
+        ///
+        /// ```mulan
+        /// Operation cancelled.
+        /// ```
+        #[must_use]
+        pub struct Canceled;
+
+        impl Canceled {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Operation cancelled.",
+                }
+            }
+        }
+
+        /// `cmd-init.created-config`
+        ///
+        /// ```mulan
+        /// Created config at `{path}`
+        /// ```
+        #[must_use]
+        pub struct CreatedConfig<'path> {
+            pub path: &'path str,
+        }
+
+        impl CreatedConfig<'_> {
+            #[must_use]
+            pub fn get_in(&self, locale: Locale) -> String {
+                match locale {
+                    _ => format!("Created config at `{path}`", path = self.path),
+                }
+            }
+        }
+
+        /// `cmd-init.defined-locales`
+        ///
+        /// ```mulan
+        /// Defined sample locales at `locales/`
+        /// ```
+        #[must_use]
+        pub struct DefinedLocales;
+
+        impl DefinedLocales {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Defined sample locales at `locales/`",
+                }
+            }
+        }
+
         /// `cmd-init.intro`
         ///
         /// ```mulan
-        /// Mulan
+        /// Mulan / Setup Wizard
         /// ```
         #[must_use]
         pub struct Intro;
@@ -60,7 +113,7 @@ pub mod t {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "Mulan",
+                    _ => "Mulan / Setup Wizard",
                 }
             }
         }
@@ -102,7 +155,10 @@ pub mod t {
         /// `cmd-init.outro`
         ///
         /// ```mulan
-        /// You're all set
+        /// Done!
+
+        ///    Feel free to modify the generated config to your liking.
+        ///    Use `mulan gen` to generate i18n bindings.
         /// ```
         #[must_use]
         pub struct Outro;
@@ -111,7 +167,41 @@ pub mod t {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "You\'re all set",
+                    _ => "Done!\n\n   Feel free to modify the generated config to your liking.\n   Use `mulan gen` to generate i18n bindings.",
+                }
+            }
+        }
+
+        /// `cmd-init.prompt-confirm`
+        ///
+        /// ```mulan
+        /// Confirm?
+        /// ```
+        #[must_use]
+        pub struct PromptConfirm;
+
+        impl PromptConfirm {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Confirm?",
+                }
+            }
+        }
+
+        /// `cmd-init.prompt-create-locales`
+        ///
+        /// ```mulan
+        /// Create locale files?
+        /// ```
+        #[must_use]
+        pub struct PromptCreateLocales;
+
+        impl PromptCreateLocales {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Create locale files?",
                 }
             }
         }
@@ -150,6 +240,23 @@ pub mod t {
                 pub const fn get_in(&self, locale: Locale) -> &'static str {
                     match locale {
                         _ => "No",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.path`
+            ///
+            /// ```mulan
+            /// Enter the file path where Rust bindings should be generated
+            /// ```
+            #[must_use]
+            pub struct Path;
+
+            impl Path {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Enter the file path where Rust bindings should be generated",
                     }
                 }
             }

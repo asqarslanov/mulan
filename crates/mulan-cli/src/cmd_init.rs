@@ -1,9 +1,9 @@
 use std::fs::{self, File};
 use std::io::{self, Write};
+use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use either::Either;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
@@ -23,27 +23,27 @@ const SIGINT: u8 = 128 + 2;
 /// $ mulan init ...
 /// ```
 pub fn execute() -> miette::Result<ExitCode> {
-    match mulan_config::Config::locate_without_parents() {
-        Ok(path) => {
-            return Err(ConfigExistsError { path }.to_report(&mulan_config::Config::dummy()));
-        }
-        Err(LocateError::Io(e)) => return Err(e.to_report(&mulan_config::Config::dummy())),
-        Err(LocateError::NotFound(NotFoundError)) => (),
-    }
+    verify_no_config_exists().continue_ok()?;
     match prompt_and_init() {
         Ok(()) => Ok(ExitCode::SUCCESS),
-        Err(Either::Right(miette_report)) => Err(miette_report),
-        Err(Either::Left(io_err)) if matches!(io_err.kind(), io::ErrorKind::Interrupted) => {
+        Err(PromptAndInitError::Cancel) => {
+            // Cancelled at the end.
+            Ok(ExitCode::from(SIGINT))
+        }
+        Err(PromptAndInitError::Cliclack(err))
+            if matches!(err.kind(), io::ErrorKind::Interrupted) =>
+        {
             // Ctrl+C interrupt.
             Ok(ExitCode::from(SIGINT))
         }
-        Err(Either::Left(io_err)) => {
+        Err(PromptAndInitError::Cliclack(err)) => {
             // A `cliclack` error indicates that we couldn't print to the console.
             // There's no meaningful recovery strategy, so we just `panic!`.
             // There's no point in creating rich Miette reports---
             // we won't probably be able to print them anyway.
-            panic!("{io_err}");
+            panic!("{err}");
         }
+        Err(PromptAndInitError::Miette(report)) => Err(report),
     }
 }
 
@@ -52,6 +52,103 @@ pub fn execute() -> miette::Result<ExitCode> {
 pub struct ConfigExistsError {
     /// The path of the existing Mulan config.
     pub path: RelativePathBuf,
+}
+
+/// Used in the [`execute`] function to know whether we should
+/// proceed (no config exists) or abort (a config exists).
+fn verify_no_config_exists() -> ControlFlow<miette::Report> {
+    match mulan_config::Config::locate_without_parents() {
+        Ok(path) => {
+            // If a config exists, we shouldn't try to initialize a new one.
+            let report = ConfigExistsError { path }.to_report(&mulan_config::Config::dummy());
+            ControlFlow::Break(report)
+        }
+        Err(LocateError::Io(e)) => {
+            // If we can't know whether a config exists, it's another beast of an error.
+            let report = e.to_report(&mulan_config::Config::dummy());
+            ControlFlow::Break(report)
+        }
+        Err(LocateError::NotFound(NotFoundError)) => {
+            // Only when a config doesn't exist can we go next.
+            ControlFlow::Continue(())
+        }
+    }
+}
+
+/// Errors of [`prompt_and_init`].
+#[derive(Debug)]
+enum PromptAndInitError {
+    /// The user manually didn't confirm initialization.
+    Cancel,
+
+    /// A [`mod@cliclack`] error
+    /// (e.g., Ctrl+C or couldn't print to the console).
+    Cliclack(io::Error),
+
+    /// A ready-to-print report.
+    Miette(miette::Report),
+}
+
+/// Shows an interactive [`mod@cliclack`] menu and initializes Mulan
+/// in the current directory.
+fn prompt_and_init() -> Result<(), PromptAndInitError> {
+    use PromptAndInitError as E;
+    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(E::Cliclack)?;
+    let init_options = InitConfig::interactive_prompt().map_err(E::Cliclack)?;
+    let confirm = {
+        let prompt = t::cmd_init::PromptConfirm.get_in(Locale::default());
+        cliclack::confirm(prompt)
+            .initial_value(true)
+            .interact()
+            .map_err(E::Cliclack)?
+    };
+    if !confirm {
+        let message = t::cmd_init::Canceled.get_in(Locale::default());
+        cliclack::outro_cancel(message).map_err(E::Cliclack)?;
+        return Err(E::Cancel);
+    }
+    match init_options.write_to_file() {
+        Ok(config_path) => {
+            let path = config_path.as_str();
+            let message = t::cmd_init::CreatedConfig { path }.get_in(Locale::default());
+            cliclack::note("", message).map_err(E::Cliclack)?;
+        }
+        Err(e) => {
+            let report = e.to_report(&mulan_config::Config::dummy());
+            return Err(E::Miette(report));
+        }
+    }
+    let create_locales = {
+        let prompt = t::cmd_init::PromptCreateLocales.get_in(Locale::default());
+        cliclack::confirm(prompt)
+            .initial_value(true)
+            .interact()
+            .map_err(E::Cliclack)?
+    };
+    if create_locales {
+        create_locale_files(&init_options.locales)
+            .map_err(|e| E::Miette(e.to_report(&mulan_config::Config::dummy())))?;
+        let message = t::cmd_init::DefinedLocales.get_in(Locale::default());
+        cliclack::note("", message).map_err(E::Cliclack)?;
+    }
+    let outro_message = t::cmd_init::Outro.get_in(Locale::default());
+    cliclack::outro(outro_message).map_err(E::Cliclack)?;
+    Ok(())
+}
+
+/// A simplified version of [`mulan_config::Config`]
+/// the user builds with a [`mod@cliclack`] interactive menu.
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "kebab-case")]
+struct InitConfig {
+    /// Maps to [`mulan_config::Config::locales`].
+    locales: Vec<Language>,
+
+    /// Maps to [`mulan_config::Config::main_locale`].
+    main_locale: Language,
+
+    /// Maps to [`mulan_config::Config::generate`].
+    generate: Option<SmallVec1<[Target; 1]>>,
 }
 
 /// Couldn't create a new Mulan config.
@@ -79,35 +176,6 @@ pub struct WriteConfigError {
     pub path: RelativePathBuf,
 }
 
-/// Shows an interactive [`mod@cliclack`] menu and initializes Mulan
-/// in the current directory.
-fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
-    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
-    let init_options = InitConfig::interactive_prompt().map_err(Either::Left)?;
-    init_options
-        .write_to_file()
-        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
-    create_locale_files(&init_options.locales)
-        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
-    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(Either::Left)?;
-    Ok(())
-}
-
-/// A simplified version of [`mulan_config::Config`]
-/// the user builds with a [`mod@cliclack`] interactive menu.
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "kebab-case")]
-struct InitConfig {
-    /// Maps to [`mulan_config::Config::locales`].
-    locales: Vec<Language>,
-
-    /// Maps to [`mulan_config::Config::main_locale`].
-    main_locale: Language,
-
-    /// Maps to [`mulan_config::Config::generate`].
-    generate: Option<SmallVec1<[Target; 1]>>,
-}
-
 impl InitConfig {
     /// Requests values to build this type from the user
     /// via an interactive [`mod@cliclack`] menu.
@@ -122,17 +190,18 @@ impl InitConfig {
         })
     }
 
-    /// Creates a new config file and writes data to it in a pretty form.
-    fn write_to_file(&self) -> Result<(), NewConfigError> {
+    /// Creates a new config file, writes data to it in a pretty form.
+    fn write_to_file(&self) -> Result<RelativePathBuf, NewConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
         let mut file = match File::create_new(path.as_str()) {
             Ok(file) => file,
             Err(error) => return Err(NewConfigError::Create(CreateConfigError { error, path })),
         };
-        file.write_all(contents.as_bytes())
-            .map_err(|error| NewConfigError::Write(WriteConfigError { error, path }))?;
-        Ok(())
+        if let Err(error) = file.write_all(contents.as_bytes()) {
+            return Err(NewConfigError::Write(WriteConfigError { error, path }));
+        }
+        Ok(path)
     }
 
     /// Request a [`Self::locales`] value from the user.
@@ -178,7 +247,7 @@ impl InitConfig {
             return Ok(None);
         }
         let path: PathBuf = {
-            cliclack::input("path")
+            cliclack::input(t::cmd_init::generate::Path.get_in(Locale::default()))
                 .default_input("src/mulan.rs")
                 .validate_on_enter(|input: &String| RelativePathBuf::from_path(input).map(|_| ()))
                 .interact()?
@@ -224,7 +293,8 @@ pub struct WriteLocaleFileError {
     pub path: RelativePathBuf,
 }
 
-/// Create a locales directory and all needed files inside of it.
+/// Create a locales directory and all needed files inside of it
+/// and logs the result to the user.
 ///
 /// # Errors
 ///
@@ -261,8 +331,10 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
                 return Err(CreateLocalesError::CreateFile(error));
             }
         };
-        file.write_all(contents.as_bytes())
-            .map_err(|error| CreateLocalesError::WriteFile(WriteLocaleFileError { error, path }))?;
+        if let Err(error) = file.write_all(contents.as_bytes()) {
+            let error = WriteLocaleFileError { error, path };
+            return Err(CreateLocalesError::WriteFile(error));
+        }
     }
     Ok(())
 }

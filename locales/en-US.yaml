@@ -1,14 +1,24 @@
 cmd-init:
-  intro: "Mulan"
+  intro: "Mulan / Setup Wizard"
   locales: "Select locales you want to support"
   main-locale: "Choose the main locale"
   generate:
     prompt: "Add a Rust codegen target?"
+    path: "Enter the file path where Rust bindings should be generated"
     yes-label: "Yes"
     yes-hint: "you will need to specify a path to where bindings should be generated"
     no-label: "No"
     no-hint: "you can always add it later"
-  outro: "You're all set"
+  prompt-confirm: "Confirm?"
+  canceled: "Operation cancelled." # imitating `cliclack`'s message
+  created-config: "Created config at `{path}`"
+  prompt-create-locales: "Create locale files?"
+  defined-locales: "Defined sample locales at `locales/`"
+  outro: |- # 3 spaces are needed for alignment
+    Done!
+
+       Feel free to modify the generated config to your liking.
+       Use `mulan gen` to generate i18n bindings.
 
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"
