@@ -67,7 +67,7 @@ pub struct CreateConfigError {
 /// in the current directory.
 fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
-    let init_options = InitOptions::interactive_prompt().map_err(Either::Left)?;
+    let init_options = InitConfig::interactive_prompt().map_err(Either::Left)?;
     init_options
         .write_to_file()
         .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
@@ -81,7 +81,7 @@ fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
 /// the user builds with a [`mod@cliclack`] interactive menu.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
-struct InitOptions {
+struct InitConfig {
     /// Maps to [`mulan_config::Config::locales`].
     locales: Vec<Language>,
 
@@ -92,7 +92,7 @@ struct InitOptions {
     generate: Option<SmallVec1<[Target; 1]>>,
 }
 
-impl InitOptions {
+impl InitConfig {
     ///
     fn interactive_prompt() -> io::Result<Self> {
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
