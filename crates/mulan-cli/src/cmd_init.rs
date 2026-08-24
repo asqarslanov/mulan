@@ -106,11 +106,10 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
             .map_err(PromptAndInitError::Cliclack)?;
         return Err(PromptAndInitError::Cancel);
     }
-    let config_path = {
-        init_options.write_to_file().map_err(|err| {
-            PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
-        })?
-    };
+    let config_path = init_options.write_to_file().map_err(|err| {
+        let report = err.to_report(&mulan_config::Config::dummy());
+        PromptAndInitError::Miette(report)
+    })?;
     cliclack::note(
         "",
         t::cmd_init::CreatedConfig {
