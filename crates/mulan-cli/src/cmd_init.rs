@@ -116,8 +116,17 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
     init_options
         .write_to_file()
         .map_err(|err| PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy())))?;
-    create_locale_files(&init_options.locales)
-        .map_err(|err| PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy())))?;
+    let create_locales = {
+        cliclack::confirm("Create `locales/` and locale files?")
+            .initial_value(true)
+            .interact()
+            .map_err(PromptAndInitError::Io)?
+    };
+    if create_locales {
+        create_locale_files(&init_options.locales).map_err(|err| {
+            PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
+        })?;
+    }
     cliclack::outro(t::cmd_init::Outro.get_in(Locale::default()))
         .map_err(PromptAndInitError::Io)?;
     Ok(())
