@@ -322,7 +322,7 @@ impl self::Reportable for crate::cmd_init::CreateLocalesDirError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "cli::init::create_locales_dir"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
@@ -344,7 +344,7 @@ impl self::Reportable for crate::cmd_init::CreateLocaleFileError {
     }
 
     fn code(&self) -> &'static str {
-        todo!()
+        "cli::init::create_locale_file"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
