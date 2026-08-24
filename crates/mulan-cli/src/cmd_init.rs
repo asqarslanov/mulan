@@ -113,11 +113,15 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
             .map_err(PromptAndInitError::Io)?;
         return Err(PromptAndInitError::Cancel);
     }
-    init_options
-        .write_to_file()
-        .map_err(|err| PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy())))?;
+    let config_path = {
+        init_options.write_to_file().map_err(|err| {
+            PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
+        })?
+    };
+    cliclack::note("", format_compact!("Created `{config_path}`"))
+        .map_err(PromptAndInitError::Io)?;
     let create_locales = {
-        cliclack::confirm("Create `locales/` and locale files?")
+        cliclack::confirm("Create and locale files?")
             .initial_value(true)
             .interact()
             .map_err(PromptAndInitError::Io)?
@@ -126,6 +130,8 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         create_locale_files(&init_options.locales).map_err(|err| {
             PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
         })?;
+        cliclack::note("", format_compact!("Created `locales/`"))
+            .map_err(PromptAndInitError::Io)?;
     }
     cliclack::outro(t::cmd_init::Outro.get_in(Locale::default()))
         .map_err(PromptAndInitError::Io)?;
@@ -161,9 +167,8 @@ impl InitConfig {
         })
     }
 
-    /// Creates a new config file, writes data to it in a pretty form,
-    /// and logs the result to the user.
-    fn write_to_file(&self) -> Result<(), NewConfigError> {
+    /// Creates a new config file, writes data to it in a pretty form.
+    fn write_to_file(&self) -> Result<RelativePathBuf, NewConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
         let mut file = match File::create_new(path.as_str()) {
@@ -173,8 +178,7 @@ impl InitConfig {
         if let Err(error) = file.write_all(contents.as_bytes()) {
             return Err(NewConfigError::Write(WriteConfigError { error, path }));
         }
-        cliclack::note("", format_compact!("Created `{path}`"));
-        Ok(())
+        Ok(path)
     }
 
     /// Request a [`Self::locales`] value from the user.
@@ -286,7 +290,6 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
             path: dir_path.clone(),
         })
     })?;
-    cliclack::note("", format_compact!("Created `{dir_path}/`"));
     for locale in locales {
         let contents = serde_saphyr::to_string(&match locale {
             Language::RuRu => ExampleLocale {
@@ -309,7 +312,6 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
             let error = WriteLocaleFileError { error, path };
             return Err(CreateLocalesError::WriteFile(error));
         }
-        cliclack::note("", format_compact!("Created `{path}`"));
     }
     Ok(())
 }
