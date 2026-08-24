@@ -60,11 +60,13 @@ fn verify_no_config_exists() -> ControlFlow<miette::Report> {
     match mulan_config::Config::locate_without_parents() {
         Ok(path) => {
             // If a config exists, we shouldn't try to initialize a new one.
-            ControlFlow::Break(ConfigExistsError { path }.to_report(&mulan_config::Config::dummy()))
+            let report = ConfigExistsError { path }.to_report(&mulan_config::Config::dummy());
+            ControlFlow::Break(report)
         }
         Err(LocateError::Io(e)) => {
             // If we can't know whether a config exists, it's another beast of an error.
-            ControlFlow::Break(e.to_report(&mulan_config::Config::dummy()))
+            let report = e.to_report(&mulan_config::Config::dummy());
+            ControlFlow::Break(report)
         }
         Err(LocateError::NotFound(NotFoundError)) => {
             // Only when a config doesn't exist can we go next.
