@@ -1,8 +1,7 @@
-use std::fs;
-use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
+use std::{fs, io};
 
 use either::Either;
 use itertools::Itertools as _;

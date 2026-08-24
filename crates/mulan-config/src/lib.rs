@@ -126,7 +126,8 @@ impl crate::Config {
         config
     }
 
-    ///
+    /// Tries to find the config file in the current directory.
+    /// Unlike [`Self::locate_and_read`], doesn't check parent directories.
     pub fn locate_without_parents() -> Result<RelativePathBuf, LocateError> {
         let path = RelativePathBuf::from("mulan.toml");
         let exists = match path.to_path("").try_exists() {
