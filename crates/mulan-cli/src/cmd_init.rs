@@ -47,30 +47,31 @@ pub fn execute() -> miette::Result<ExitCode> {
     }
 }
 
-///
+/// A Mulan config already exists, so we can't initialize a new one.
 #[derive(Debug)]
 pub struct ConfigExistsError {
-    ///
+    /// The path of the existing Mulan config.
     pub path: RelativePathBuf,
 }
 
-///
+/// Couldn't create a new Mulan config.
 #[derive(Debug)]
 pub struct CreateConfigError {
     pub error: io::Error,
 
-    ///
+    /// The path where we tried to create a config.
     pub path: RelativePathBuf,
 }
 
-///
+/// Shows an interactive [`mod@cliclack`] menu and initializes Mulan
+/// in the current directory.
 fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
-    let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
-    user_choice
+    let init_options = InitOptions::interactive_prompt().map_err(Either::Left)?;
+    init_options
         .write_to_file()
         .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
-    create_locale_files(&user_choice.locales)
+    create_locale_files(&init_options.locales)
         .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
     cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(Either::Left)?;
     Ok(())
@@ -79,7 +80,7 @@ fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
 ///
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
-struct UserChoice {
+struct InitOptions {
     ///
     locales: Vec<Language>,
 
@@ -90,7 +91,7 @@ struct UserChoice {
     generate: Option<SmallVec1<[Target; 1]>>,
 }
 
-impl UserChoice {
+impl InitOptions {
     ///
     fn interactive_prompt() -> io::Result<Self> {
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
