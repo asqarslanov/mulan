@@ -265,7 +265,7 @@ impl miette::Diagnostic for self::ReportData {
 impl self::Reportable for crate::cmd_init::ConfigExistsError {
     fn message(&self, _: &mulan_config::Config) -> String {
         let path = self.path.as_str();
-        t::errors::cli::init::config_exists::Message { path }.get_in(Locale::default())
+        t::errors::cli::init::config::already_exists::Message { path }.get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
@@ -285,19 +285,55 @@ impl self::Reportable for crate::cmd_init::ConfigExistsError {
     }
 }
 
+impl self::ToReport for crate::cmd_init::NewConfigError {
+    fn to_report(&self, dummy_config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::Create(e) => e.to_report(dummy_config),
+            Self::Write(e) => e.to_report(dummy_config),
+        }
+    }
+}
+
 impl self::Reportable for crate::cmd_init::CreateConfigError {
     fn message(&self, _: &mulan_config::Config) -> String {
         let os_error = &self.error.to_compact_string();
         let path = self.path.as_str();
-        t::errors::cli::init::create_config::Message { os_error, path }.get_in(Locale::default())
+        t::errors::cli::init::config::create_file::Message { os_error, path }
+            .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
-        "cli::init::create_config"
+        "cli::init::config::create_file"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        let message = t::errors::cli::init::create_config::Help.get_in(Locale::default());
+        let message = t::errors::cli::init::config::create_file::Help.get_in(Locale::default());
+        Some(message.to_owned())
+    }
+
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for crate::cmd_init::WriteConfigError {
+    fn message(&self, _: &mulan_config::Config) -> String {
+        let os_error = &self.error.to_compact_string();
+        let path = self.path.as_str();
+        t::errors::cli::init::config::write_file::Message { os_error, path }
+            .get_in(Locale::default())
+    }
+
+    fn code(&self) -> &'static str {
+        "cli::init::config::write_file"
+    }
+
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
+        let message = t::errors::cli::init::config::write_file::Help.get_in(Locale::default());
         Some(message.to_owned())
     }
 
@@ -324,16 +360,16 @@ impl self::Reportable for crate::cmd_init::CreateLocalesDirError {
     fn message(&self, _: &mulan_config::Config) -> String {
         let os_error = &self.error.to_compact_string();
         let path = self.path.as_str();
-        t::errors::cli::init::create_locales_dir::Message { os_error, path }
+        t::errors::cli::init::locale::create_dir::Message { os_error, path }
             .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
-        "cli::init::create_locales_dir"
+        "cli::init::locale::create_dir"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        let message = t::errors::cli::init::create_locales_dir::Help.get_in(Locale::default());
+        let message = t::errors::cli::init::locale::create_dir::Help.get_in(Locale::default());
         Some(message.to_owned())
     }
 
@@ -350,16 +386,16 @@ impl self::Reportable for crate::cmd_init::CreateLocaleFileError {
     fn message(&self, _: &mulan_config::Config) -> String {
         let os_error = &self.error.to_compact_string();
         let path = self.path.as_str();
-        t::errors::cli::init::create_locale_file::Message { os_error, path }
+        t::errors::cli::init::locale::create_file::Message { os_error, path }
             .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
-        "cli::init::create_locale_file"
+        "cli::init::locale::create_file"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        let message = t::errors::cli::init::create_locale_file::Help.get_in(Locale::default());
+        let message = t::errors::cli::init::locale::create_file::Help.get_in(Locale::default());
         Some(message.to_owned())
     }
 
@@ -376,16 +412,16 @@ impl self::Reportable for crate::cmd_init::WriteLocaleFileError {
     fn message(&self, _: &mulan_config::Config) -> String {
         let os_error = &self.error.to_compact_string();
         let path = self.path.as_str();
-        t::errors::cli::init::write_locale_file::Message { os_error, path }
+        t::errors::cli::init::locale::write_file::Message { os_error, path }
             .get_in(Locale::default())
     }
 
     fn code(&self) -> &'static str {
-        "cli::init::write_locale_file"
+        "cli::init::locale::write_file"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
-        let message = t::errors::cli::init::write_locale_file::Help.get_in(Locale::default());
+        let message = t::errors::cli::init::locale::write_file::Help.get_in(Locale::default());
         Some(message.to_owned())
     }
 

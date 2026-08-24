@@ -16,36 +16,51 @@ cmd-gen:
 errors:
   cli:
     init:
-      config-exists:
-        message: "config already exists at `{path}`"
+      config:
+        already-exists:
+          message: "config already exists at `{path}`"
 
-      create-config:
-        message: |-
-          failed to create config at {path}
-          - OS error: {os-error}
-        help: |-
-          make sure that you have permissions to create files here
+        create-file:
+          message: |-
+            failed to create config at {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this file doesn't already exist
+            - you have permissions to create files here
 
-      create-locales-dir:
-        message: |-
-          failed to create {path}/
-          - OS error: {os-error}
-        help: |-
-          make sure that you have permissions to create files here
+        write-file:
+          message: |-
+            failed to write to config at {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that you have permissions to write to this file
 
-      create-locale-file:
-        message: |-
-          failed to create {path}
-          - OS error: {os-error}
-        help: |-
-          make sure that you have permissions to create files here
+      locale:
+        create-dir:
+          message: |-
+            failed to create {path}/
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this directory doesn't already exist
+            - you have permissions to create files here
 
-      write-locale-file:
-        message: |-
-          failed to write to {path}
-          - OS error: {os-error}
-        help: |-
-          make sure that you have permissions to write to this file
+        create-file:
+          message: |-
+            failed to create {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this file doesn't already exist
+            - you have permissions to create files here
+
+        write-file:
+          message: |-
+            failed to write to {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that you have permissions to write to this file
 
   config:
     parse:

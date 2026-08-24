@@ -219,197 +219,256 @@ pub mod t {
             pub mod init {
                 use super::Locale;
 
-                /// `errors.cli.init.config-exists`
-                pub mod config_exists {
+                /// `errors.cli.init.config`
+                pub mod config {
                     use super::Locale;
 
-                    /// `errors.cli.init.config-exists.message`
-                    ///
-                    /// ```mulan
-                    /// config already exists at `{path}`
-                    /// ```
-                    #[must_use]
-                    pub struct Message<'path> {
-                        pub path: &'path str,
+                    /// `errors.cli.init.config.already-exists`
+                    pub mod already_exists {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.already-exists.message`
+                        ///
+                        /// ```mulan
+                        /// config already exists at `{path}`
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'path> {
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("config already exists at `{path}`", path = self.path),
+                                }
+                            }
+                        }
                     }
 
-                    impl Message<'_> {
+                    /// `errors.cli.init.config.create-file`
+                    pub mod create_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.create-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this file doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
                         #[must_use]
-                        pub fn get_in(&self, locale: Locale) -> String {
-                            match locale {
-                                _ => format!("config already exists at `{path}`", path = self.path),
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this file doesn\'t already exist\n- you have permissions to create files here",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.config.create-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create config at {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.config.write-file`
+                    pub mod write_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.write-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that you have permissions to write to this file
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that you have permissions to write to this file",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.config.write-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to write to config at {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to write to config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
                             }
                         }
                     }
                 }
 
-                /// `errors.cli.init.create-config`
-                pub mod create_config {
+                /// `errors.cli.init.locale`
+                pub mod locale {
                     use super::Locale;
 
-                    /// `errors.cli.init.create-config.help`
-                    ///
-                    /// ```mulan
-                    /// make sure that you have permissions to create files here
-                    /// ```
-                    #[must_use]
-                    pub struct Help;
+                    /// `errors.cli.init.locale.create-dir`
+                    pub mod create_dir {
+                        use super::Locale;
 
-                    impl Help {
+                        /// `errors.cli.init.locale.create-dir.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this directory doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
                         #[must_use]
-                        pub const fn get_in(&self, locale: Locale) -> &'static str {
-                            match locale {
-                                _ => "make sure that you have permissions to create files here",
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this directory doesn\'t already exist\n- you have permissions to create files here",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.locale.create-dir.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create {path}/
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create {path}/\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
                             }
                         }
                     }
 
-                    /// `errors.cli.init.create-config.message`
-                    ///
-                    /// ```mulan
-                    /// failed to create config at {path}
-                    /// - OS error: {os-error}
-                    /// ```
-                    #[must_use]
-                    pub struct Message<'os_error, 'path> {
-                        pub os_error: &'os_error str,
-                        pub path: &'path str,
-                    }
+                    /// `errors.cli.init.locale.create-file`
+                    pub mod create_file {
+                        use super::Locale;
 
-                    impl Message<'_, '_> {
+                        /// `errors.cli.init.locale.create-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this file doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
                         #[must_use]
-                        pub fn get_in(&self, locale: Locale) -> String {
-                            match locale {
-                                _ => format!("failed to create config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this file doesn\'t already exist\n- you have permissions to create files here",
+                                }
                             }
                         }
-                    }
-                }
 
-                /// `errors.cli.init.create-locale-file`
-                pub mod create_locale_file {
-                    use super::Locale;
-
-                    /// `errors.cli.init.create-locale-file.help`
-                    ///
-                    /// ```mulan
-                    /// make sure that you have permissions to create files here
-                    /// ```
-                    #[must_use]
-                    pub struct Help;
-
-                    impl Help {
+                        /// `errors.cli.init.locale.create-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create {path}
+                        /// - OS error: {os-error}
+                        /// ```
                         #[must_use]
-                        pub const fn get_in(&self, locale: Locale) -> &'static str {
-                            match locale {
-                                _ => "make sure that you have permissions to create files here",
-                            }
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
                         }
-                    }
 
-                    /// `errors.cli.init.create-locale-file.message`
-                    ///
-                    /// ```mulan
-                    /// failed to create {path}
-                    /// - OS error: {os-error}
-                    /// ```
-                    #[must_use]
-                    pub struct Message<'os_error, 'path> {
-                        pub os_error: &'os_error str,
-                        pub path: &'path str,
-                    }
-
-                    impl Message<'_, '_> {
-                        #[must_use]
-                        pub fn get_in(&self, locale: Locale) -> String {
-                            match locale {
-                                _ => format!("failed to create {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
-                            }
-                        }
-                    }
-                }
-
-                /// `errors.cli.init.create-locales-dir`
-                pub mod create_locales_dir {
-                    use super::Locale;
-
-                    /// `errors.cli.init.create-locales-dir.help`
-                    ///
-                    /// ```mulan
-                    /// make sure that you have permissions to create files here
-                    /// ```
-                    #[must_use]
-                    pub struct Help;
-
-                    impl Help {
-                        #[must_use]
-                        pub const fn get_in(&self, locale: Locale) -> &'static str {
-                            match locale {
-                                _ => "make sure that you have permissions to create files here",
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
                             }
                         }
                     }
 
-                    /// `errors.cli.init.create-locales-dir.message`
-                    ///
-                    /// ```mulan
-                    /// failed to create {path}/
-                    /// - OS error: {os-error}
-                    /// ```
-                    #[must_use]
-                    pub struct Message<'os_error, 'path> {
-                        pub os_error: &'os_error str,
-                        pub path: &'path str,
-                    }
+                    /// `errors.cli.init.locale.write-file`
+                    pub mod write_file {
+                        use super::Locale;
 
-                    impl Message<'_, '_> {
+                        /// `errors.cli.init.locale.write-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that you have permissions to write to this file
+                        /// ```
                         #[must_use]
-                        pub fn get_in(&self, locale: Locale) -> String {
-                            match locale {
-                                _ => format!("failed to create {path}/\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that you have permissions to write to this file",
+                                }
                             }
                         }
-                    }
-                }
 
-                /// `errors.cli.init.write-locale-file`
-                pub mod write_locale_file {
-                    use super::Locale;
-
-                    /// `errors.cli.init.write-locale-file.help`
-                    ///
-                    /// ```mulan
-                    /// make sure that you have permissions to write to this file
-                    /// ```
-                    #[must_use]
-                    pub struct Help;
-
-                    impl Help {
+                        /// `errors.cli.init.locale.write-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to write to {path}
+                        /// - OS error: {os-error}
+                        /// ```
                         #[must_use]
-                        pub const fn get_in(&self, locale: Locale) -> &'static str {
-                            match locale {
-                                _ => "make sure that you have permissions to write to this file",
-                            }
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
                         }
-                    }
 
-                    /// `errors.cli.init.write-locale-file.message`
-                    ///
-                    /// ```mulan
-                    /// failed to write to {path}
-                    /// - OS error: {os-error}
-                    /// ```
-                    #[must_use]
-                    pub struct Message<'os_error, 'path> {
-                        pub os_error: &'os_error str,
-                        pub path: &'path str,
-                    }
-
-                    impl Message<'_, '_> {
-                        #[must_use]
-                        pub fn get_in(&self, locale: Locale) -> String {
-                            match locale {
-                                _ => format!("failed to write to {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to write to {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
                             }
                         }
                     }

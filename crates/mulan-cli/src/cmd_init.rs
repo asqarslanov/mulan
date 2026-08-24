@@ -56,10 +56,26 @@ pub struct ConfigExistsError {
 
 /// Couldn't create a new Mulan config.
 #[derive(Debug)]
+pub enum NewConfigError {
+    Create(CreateConfigError),
+    Write(WriteConfigError),
+}
+
+/// See [`NewConfigError::Create`].
+#[derive(Debug)]
 pub struct CreateConfigError {
     pub error: io::Error,
 
     /// The path where we tried to create a config.
+    pub path: RelativePathBuf,
+}
+
+/// See [`NewConfigError::Write`].
+#[derive(Debug)]
+pub struct WriteConfigError {
+    pub error: io::Error,
+
+    /// The path to the config we were trying to write to.
     pub path: RelativePathBuf,
 }
 
@@ -107,10 +123,15 @@ impl InitConfig {
     }
 
     /// Creates a new config file and writes data to it in a pretty form.
-    fn write_to_file(&self) -> Result<(), CreateConfigError> {
+    fn write_to_file(&self) -> Result<(), NewConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
-        fs::write(path.as_str(), contents).map_err(|error| CreateConfigError { error, path })?;
+        let mut file = match File::create_new(path.as_str()) {
+            Ok(file) => file,
+            Err(error) => return Err(NewConfigError::Create(CreateConfigError { error, path })),
+        };
+        file.write_all(contents.as_bytes())
+            .map_err(|error| NewConfigError::Write(WriteConfigError { error, path }))?;
         Ok(())
     }
 
