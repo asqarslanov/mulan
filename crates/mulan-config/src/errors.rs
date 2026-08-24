@@ -53,10 +53,10 @@ pub struct AmbiguousSourceError {
 /// Errors of [`crate::Config::locate_without_parents`].
 #[derive(Debug)]
 pub enum LocateError {
-    ///
+    /// We verified that there's no Mulan config.
     NotFound(NotFoundError),
 
-    ///
+    /// We couldn't verify whether a Mulan config exists.
     Io(LocateIoError),
 }
 
