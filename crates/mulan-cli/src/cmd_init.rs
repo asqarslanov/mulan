@@ -32,17 +32,17 @@ pub fn execute() -> miette::Result<ExitCode> {
     }
     match do_it() {
         Ok(()) => Ok(ExitCode::SUCCESS),
-        Err(Either::Right(err)) => Err(err),
-        Err(Either::Left(err)) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
+        Err(Either::Right(miette_report)) => Err(miette_report),
+        Err(Either::Left(io_err)) if matches!(io_err.kind(), io::ErrorKind::Interrupted) => {
             // Ctrl+C interrupt.
             Ok(ExitCode::from(SIGINT))
         }
-        Err(Either::Left(err)) => {
+        Err(Either::Left(io_err)) => {
             // A `cliclack` error indicates that we couldn't print to the console.
             // There's no meaningful recovery strategy, so we just `panic!`.
             // There's no point in creating rich Miette reports---
             // we won't probably be able to print them anyway.
-            panic!("{err}");
+            panic!("{io_err}");
         }
     }
 }
