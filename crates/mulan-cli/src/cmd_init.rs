@@ -165,6 +165,30 @@ impl UserChoice {
 }
 
 ///
+#[derive(Debug)]
+enum CreateLocalesError {
+    ///
+    CreateDir(CreateLocalesDirError),
+
+    ///
+    CreateFile(CreateLocaleFileError),
+}
+
+///
+#[derive(Debug)]
+struct CreateLocalesDirError {
+    pub error: io::Error,
+    pub path: RelativePathBuf,
+}
+
+///
+#[derive(Debug)]
+struct CreateLocaleFileError {
+    pub error: io::Error,
+    pub path: RelativePathBuf,
+}
+
+///
 fn create_locale_files(locales: &[Language]) -> io::Result<()> {
     #[derive(Serialize)]
     struct ExampleLocale {
