@@ -69,9 +69,9 @@ fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
     user_choice
         .write_to_file()
-        .map_err(|err| err.to_report(&mulan_config::Config::dummy()))
-        .map_err(Either::Right)?;
-    create_locale_files(&user_choice.locales);
+        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
+    create_locale_files(&user_choice.locales)
+        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
     cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(Either::Left)?;
     Ok(())
 }
@@ -194,9 +194,13 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
     struct ExampleLocale {
         greeting: &'static str,
     }
-
     let dir_path = RelativePathBuf::from("locales");
-    fs::create_dir(dir_path.as_str());
+    fs::create_dir(dir_path.as_str()).map_err(|error| {
+        CreateLocalesError::CreateDir(CreateLocalesDirError {
+            error,
+            path: dir_path.clone(),
+        })
+    })?;
     for locale in locales {
         let contents = serde_saphyr::to_string(&match locale {
             Language::RuRu => ExampleLocale {
@@ -209,7 +213,9 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
         .expect("should never fail");
         let path = dir_path.join(locale.tag().as_str()).with_extension("yaml");
         let mut file = fs::File::create_new(path.as_str()).unwrap();
-        file.write_all(contents.as_bytes());
+        file.write_all(contents.as_bytes()).map_err(|error| {
+            CreateLocalesError::CreateFile(CreateLocaleFileError { error, path })
+        })?;
     }
     Ok(())
 }
