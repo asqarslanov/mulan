@@ -4,6 +4,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use either::Either;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
@@ -31,12 +32,12 @@ pub fn execute() -> miette::Result<ExitCode> {
     }
     match do_it() {
         Ok(()) => Ok(ExitCode::SUCCESS),
-        Err(MietteOrIoError::Miette(err)) => Err(err),
-        Err(MietteOrIoError::Io(err)) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
+        Err(Either::Right(err)) => Err(err),
+        Err(Either::Left(err)) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
             // Ctrl+C interrupt.
             Ok(ExitCode::from(SIGINT))
         }
-        Err(MietteOrIoError::Io(err)) => {
+        Err(Either::Left(err)) => {
             // A `cliclack` error indicates that we couldn't print to the console.
             // There's no meaningful recovery strategy, so we just `panic!`.
             // There's no point in creating rich Miette reports---
@@ -63,24 +64,17 @@ pub struct CreateConfigError {
 }
 
 ///
-#[derive(Debug)]
-enum MietteOrIoError {
-    Miette(miette::Report),
-    Io(io::Error),
-}
-
-///
-fn do_it() -> Result<(), MietteOrIoError> {
+fn do_it() -> Result<(), Either<io::Error, miette::Report>> {
     todo!("rename the function");
     todo!("use mulan");
-    cliclack::intro("Mulan").map_err(MietteOrIoError::Io)?;
-    let user_choice = UserChoice::interactive_prompt().map_err(MietteOrIoError::Io)?;
+    cliclack::intro("Mulan").map_err(Either::Left)?;
+    let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
     user_choice
         .write_to_file()
         .map_err(|err| err.to_report(&mulan_config::Config::dummy()))
-        .map_err(MietteOrIoError::Miette)?;
+        .map_err(Either::Right)?;
     create_locale_files(&user_choice.locales);
-    cliclack::outro("You're all set").map_err(MietteOrIoError::Io)?;
+    cliclack::outro("You're all set").map_err(Either::Left)?;
     Ok(())
 }
 
