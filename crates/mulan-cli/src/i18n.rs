@@ -44,9 +44,437 @@ pub mod t {
         }
     }
 
+    /// `cmd-init`
+    pub mod cmd_init {
+        use super::Locale;
+
+        /// `cmd-init.intro`
+        ///
+        /// ```mulan
+        /// Mulan
+        /// ```
+        #[must_use]
+        pub struct Intro;
+
+        impl Intro {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Mulan",
+                }
+            }
+        }
+
+        /// `cmd-init.locales`
+        ///
+        /// ```mulan
+        /// Select locales you want to support
+        /// ```
+        #[must_use]
+        pub struct Locales;
+
+        impl Locales {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Select locales you want to support",
+                }
+            }
+        }
+
+        /// `cmd-init.main-locale`
+        ///
+        /// ```mulan
+        /// Choose the main locale
+        /// ```
+        #[must_use]
+        pub struct MainLocale;
+
+        impl MainLocale {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Choose the main locale",
+                }
+            }
+        }
+
+        /// `cmd-init.outro`
+        ///
+        /// ```mulan
+        /// You're all set
+        /// ```
+        #[must_use]
+        pub struct Outro;
+
+        impl Outro {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "You\'re all set",
+                }
+            }
+        }
+
+        /// `cmd-init.generate`
+        pub mod generate {
+            use super::Locale;
+
+            /// `cmd-init.generate.no-hint`
+            ///
+            /// ```mulan
+            /// you can always add it later
+            /// ```
+            #[must_use]
+            pub struct NoHint;
+
+            impl NoHint {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "you can always add it later",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.no-label`
+            ///
+            /// ```mulan
+            /// No
+            /// ```
+            #[must_use]
+            pub struct NoLabel;
+
+            impl NoLabel {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "No",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.prompt`
+            ///
+            /// ```mulan
+            /// Add a Rust codegen target?
+            /// ```
+            #[must_use]
+            pub struct Prompt;
+
+            impl Prompt {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Add a Rust codegen target?",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.yes-hint`
+            ///
+            /// ```mulan
+            /// you will need to specify a path to where bindings should be generated
+            /// ```
+            #[must_use]
+            pub struct YesHint;
+
+            impl YesHint {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "you will need to specify a path to where bindings should be generated",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.yes-label`
+            ///
+            /// ```mulan
+            /// Yes
+            /// ```
+            #[must_use]
+            pub struct YesLabel;
+
+            impl YesLabel {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Yes",
+                    }
+                }
+            }
+        }
+    }
+
     /// `errors`
     pub mod errors {
         use super::Locale;
+
+        /// `errors.cli`
+        pub mod cli {
+            use super::Locale;
+
+            /// `errors.cli.init`
+            pub mod init {
+                use super::Locale;
+
+                /// `errors.cli.init.config`
+                pub mod config {
+                    use super::Locale;
+
+                    /// `errors.cli.init.config.already-exists`
+                    pub mod already_exists {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.already-exists.message`
+                        ///
+                        /// ```mulan
+                        /// config already exists at `{path}`
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'path> {
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("config already exists at `{path}`", path = self.path),
+                                }
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.config.create-file`
+                    pub mod create_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.create-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this file doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this file doesn\'t already exist\n- you have permissions to create files here",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.config.create-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create config at {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.config.write-file`
+                    pub mod write_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.config.write-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that you have permissions to write to this file
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that you have permissions to write to this file",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.config.write-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to write to config at {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to write to config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /// `errors.cli.init.locale`
+                pub mod locale {
+                    use super::Locale;
+
+                    /// `errors.cli.init.locale.create-dir`
+                    pub mod create_dir {
+                        use super::Locale;
+
+                        /// `errors.cli.init.locale.create-dir.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this directory doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this directory doesn\'t already exist\n- you have permissions to create files here",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.locale.create-dir.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create {path}/
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create {path}/\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.locale.create-file`
+                    pub mod create_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.locale.create-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that
+                        /// - this file doesn't already exist
+                        /// - you have permissions to create files here
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that\n- this file doesn\'t already exist\n- you have permissions to create files here",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.locale.create-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to create {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to create {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.locale.write-file`
+                    pub mod write_file {
+                        use super::Locale;
+
+                        /// `errors.cli.init.locale.write-file.help`
+                        ///
+                        /// ```mulan
+                        /// make sure that you have permissions to write to this file
+                        /// ```
+                        #[must_use]
+                        pub struct Help;
+
+                        impl Help {
+                            #[must_use]
+                            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                                match locale {
+                                    _ => "make sure that you have permissions to write to this file",
+                                }
+                            }
+                        }
+
+                        /// `errors.cli.init.locale.write-file.message`
+                        ///
+                        /// ```mulan
+                        /// failed to write to {path}
+                        /// - OS error: {os-error}
+                        /// ```
+                        #[must_use]
+                        pub struct Message<'os_error, 'path> {
+                            pub os_error: &'os_error str,
+                            pub path: &'path str,
+                        }
+
+                        impl Message<'_, '_> {
+                            #[must_use]
+                            pub fn get_in(&self, locale: Locale) -> String {
+                                match locale {
+                                    _ => format!("failed to write to {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /// `errors.config`
         pub mod config {
@@ -188,6 +616,54 @@ pub mod t {
                     pub fn get_in(&self, locale: Locale) -> String {
                         match locale {
                             _ => format!("failed to get current working directory\n- OS error: {os_error}", os_error = self.os_error),
+                        }
+                    }
+                }
+            }
+
+            /// `errors.config.locate`
+            pub mod locate {
+                use super::Locale;
+
+                /// `errors.config.locate.io`
+                pub mod io {
+                    use super::Locale;
+
+                    /// `errors.config.locate.io.help`
+                    ///
+                    /// ```mulan
+                    /// make sure that you have listing permissions
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "make sure that you have listing permissions",
+                            }
+                        }
+                    }
+
+                    /// `errors.config.locate.io.message`
+                    ///
+                    /// ```mulan
+                    /// failed to check if {path} exists
+                    /// OS error: {os-error}
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("failed to check if {path} exists\nOS error: {os_error}", os_error = self.os_error, path = self.path),
+                            }
                         }
                     }
                 }

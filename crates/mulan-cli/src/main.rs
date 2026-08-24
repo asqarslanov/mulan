@@ -3,6 +3,7 @@ use std::process::ExitCode;
 use clap::crate_description;
 
 mod cmd_gen;
+mod cmd_init;
 mod error_reporting;
 #[rustfmt::skip]
 mod i18n;
@@ -10,7 +11,8 @@ mod i18n;
 fn main() -> miette::Result<ExitCode> {
     let cli = <self::Cli as clap::Parser>::parse();
     match cli.command {
-        Command::Gen(args) => args.execute(),
+        Command::Gen => self::cmd_gen::execute().map(|()| ExitCode::SUCCESS),
+        Command::Init => self::cmd_init::execute(),
     }
 }
 
@@ -23,6 +25,9 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Command {
+    /// Initialize a new Mulan config in the current directory
+    Init,
+
     /// Generate i18n bindings for your targets
-    Gen(self::cmd_gen::Args),
+    Gen,
 }

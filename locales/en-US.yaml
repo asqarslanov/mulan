@@ -1,7 +1,67 @@
+cmd-init:
+  intro: "Mulan"
+  locales: "Select locales you want to support"
+  main-locale: "Choose the main locale"
+  generate:
+    prompt: "Add a Rust codegen target?"
+    yes-label: "Yes"
+    yes-hint: "you will need to specify a path to where bindings should be generated"
+    no-label: "No"
+    no-hint: "you can always add it later"
+  outro: "You're all set"
+
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"
 
 errors:
+  cli:
+    init:
+      config:
+        already-exists:
+          message: "config already exists at `{path}`"
+
+        create-file:
+          message: |-
+            failed to create config at {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this file doesn't already exist
+            - you have permissions to create files here
+
+        write-file:
+          message: |-
+            failed to write to config at {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that you have permissions to write to this file
+
+      locale:
+        create-dir:
+          message: |-
+            failed to create {path}/
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this directory doesn't already exist
+            - you have permissions to create files here
+
+        create-file:
+          message: |-
+            failed to create {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that
+            - this file doesn't already exist
+            - you have permissions to create files here
+
+        write-file:
+          message: |-
+            failed to write to {path}
+            - OS error: {os-error}
+          help: |-
+            make sure that you have permissions to write to this file
+
   config:
     parse:
       invalid-type:
@@ -47,6 +107,13 @@ errors:
         first-label: "maybe this?"
         second-label: "or maybe this?"
         other-labels: "or maybe even this?"
+
+    locate:
+      io:
+        message: |-
+          failed to check if {path} exists
+          OS error: {os-error}
+        help: "make sure that you have listing permissions"
 
   parser:
     read:

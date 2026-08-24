@@ -13,16 +13,21 @@ publish.workspace = true
 
 [dependencies]
 clap = { workspace = true, features = ["cargo", "derive", "wrap_help"] }
+cliclack = { workspace = true }
 compact_str = { workspace = true }
+either = { workspace = true }
 figment2 = { workspace = true }
 itertools = { workspace = true }
 miette = { workspace = true, features = ["fancy"] }
-mitsein = { workspace = true, features = ["smallvec"] }
+mitsein = { workspace = true, features = ["serde", "smallvec"] }
 mulan-config = { workspace = true }
 mulan-gen = { workspace = true }
 mulan-parser = { workspace = true }
+relative-path = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde-saphyr = { workspace = true }
 thiserror = { workspace = true }
+toml = { workspace = true }
 
 [lints]
 workspace = true

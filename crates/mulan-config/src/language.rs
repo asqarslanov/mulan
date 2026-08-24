@@ -1,6 +1,6 @@
 use mitsein::str1;
 use mitsein::str1::Str1;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A unique identifier of a human language
 /// (e.g., English, Canadian French, or Esperanto).
@@ -10,7 +10,7 @@ use serde::Deserialize;
     clippy::unsafe_derive_deserialize,
     reason = "can only be deserialized from a hard-coded subset of strings"
 )]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Language {
     /// English (United States)
     #[serde(rename = "en-US")]

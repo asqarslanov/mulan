@@ -15,12 +15,12 @@ use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
 use mitsein::small_vec1::SmallVec1;
 use relative_path::RelativePathBuf;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_with::{SetPreventDuplicates, serde_as};
 
 pub use self::language::Language;
 pub use self::meta::ConfigMeta;
-use crate::errors::{ConfigError, FigmentError};
+use crate::errors::{ConfigError, FigmentError, LocateError, LocateIoError, NotFoundError};
 
 pub mod errors;
 mod language;
@@ -70,7 +70,7 @@ pub struct Config {
 }
 
 /// See [`crate::Config::generate`].
-#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case", tag = "target")]
 pub enum Target {
     /// The Rust programming language.
@@ -78,7 +78,7 @@ pub enum Target {
 }
 
 /// See [`Target::Rust`].
-#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RustTarget {
     /// Where to generate a Rust module with i18n bindings.
     pub file: RelativePathBuf,
@@ -124,6 +124,21 @@ impl crate::Config {
             config.meta = meta;
         }
         config
+    }
+
+    /// Tries to find the config file in the current directory.
+    /// Unlike [`Self::locate_and_read`], doesn't check parent directories.
+    pub fn locate_without_parents() -> Result<RelativePathBuf, LocateError> {
+        let path = RelativePathBuf::from("mulan.toml");
+        let exists = match path.to_path("").try_exists() {
+            Ok(exists) => exists,
+            Err(error) => return Err(LocateError::Io(LocateIoError { path, error })),
+        };
+        if exists {
+            Ok(path)
+        } else {
+            Err(LocateError::NotFound(NotFoundError))
+        }
     }
 
     /// Returns an iterator over [`Self::locales`]
