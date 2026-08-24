@@ -85,6 +85,12 @@ pub struct WriteConfigError {
 fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
     let init_options = InitConfig::interactive_prompt().map_err(Either::Left)?;
+    let confirm = {
+        cliclack::confirm("Confirm?")
+            .initial_value(true)
+            .interact()
+            .map_err(Either::Left)?
+    };
     init_options
         .write_to_file()
         .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
