@@ -202,7 +202,13 @@ pub struct WriteLocaleFileError {
     pub path: RelativePathBuf,
 }
 
+/// Create a locales directory and all needed files inside of it.
 ///
+/// # Errors
+///
+/// - Such a directory already exists.
+/// - Any of such files already exist.
+/// - OS errors.
 fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
     #[derive(Serialize)]
     struct ExampleLocale {
