@@ -30,7 +30,7 @@ pub fn execute() -> miette::Result<ExitCode> {
         Err(LocateError::Io(e)) => return Err(e.to_report(&mulan_config::Config::dummy())),
         Err(LocateError::NotFound(NotFoundError)) => (),
     }
-    match do_it() {
+    match prompt_and_init() {
         Ok(()) => Ok(ExitCode::SUCCESS),
         Err(Either::Right(miette_report)) => Err(miette_report),
         Err(Either::Left(io_err)) if matches!(io_err.kind(), io::ErrorKind::Interrupted) => {
@@ -64,8 +64,7 @@ pub struct CreateConfigError {
 }
 
 ///
-fn do_it() -> Result<(), Either<io::Error, miette::Report>> {
-    todo!("rename the function");
+fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     todo!("use mulan");
     cliclack::intro("Mulan").map_err(Either::Left)?;
     let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
