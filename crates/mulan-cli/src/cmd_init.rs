@@ -1,7 +1,7 @@
-use std::io::Write;
+use std::fs::{self, File};
+use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
-use std::{fs, io};
 
 use either::Either;
 use itertools::Itertools as _;
@@ -172,6 +172,9 @@ pub enum CreateLocalesError {
 
     ///
     CreateFile(CreateLocaleFileError),
+
+    ///
+    WriteFile(WriteLocaleFileError),
 }
 
 /// See [`CreateLocalesError::CreateDir`].
@@ -184,6 +187,13 @@ pub struct CreateLocalesDirError {
 /// See [`CreateLocalesError::CreateFile`].
 #[derive(Debug)]
 pub struct CreateLocaleFileError {
+    pub error: io::Error,
+    pub path: RelativePathBuf,
+}
+
+/// See [`CreateLocalesError::WriteFile`].
+#[derive(Debug)]
+pub struct WriteLocaleFileError {
     pub error: io::Error,
     pub path: RelativePathBuf,
 }
@@ -212,10 +222,15 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
         })
         .expect("should never fail");
         let path = dir_path.join(locale.tag().as_str()).with_extension("yaml");
-        let mut file = fs::File::create_new(path.as_str()).unwrap();
-        file.write_all(contents.as_bytes()).map_err(|error| {
-            CreateLocalesError::CreateFile(CreateLocaleFileError { error, path })
-        })?;
+        let mut file = match File::create_new(path.as_str()) {
+            Ok(file) => file,
+            Err(error) => {
+                let error = CreateLocaleFileError { error, path };
+                return Err(CreateLocalesError::CreateFile(error));
+            }
+        };
+        file.write_all(contents.as_bytes())
+            .map_err(|error| CreateLocalesError::WriteFile(WriteLocaleFileError { error, path }))?;
     }
     Ok(())
 }

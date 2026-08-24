@@ -315,6 +315,7 @@ impl self::ToReport for crate::cmd_init::CreateLocalesError {
         match self {
             Self::CreateDir(e) => e.to_report(dummy_config),
             Self::CreateFile(e) => e.to_report(dummy_config),
+            Self::WriteFile(e) => e.to_report(dummy_config),
         }
     }
 }
@@ -359,6 +360,32 @@ impl self::Reportable for crate::cmd_init::CreateLocaleFileError {
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
         let message = t::errors::cli::init::create_locale_file::Help.get_in(Locale::default());
+        Some(message.to_owned())
+    }
+
+    fn annotation_block(&self, _: &mulan_config::Config) -> Option<self::AnnotationBlock> {
+        None
+    }
+
+    fn related(&self, _: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
+        iter::empty()
+    }
+}
+
+impl self::Reportable for crate::cmd_init::WriteLocaleFileError {
+    fn message(&self, _: &mulan_config::Config) -> String {
+        let os_error = &self.error.to_compact_string();
+        let path = self.path.as_str();
+        t::errors::cli::init::write_locale_file::Message { os_error, path }
+            .get_in(Locale::default())
+    }
+
+    fn code(&self) -> &'static str {
+        "cli::init::write_locale_file"
+    }
+
+    fn help(&self, _: &mulan_config::Config) -> Option<String> {
+        let message = t::errors::cli::init::write_locale_file::Help.get_in(Locale::default());
         Some(message.to_owned())
     }
 

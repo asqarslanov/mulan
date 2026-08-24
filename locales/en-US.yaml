@@ -43,6 +43,14 @@ errors:
         help: |-
           ...
 
+      write-locale-file:
+        message: |-
+          {path}
+          {os-error}
+          ...
+        help: |-
+          ...
+
   config:
     parse:
       invalid-type:
