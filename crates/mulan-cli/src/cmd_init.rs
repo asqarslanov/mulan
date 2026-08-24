@@ -96,14 +96,15 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
     cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(E::Cliclack)?;
     let init_options = InitConfig::interactive_prompt().map_err(E::Cliclack)?;
     let confirm = {
-        cliclack::confirm(t::cmd_init::PromptConfirm.get_in(Locale::default()))
+        let prompt = t::cmd_init::PromptConfirm.get_in(Locale::default());
+        cliclack::confirm(prompt)
             .initial_value(true)
             .interact()
             .map_err(E::Cliclack)?
     };
     if !confirm {
-        cliclack::outro_cancel(t::cmd_init::Canceled.get_in(Locale::default()))
-            .map_err(E::Cliclack)?;
+        let message = t::cmd_init::Canceled.get_in(Locale::default());
+        cliclack::outro_cancel(message).map_err(E::Cliclack)?;
         return Err(E::Cancel);
     }
     match init_options.write_to_file() {
@@ -118,18 +119,20 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         }
     }
     let create_locales = {
-        cliclack::confirm(t::cmd_init::PromptCreateLocales.get_in(Locale::default()))
+        let prompt = t::cmd_init::PromptCreateLocales.get_in(Locale::default());
+        cliclack::confirm(prompt)
             .initial_value(true)
             .interact()
             .map_err(E::Cliclack)?
     };
     if create_locales {
         create_locale_files(&init_options.locales)
-            .map_err(|err| E::Miette(err.to_report(&mulan_config::Config::dummy())))?;
-        cliclack::note("", t::cmd_init::DefinedLocales.get_in(Locale::default()))
-            .map_err(E::Cliclack)?;
+            .map_err(|e| E::Miette(e.to_report(&mulan_config::Config::dummy())))?;
+        let message = t::cmd_init::DefinedLocales.get_in(Locale::default());
+        cliclack::note("", message).map_err(E::Cliclack)?;
     }
-    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(E::Cliclack)?;
+    let outro_message = t::cmd_init::Outro.get_in(Locale::default());
+    cliclack::outro(outro_message).map_err(E::Cliclack)?;
     Ok(())
 }
 
