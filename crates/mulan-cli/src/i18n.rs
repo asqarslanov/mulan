@@ -48,6 +48,23 @@ pub mod t {
     pub mod cmd_init {
         use super::Locale;
 
+        /// `cmd-init.canceled`
+        ///
+        /// ```mulan
+        /// Operation cancelled.
+        /// ```
+        #[must_use]
+        pub struct Canceled;
+
+        impl Canceled {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Operation cancelled.",
+                }
+            }
+        }
+
         /// `cmd-init.confirm`
         ///
         /// ```mulan

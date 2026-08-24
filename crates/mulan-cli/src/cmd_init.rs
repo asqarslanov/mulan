@@ -109,6 +109,8 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
             .map_err(PromptAndInitError::Io)?
     };
     if !confirm {
+        cliclack::outro_cancel(t::cmd_init::Canceled.get_in(Locale::default()))
+            .map_err(PromptAndInitError::Io)?;
         return Err(PromptAndInitError::Cancel);
     }
     init_options

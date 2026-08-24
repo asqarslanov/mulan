@@ -10,6 +10,7 @@ cmd-init:
     no-label: "No"
     no-hint: "you can always add it later"
   confirm: "Confirm?"
+  canceled: "Operation cancelled." # imitating `cliclack`'s message
   outro: "You're all set"
 
 cmd-gen:
