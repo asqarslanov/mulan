@@ -90,7 +90,8 @@ enum PromptAndInitError {
     /// The user manually didn't confirm initialization.
     Cancel,
 
-    /// A [`mod@cliclack`] error (e.g., Ctrl+C or couldn't print to the console).
+    /// A [`mod@cliclack`] error
+    /// (e.g., Ctrl+C or couldn't print to the console).
     Cliclack(io::Error),
 
     /// A ready-to-print report.
