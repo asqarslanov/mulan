@@ -139,19 +139,18 @@ impl UserChoice {
 
     ///
     fn prompt_generate() -> io::Result<Option<Target>> {
-        let add = cliclack::select(t::cmd_init::generate::Prompt.get_in(Locale::default()))
-            .item(
-                true,
-                t::cmd_init::generate::YesLabel.get_in(Locale::default()),
-                t::cmd_init::generate::YesHint.get_in(Locale::default()),
-            )
-            .item(
-                false,
-                t::cmd_init::generate::NoLabel.get_in(Locale::default()),
-                t::cmd_init::generate::NoHint.get_in(Locale::default()),
-            )
-            .interact()?;
-        if !add {
+        let add_rust_target: bool = {
+            let prompt = t::cmd_init::generate::Prompt.get_in(Locale::default());
+            let yes_label = t::cmd_init::generate::YesLabel.get_in(Locale::default());
+            let yes_hint = t::cmd_init::generate::YesHint.get_in(Locale::default());
+            let no_label = t::cmd_init::generate::NoLabel.get_in(Locale::default());
+            let no_hint = t::cmd_init::generate::NoHint.get_in(Locale::default());
+            cliclack::select(prompt)
+                .item(true, yes_label, yes_hint)
+                .item(false, no_label, no_hint)
+                .interact()?
+        };
+        if !add_rust_target {
             return Ok(None);
         }
         let path: PathBuf = {
