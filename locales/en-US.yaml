@@ -11,7 +11,11 @@ cmd-init:
     no-hint: "you can always add it later"
   confirm: "Confirm?"
   canceled: "Operation cancelled." # imitating `cliclack`'s message
-  outro: "You're all set"
+  outro: |-
+    Done!
+
+    Feel free to modify the generated config to your liking.
+    Use `mulan gen` to generate i18n bindings.
 
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"

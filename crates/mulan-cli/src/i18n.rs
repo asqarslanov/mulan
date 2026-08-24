@@ -136,7 +136,10 @@ pub mod t {
         /// `cmd-init.outro`
         ///
         /// ```mulan
-        /// You're all set
+        /// Done!
+
+        /// Feel free to modify the generated config to your liking.
+        /// Use `mulan gen` to generate i18n bindings.
         /// ```
         #[must_use]
         pub struct Outro;
@@ -145,7 +148,7 @@ pub mod t {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "You\'re all set",
+                    _ => "Done!\n\nFeel free to modify the generated config to your liking.\nUse `mulan gen` to generate i18n bindings.",
                 }
             }
         }
