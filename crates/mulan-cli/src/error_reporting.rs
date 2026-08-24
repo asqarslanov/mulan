@@ -269,7 +269,7 @@ impl self::Reportable for crate::cmd_init::ConfigExistsError {
     }
 
     fn code(&self) -> &'static str {
-        "cli::init::config_exists"
+        "cli::init::config::already_exists"
     }
 
     fn help(&self, _: &mulan_config::Config) -> Option<String> {
