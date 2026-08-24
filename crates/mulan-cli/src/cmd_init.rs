@@ -103,7 +103,7 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         .map_err(PromptAndInitError::Io)?;
     let init_options = InitConfig::interactive_prompt().map_err(PromptAndInitError::Io)?;
     let confirm = {
-        cliclack::confirm("Confirm?")
+        cliclack::confirm(t::cmd_init::Confirm.get_in(Locale::default()))
             .initial_value(true)
             .interact()
             .map_err(PromptAndInitError::Io)?

@@ -48,6 +48,23 @@ pub mod t {
     pub mod cmd_init {
         use super::Locale;
 
+        /// `cmd-init.confirm`
+        ///
+        /// ```mulan
+        /// Confirm?
+        /// ```
+        #[must_use]
+        pub struct Confirm;
+
+        impl Confirm {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Confirm?",
+                }
+            }
+        }
+
         /// `cmd-init.intro`
         ///
         /// ```mulan

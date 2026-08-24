@@ -9,6 +9,7 @@ cmd-init:
     yes-hint: "you will need to specify a path to where bindings should be generated"
     no-label: "No"
     no-hint: "you can always add it later"
+  confirm: "Confirm?"
   outro: "You're all set"
 
 cmd-gen:
