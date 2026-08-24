@@ -21,35 +21,31 @@ errors:
 
       create-config:
         message: |-
-          {path}
-          {os-error}
-          ...
+          failed to create config at {path}
+          - OS error: {os-error}
         help: |-
-          ...
+          make sure that you have permissions to create files here
 
       create-locales-dir:
         message: |-
-          {path}
-          {os-error}
-          ...
+          failed to create {path}/
+          - OS error: {os-error}
         help: |-
-          ...
+          make sure that you have permissions to create files here
 
       create-locale-file:
         message: |-
-          {path}
-          {os-error}
-          ...
+          failed to create {path}
+          - OS error: {os-error}
         help: |-
-          ...
+          make sure that you have permissions to create files here
 
       write-locale-file:
         message: |-
-          {path}
-          {os-error}
-          ...
+          failed to write to {path}
+          - OS error: {os-error}
         help: |-
-          ...
+          make sure that you have permissions to write to this file
 
   config:
     parse:

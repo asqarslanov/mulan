@@ -250,7 +250,7 @@ pub mod t {
                     /// `errors.cli.init.create-config.help`
                     ///
                     /// ```mulan
-                    /// ...
+                    /// make sure that you have permissions to create files here
                     /// ```
                     #[must_use]
                     pub struct Help;
@@ -259,7 +259,7 @@ pub mod t {
                         #[must_use]
                         pub const fn get_in(&self, locale: Locale) -> &'static str {
                             match locale {
-                                _ => "...",
+                                _ => "make sure that you have permissions to create files here",
                             }
                         }
                     }
@@ -267,9 +267,8 @@ pub mod t {
                     /// `errors.cli.init.create-config.message`
                     ///
                     /// ```mulan
-                    /// {path}
-                    /// {os-error}
-                    /// ...
+                    /// failed to create config at {path}
+                    /// - OS error: {os-error}
                     /// ```
                     #[must_use]
                     pub struct Message<'os_error, 'path> {
@@ -281,7 +280,7 @@ pub mod t {
                         #[must_use]
                         pub fn get_in(&self, locale: Locale) -> String {
                             match locale {
-                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                                _ => format!("failed to create config at {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
                             }
                         }
                     }
@@ -294,7 +293,7 @@ pub mod t {
                     /// `errors.cli.init.create-locale-file.help`
                     ///
                     /// ```mulan
-                    /// ...
+                    /// make sure that you have permissions to create files here
                     /// ```
                     #[must_use]
                     pub struct Help;
@@ -303,7 +302,7 @@ pub mod t {
                         #[must_use]
                         pub const fn get_in(&self, locale: Locale) -> &'static str {
                             match locale {
-                                _ => "...",
+                                _ => "make sure that you have permissions to create files here",
                             }
                         }
                     }
@@ -311,9 +310,8 @@ pub mod t {
                     /// `errors.cli.init.create-locale-file.message`
                     ///
                     /// ```mulan
-                    /// {path}
-                    /// {os-error}
-                    /// ...
+                    /// failed to create {path}
+                    /// - OS error: {os-error}
                     /// ```
                     #[must_use]
                     pub struct Message<'os_error, 'path> {
@@ -325,7 +323,7 @@ pub mod t {
                         #[must_use]
                         pub fn get_in(&self, locale: Locale) -> String {
                             match locale {
-                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                                _ => format!("failed to create {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
                             }
                         }
                     }
@@ -338,7 +336,7 @@ pub mod t {
                     /// `errors.cli.init.create-locales-dir.help`
                     ///
                     /// ```mulan
-                    /// ...
+                    /// make sure that you have permissions to create files here
                     /// ```
                     #[must_use]
                     pub struct Help;
@@ -347,7 +345,7 @@ pub mod t {
                         #[must_use]
                         pub const fn get_in(&self, locale: Locale) -> &'static str {
                             match locale {
-                                _ => "...",
+                                _ => "make sure that you have permissions to create files here",
                             }
                         }
                     }
@@ -355,9 +353,8 @@ pub mod t {
                     /// `errors.cli.init.create-locales-dir.message`
                     ///
                     /// ```mulan
-                    /// {path}
-                    /// {os-error}
-                    /// ...
+                    /// failed to create {path}/
+                    /// - OS error: {os-error}
                     /// ```
                     #[must_use]
                     pub struct Message<'os_error, 'path> {
@@ -369,7 +366,7 @@ pub mod t {
                         #[must_use]
                         pub fn get_in(&self, locale: Locale) -> String {
                             match locale {
-                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                                _ => format!("failed to create {path}/\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
                             }
                         }
                     }
@@ -382,7 +379,7 @@ pub mod t {
                     /// `errors.cli.init.write-locale-file.help`
                     ///
                     /// ```mulan
-                    /// ...
+                    /// make sure that you have permissions to write to this file
                     /// ```
                     #[must_use]
                     pub struct Help;
@@ -391,7 +388,7 @@ pub mod t {
                         #[must_use]
                         pub const fn get_in(&self, locale: Locale) -> &'static str {
                             match locale {
-                                _ => "...",
+                                _ => "make sure that you have permissions to write to this file",
                             }
                         }
                     }
@@ -399,9 +396,8 @@ pub mod t {
                     /// `errors.cli.init.write-locale-file.message`
                     ///
                     /// ```mulan
-                    /// {path}
-                    /// {os-error}
-                    /// ...
+                    /// failed to write to {path}
+                    /// - OS error: {os-error}
                     /// ```
                     #[must_use]
                     pub struct Message<'os_error, 'path> {
@@ -413,7 +409,7 @@ pub mod t {
                         #[must_use]
                         pub fn get_in(&self, locale: Locale) -> String {
                             match locale {
-                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                                _ => format!("failed to write to {path}\n- OS error: {os_error}", os_error = self.os_error, path = self.path),
                             }
                         }
                     }

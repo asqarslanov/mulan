@@ -181,6 +181,8 @@ pub enum CreateLocalesError {
 #[derive(Debug)]
 pub struct CreateLocalesDirError {
     pub error: io::Error,
+
+    ///
     pub path: RelativePathBuf,
 }
 
