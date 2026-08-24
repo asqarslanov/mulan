@@ -93,7 +93,8 @@ struct InitConfig {
 }
 
 impl InitConfig {
-    ///
+    /// Requests values to build this type from the user
+    /// via an interactive [`mod@cliclack`] menu.
     fn interactive_prompt() -> io::Result<Self> {
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
@@ -105,7 +106,7 @@ impl InitConfig {
         })
     }
 
-    ///
+    /// Creates a new config file and writes data to it in a pretty form.
     fn write_to_file(&self) -> Result<(), CreateConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
