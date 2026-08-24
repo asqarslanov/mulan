@@ -92,47 +92,44 @@ enum PromptAndInitError {
 /// Shows an interactive [`mod@cliclack`] menu and initializes Mulan
 /// in the current directory.
 fn prompt_and_init() -> Result<(), PromptAndInitError> {
-    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default()))
-        .map_err(PromptAndInitError::Cliclack)?;
-    let init_options = InitConfig::interactive_prompt().map_err(PromptAndInitError::Cliclack)?;
+    use PromptAndInitError as E;
+    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(E::Cliclack)?;
+    let init_options = InitConfig::interactive_prompt().map_err(E::Cliclack)?;
     let confirm = {
         cliclack::confirm(t::cmd_init::PromptConfirm.get_in(Locale::default()))
             .initial_value(true)
             .interact()
-            .map_err(PromptAndInitError::Cliclack)?
+            .map_err(E::Cliclack)?
     };
     if !confirm {
         cliclack::outro_cancel(t::cmd_init::Canceled.get_in(Locale::default()))
-            .map_err(PromptAndInitError::Cliclack)?;
-        return Err(PromptAndInitError::Cancel);
+            .map_err(E::Cliclack)?;
+        return Err(E::Cancel);
     }
-    let config_path = init_options.write_to_file().map_err(|err| {
-        let report = err.to_report(&mulan_config::Config::dummy());
-        PromptAndInitError::Miette(report)
-    })?;
-    cliclack::note(
-        "",
-        t::cmd_init::CreatedConfig {
-            path: config_path.as_str(),
+    match init_options.write_to_file() {
+        Ok(config_path) => {
+            let path = config_path.as_str();
+            let message = t::cmd_init::CreatedConfig { path }.get_in(Locale::default());
+            cliclack::note("", message).map_err(E::Cliclack)?;
         }
-        .get_in(Locale::default()),
-    )
-    .map_err(PromptAndInitError::Cliclack)?;
+        Err(e) => {
+            let report = e.to_report(&mulan_config::Config::dummy());
+            return Err(E::Miette(report));
+        }
+    }
     let create_locales = {
         cliclack::confirm(t::cmd_init::PromptCreateLocales.get_in(Locale::default()))
             .initial_value(true)
             .interact()
-            .map_err(PromptAndInitError::Cliclack)?
+            .map_err(E::Cliclack)?
     };
     if create_locales {
-        create_locale_files(&init_options.locales).map_err(|err| {
-            PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
-        })?;
+        create_locale_files(&init_options.locales)
+            .map_err(|err| E::Miette(err.to_report(&mulan_config::Config::dummy())))?;
         cliclack::note("", t::cmd_init::DefinedLocales.get_in(Locale::default()))
-            .map_err(PromptAndInitError::Cliclack)?;
+            .map_err(E::Cliclack)?;
     }
-    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default()))
-        .map_err(PromptAndInitError::Cliclack)?;
+    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(E::Cliclack)?;
     Ok(())
 }
 
