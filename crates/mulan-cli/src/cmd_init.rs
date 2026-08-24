@@ -3,6 +3,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use compact_str::format_compact;
 use either::Either;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
@@ -122,7 +123,8 @@ impl InitConfig {
         })
     }
 
-    /// Creates a new config file and writes data to it in a pretty form.
+    /// Creates a new config file, writes data to it in a pretty form,
+    /// and logs the result to the user.
     fn write_to_file(&self) -> Result<(), NewConfigError> {
         let path = RelativePathBuf::from("mulan.toml");
         let contents = toml::to_string_pretty(self).expect("should never fail");
@@ -130,8 +132,10 @@ impl InitConfig {
             Ok(file) => file,
             Err(error) => return Err(NewConfigError::Create(CreateConfigError { error, path })),
         };
-        file.write_all(contents.as_bytes())
-            .map_err(|error| NewConfigError::Write(WriteConfigError { error, path }))?;
+        if let Err(error) = file.write_all(contents.as_bytes()) {
+            return Err(NewConfigError::Write(WriteConfigError { error, path }));
+        }
+        cliclack::note("", format_compact!("Created `{path}`"));
         Ok(())
     }
 
@@ -224,7 +228,8 @@ pub struct WriteLocaleFileError {
     pub path: RelativePathBuf,
 }
 
-/// Create a locales directory and all needed files inside of it.
+/// Create a locales directory and all needed files inside of it
+/// and logs the result to the user.
 ///
 /// # Errors
 ///
@@ -243,6 +248,7 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
             path: dir_path.clone(),
         })
     })?;
+    cliclack::note("", format_compact!("Created `{dir_path}/`"));
     for locale in locales {
         let contents = serde_saphyr::to_string(&match locale {
             Language::RuRu => ExampleLocale {
@@ -261,8 +267,11 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
                 return Err(CreateLocalesError::CreateFile(error));
             }
         };
-        file.write_all(contents.as_bytes())
-            .map_err(|error| CreateLocalesError::WriteFile(WriteLocaleFileError { error, path }))?;
+        if let Err(error) = file.write_all(contents.as_bytes()) {
+            let error = WriteLocaleFileError { error, path };
+            return Err(CreateLocalesError::WriteFile(error));
+        }
+        cliclack::note("", format_compact!("Created `{path}`"));
     }
     Ok(())
 }
