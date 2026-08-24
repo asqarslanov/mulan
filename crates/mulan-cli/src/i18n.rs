@@ -65,19 +65,38 @@ pub mod t {
             }
         }
 
-        /// `cmd-init.confirm`
+        /// `cmd-init.created-config`
         ///
         /// ```mulan
-        /// Confirm?
+        /// Created config at `{path}`
         /// ```
         #[must_use]
-        pub struct Confirm;
+        pub struct CreatedConfig<'path> {
+            pub path: &'path str,
+        }
 
-        impl Confirm {
+        impl CreatedConfig<'_> {
+            #[must_use]
+            pub fn get_in(&self, locale: Locale) -> String {
+                match locale {
+                    _ => format!("Created config at `{path}`", path = self.path),
+                }
+            }
+        }
+
+        /// `cmd-init.defined-locales`
+        ///
+        /// ```mulan
+        /// Defined sample locales at `locales/`
+        /// ```
+        #[must_use]
+        pub struct DefinedLocales;
+
+        impl DefinedLocales {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "Confirm?",
+                    _ => "Defined sample locales at `locales/`",
                 }
             }
         }
@@ -138,8 +157,8 @@ pub mod t {
         /// ```mulan
         /// Done!
 
-        /// Feel free to modify the generated config to your liking.
-        /// Use `mulan gen` to generate i18n bindings.
+        ///    Feel free to modify the generated config to your liking.
+        ///    Use `mulan gen` to generate i18n bindings.
         /// ```
         #[must_use]
         pub struct Outro;
@@ -148,7 +167,41 @@ pub mod t {
             #[must_use]
             pub const fn get_in(&self, locale: Locale) -> &'static str {
                 match locale {
-                    _ => "Done!\n\nFeel free to modify the generated config to your liking.\nUse `mulan gen` to generate i18n bindings.",
+                    _ => "Done!\n\n   Feel free to modify the generated config to your liking.\n   Use `mulan gen` to generate i18n bindings.",
+                }
+            }
+        }
+
+        /// `cmd-init.prompt-confirm`
+        ///
+        /// ```mulan
+        /// Confirm?
+        /// ```
+        #[must_use]
+        pub struct PromptConfirm;
+
+        impl PromptConfirm {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Confirm?",
+                }
+            }
+        }
+
+        /// `cmd-init.prompt-create-locales`
+        ///
+        /// ```mulan
+        /// Create locale files?
+        /// ```
+        #[must_use]
+        pub struct PromptCreateLocales;
+
+        impl PromptCreateLocales {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Create locale files?",
                 }
             }
         }

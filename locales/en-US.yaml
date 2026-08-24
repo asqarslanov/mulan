@@ -9,13 +9,16 @@ cmd-init:
     yes-hint: "you will need to specify a path to where bindings should be generated"
     no-label: "No"
     no-hint: "you can always add it later"
-  confirm: "Confirm?"
+  prompt-confirm: "Confirm?"
   canceled: "Operation cancelled." # imitating `cliclack`'s message
+  created-config: "Created config at `{path}`"
+  prompt-create-locales: "Create locale files?"
+  defined-locales: "Defined sample locales at `locales/`"
   outro: |-
     Done!
 
-    Feel free to modify the generated config to your liking.
-    Use `mulan gen` to generate i18n bindings.
+       Feel free to modify the generated config to your liking.
+       Use `mulan gen` to generate i18n bindings.
 
 cmd-gen:
   log: "Generated {target} bindings in `{path}`"

@@ -3,7 +3,6 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use compact_str::format_compact;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
@@ -103,7 +102,7 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         .map_err(PromptAndInitError::Io)?;
     let init_options = InitConfig::interactive_prompt().map_err(PromptAndInitError::Io)?;
     let confirm = {
-        cliclack::confirm(t::cmd_init::Confirm.get_in(Locale::default()))
+        cliclack::confirm(t::cmd_init::PromptConfirm.get_in(Locale::default()))
             .initial_value(true)
             .interact()
             .map_err(PromptAndInitError::Io)?
@@ -118,10 +117,16 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
             PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
         })?
     };
-    cliclack::note("", format_compact!("Created `{config_path}`"))
-        .map_err(PromptAndInitError::Io)?;
+    cliclack::note(
+        "",
+        t::cmd_init::CreatedConfig {
+            path: config_path.as_str(),
+        }
+        .get_in(Locale::default()),
+    )
+    .map_err(PromptAndInitError::Io)?;
     let create_locales = {
-        cliclack::confirm("Create and locale files?")
+        cliclack::confirm(t::cmd_init::PromptCreateLocales.get_in(Locale::default()))
             .initial_value(true)
             .interact()
             .map_err(PromptAndInitError::Io)?
@@ -130,7 +135,7 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         create_locale_files(&init_options.locales).map_err(|err| {
             PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy()))
         })?;
-        cliclack::note("", format_compact!("Created `locales/`"))
+        cliclack::note("", t::cmd_init::DefinedLocales.get_in(Locale::default()))
             .map_err(PromptAndInitError::Io)?;
     }
     cliclack::outro(t::cmd_init::Outro.get_in(Locale::default()))
