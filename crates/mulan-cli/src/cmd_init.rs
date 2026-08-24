@@ -59,31 +59,6 @@ pub struct ConfigExistsError {
     pub path: RelativePathBuf,
 }
 
-/// Couldn't create a new Mulan config.
-#[derive(Debug)]
-pub enum NewConfigError {
-    Create(CreateConfigError),
-    Write(WriteConfigError),
-}
-
-/// See [`NewConfigError::Create`].
-#[derive(Debug)]
-pub struct CreateConfigError {
-    pub error: io::Error,
-
-    /// The path where we tried to create a config.
-    pub path: RelativePathBuf,
-}
-
-/// See [`NewConfigError::Write`].
-#[derive(Debug)]
-pub struct WriteConfigError {
-    pub error: io::Error,
-
-    /// The path to the config we were trying to write to.
-    pub path: RelativePathBuf,
-}
-
 /// Errors of [`prompt_and_init`].
 #[derive(Debug)]
 enum PromptAndInitError {
@@ -159,6 +134,31 @@ struct InitConfig {
 
     /// Maps to [`mulan_config::Config::generate`].
     generate: Option<SmallVec1<[Target; 1]>>,
+}
+
+/// Couldn't create a new Mulan config.
+#[derive(Debug)]
+pub enum NewConfigError {
+    Create(CreateConfigError),
+    Write(WriteConfigError),
+}
+
+/// See [`NewConfigError::Create`].
+#[derive(Debug)]
+pub struct CreateConfigError {
+    pub error: io::Error,
+
+    /// The path where we tried to create a config.
+    pub path: RelativePathBuf,
+}
+
+/// See [`NewConfigError::Write`].
+#[derive(Debug)]
+pub struct WriteConfigError {
+    pub error: io::Error,
+
+    /// The path to the config we were trying to write to.
+    pub path: RelativePathBuf,
 }
 
 impl InitConfig {
