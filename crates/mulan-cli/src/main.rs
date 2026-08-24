@@ -25,7 +25,7 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Command {
-    ///
+    /// Initialize a new Mulan config in the current directory
     Init,
 
     /// Generate i18n bindings for your targets
