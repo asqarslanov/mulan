@@ -169,13 +169,13 @@ impl InitConfig {
 /// Errors of [`create_locale_files`].
 #[derive(Debug)]
 pub enum CreateLocalesError {
-    ///
+    /// Failed to create a locales directory (maybe it already exists?).
     CreateDir(CreateLocalesDirError),
 
-    ///
+    /// Failed to create a locale file (maybe it already exists?).
     CreateFile(CreateLocaleFileError),
 
-    ///
+    /// Failed to write data to the newly created locale file.
     WriteFile(WriteLocaleFileError),
 }
 
@@ -184,7 +184,7 @@ pub enum CreateLocalesError {
 pub struct CreateLocalesDirError {
     pub error: io::Error,
 
-    ///
+    /// Doesn't have a slash (`/`) at the end.
     pub path: RelativePathBuf,
 }
 
