@@ -83,7 +83,7 @@ pub struct WriteConfigError {
     pub path: RelativePathBuf,
 }
 
-///
+/// Errors of [`prompt_and_init`].
 #[derive(Debug)]
 enum PromptAndInitError {
     ///
