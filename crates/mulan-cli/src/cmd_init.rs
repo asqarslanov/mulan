@@ -164,9 +164,9 @@ impl UserChoice {
     }
 }
 
-///
+/// Errors of [`create_locale_files`].
 #[derive(Debug)]
-enum CreateLocalesError {
+pub enum CreateLocalesError {
     ///
     CreateDir(CreateLocalesDirError),
 
@@ -174,16 +174,16 @@ enum CreateLocalesError {
     CreateFile(CreateLocaleFileError),
 }
 
-///
+/// See [`CreateLocalesError::CreateDir`].
 #[derive(Debug)]
-struct CreateLocalesDirError {
+pub struct CreateLocalesDirError {
     pub error: io::Error,
     pub path: RelativePathBuf,
 }
 
-///
+/// See [`CreateLocalesError::CreateFile`].
 #[derive(Debug)]
-struct CreateLocaleFileError {
+pub struct CreateLocaleFileError {
     pub error: io::Error,
     pub path: RelativePathBuf,
 }
