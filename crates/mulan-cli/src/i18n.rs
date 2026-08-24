@@ -242,6 +242,138 @@ pub mod t {
                         }
                     }
                 }
+
+                /// `errors.cli.init.create-config`
+                pub mod create_config {
+                    use super::Locale;
+
+                    /// `errors.cli.init.create-config.help`
+                    ///
+                    /// ```mulan
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "...",
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.create-config.message`
+                    ///
+                    /// ```mulan
+                    /// {path}
+                    /// {os-error}
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                            }
+                        }
+                    }
+                }
+
+                /// `errors.cli.init.create-locale-file`
+                pub mod create_locale_file {
+                    use super::Locale;
+
+                    /// `errors.cli.init.create-locale-file.help`
+                    ///
+                    /// ```mulan
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "...",
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.create-locale-file.message`
+                    ///
+                    /// ```mulan
+                    /// {path}
+                    /// {os-error}
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                            }
+                        }
+                    }
+                }
+
+                /// `errors.cli.init.create-locales-dir`
+                pub mod create_locales_dir {
+                    use super::Locale;
+
+                    /// `errors.cli.init.create-locales-dir.help`
+                    ///
+                    /// ```mulan
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Help;
+
+                    impl Help {
+                        #[must_use]
+                        pub const fn get_in(&self, locale: Locale) -> &'static str {
+                            match locale {
+                                _ => "...",
+                            }
+                        }
+                    }
+
+                    /// `errors.cli.init.create-locales-dir.message`
+                    ///
+                    /// ```mulan
+                    /// {path}
+                    /// {os-error}
+                    /// ...
+                    /// ```
+                    #[must_use]
+                    pub struct Message<'os_error, 'path> {
+                        pub os_error: &'os_error str,
+                        pub path: &'path str,
+                    }
+
+                    impl Message<'_, '_> {
+                        #[must_use]
+                        pub fn get_in(&self, locale: Locale) -> String {
+                            match locale {
+                                _ => format!("{path}\n{os_error}\n...", os_error = self.os_error, path = self.path),
+                            }
+                        }
+                    }
+                }
             }
         }
 

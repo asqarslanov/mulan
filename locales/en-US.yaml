@@ -19,6 +19,30 @@ errors:
       config-exists:
         message: "config already exists at `{path}`"
 
+      create-config:
+        message: |-
+          {path}
+          {os-error}
+          ...
+        help: |-
+          ...
+
+      create-locales-dir:
+        message: |-
+          {path}
+          {os-error}
+          ...
+        help: |-
+          ...
+
+      create-locale-file:
+        message: |-
+          {path}
+          {os-error}
+          ...
+        help: |-
+          ...
+
   config:
     parse:
       invalid-type:
