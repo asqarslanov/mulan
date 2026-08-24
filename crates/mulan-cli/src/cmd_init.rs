@@ -77,17 +77,18 @@ fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
     Ok(())
 }
 
-///
+/// A simplified version of [`mulan_config::Config`]
+/// the user builds with a [`mod@cliclack`] interactive menu.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
 struct InitOptions {
-    ///
+    /// Maps to [`mulan_config::Config::locales`].
     locales: Vec<Language>,
 
-    ///
+    /// Maps to [`mulan_config::Config::main_locale`].
     main_locale: Language,
 
-    ///
+    /// Maps to [`mulan_config::Config::generate`].
     generate: Option<SmallVec1<[Target; 1]>>,
 }
 
