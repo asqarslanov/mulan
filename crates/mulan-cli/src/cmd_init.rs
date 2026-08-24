@@ -65,7 +65,6 @@ pub struct CreateConfigError {
 
 ///
 fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
-    todo!("use mulan");
     cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
     let user_choice = UserChoice::interactive_prompt().map_err(Either::Left)?;
     user_choice
@@ -140,11 +139,17 @@ impl UserChoice {
 
     ///
     fn prompt_generate() -> io::Result<Option<Target>> {
-        let yes_hint = "you will need to specify a path to where bindings should be generated";
-        let no_hint = "you can always add it later";
-        let add = cliclack::select("Add a Rust codegen target?")
-            .item(true, "Yes", yes_hint)
-            .item(false, "No", no_hint)
+        let add = cliclack::select(t::cmd_init::generate::Prompt.get_in(Locale::default()))
+            .item(
+                true,
+                t::cmd_init::generate::YesLabel.get_in(Locale::default()),
+                t::cmd_init::generate::YesHint.get_in(Locale::default()),
+            )
+            .item(
+                false,
+                t::cmd_init::generate::NoLabel.get_in(Locale::default()),
+                t::cmd_init::generate::NoHint.get_in(Locale::default()),
+            )
             .interact()?;
         if !add {
             return Ok(None);

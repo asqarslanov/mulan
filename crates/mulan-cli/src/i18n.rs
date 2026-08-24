@@ -115,6 +115,96 @@ pub mod t {
                 }
             }
         }
+
+        /// `cmd-init.generate`
+        pub mod generate {
+            use super::Locale;
+
+            /// `cmd-init.generate.no-hint`
+            ///
+            /// ```mulan
+            /// you can always add it later
+            /// ```
+            #[must_use]
+            pub struct NoHint;
+
+            impl NoHint {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "you can always add it later",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.no-label`
+            ///
+            /// ```mulan
+            /// No
+            /// ```
+            #[must_use]
+            pub struct NoLabel;
+
+            impl NoLabel {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "No",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.prompt`
+            ///
+            /// ```mulan
+            /// Add a Rust codegen target?
+            /// ```
+            #[must_use]
+            pub struct Prompt;
+
+            impl Prompt {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Add a Rust codegen target?",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.yes-hint`
+            ///
+            /// ```mulan
+            /// you will need to specify a path to where bindings should be generated
+            /// ```
+            #[must_use]
+            pub struct YesHint;
+
+            impl YesHint {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "you will need to specify a path to where bindings should be generated",
+                    }
+                }
+            }
+
+            /// `cmd-init.generate.yes-label`
+            ///
+            /// ```mulan
+            /// Yes
+            /// ```
+            #[must_use]
+            pub struct YesLabel;
+
+            impl YesLabel {
+                #[must_use]
+                pub const fn get_in(&self, locale: Locale) -> &'static str {
+                    match locale {
+                        _ => "Yes",
+                    }
+                }
+            }
+        }
     }
 
     /// `errors`

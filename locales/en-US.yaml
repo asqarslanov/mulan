@@ -2,6 +2,12 @@ cmd-init:
   intro: "Mulan"
   locales: "Select locales you want to support"
   main-locale: "Choose the main locale"
+  generate:
+    prompt: "Add a Rust codegen target?"
+    yes-label: "Yes"
+    yes-hint: "you will need to specify a path to where bindings should be generated"
+    no-label: "No"
+    no-hint: "you can always add it later"
   outro: "You're all set"
 
 cmd-gen:
