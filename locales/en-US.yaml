@@ -1,5 +1,7 @@
 cmd-init:
   intro: "Mulan"
+  locales: "Select locales you want to support"
+  main-locale: "Choose the main locale"
   outro: "You're all set"
 
 cmd-gen:

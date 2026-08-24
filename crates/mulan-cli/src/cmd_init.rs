@@ -114,13 +114,14 @@ impl UserChoice {
 
     ///
     fn prompt_locales(all_possible_locales: &[Language]) -> io::Result<Vec<Language>> {
-        cliclack::multiselect("Select locales you want to support")
-            .items(
-                &all_possible_locales
-                    .iter()
-                    .map(|&lang| (lang, lang.tag(), lang.name()))
-                    .collect_vec(),
-            )
+        let collect_vec = {
+            all_possible_locales
+                .iter()
+                .map(|&lang| (lang, lang.tag(), lang.name()))
+                .collect_vec()
+        };
+        cliclack::multiselect(t::cmd_init::Locales.get_in(Locale::default()))
+            .items(&collect_vec)
             .interact()
     }
 
@@ -132,7 +133,7 @@ impl UserChoice {
                 .map(|&lang| (lang, lang.tag(), lang.name()))
                 .collect_vec()
         };
-        cliclack::select("Choose the main locale")
+        cliclack::select(t::cmd_init::MainLocale.get_in(Locale::default()))
             .items(&items)
             .interact()
     }

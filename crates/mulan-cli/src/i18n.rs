@@ -65,6 +65,40 @@ pub mod t {
             }
         }
 
+        /// `cmd-init.locales`
+        ///
+        /// ```mulan
+        /// Select locales you want to support
+        /// ```
+        #[must_use]
+        pub struct Locales;
+
+        impl Locales {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Select locales you want to support",
+                }
+            }
+        }
+
+        /// `cmd-init.main-locale`
+        ///
+        /// ```mulan
+        /// Choose the main locale
+        /// ```
+        #[must_use]
+        pub struct MainLocale;
+
+        impl MainLocale {
+            #[must_use]
+            pub const fn get_in(&self, locale: Locale) -> &'static str {
+                match locale {
+                    _ => "Choose the main locale",
+                }
+            }
+        }
+
         /// `cmd-init.outro`
         ///
         /// ```mulan
