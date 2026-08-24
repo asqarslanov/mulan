@@ -113,7 +113,7 @@ impl InitOptions {
         Ok(())
     }
 
-    ///
+    /// Request a [`Self::locales`] value from the user.
     fn prompt_locales(all_possible_locales: &[Language]) -> io::Result<Vec<Language>> {
         let collect_vec = {
             all_possible_locales
@@ -126,7 +126,7 @@ impl InitOptions {
             .interact()
     }
 
-    ///
+    /// Request a [`Self::main_locale`] value from the user.
     fn prompt_main_locale(locales: &[Language]) -> io::Result<Language> {
         let items = {
             locales
@@ -139,7 +139,7 @@ impl InitOptions {
             .interact()
     }
 
-    ///
+    /// Request a [`Self::generate`] value from the user.
     fn prompt_generate() -> io::Result<Option<Target>> {
         let add_rust_target: bool = {
             let prompt = t::cmd_init::generate::Prompt.get_in(Locale::default());
