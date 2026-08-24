@@ -189,7 +189,7 @@ struct CreateLocaleFileError {
 }
 
 ///
-fn create_locale_files(locales: &[Language]) -> io::Result<()> {
+fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
     #[derive(Serialize)]
     struct ExampleLocale {
         greeting: &'static str,
