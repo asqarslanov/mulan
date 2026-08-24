@@ -10,7 +10,6 @@ use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::{Case, Language};
 
-use crate::Parameter;
 use crate::identifier::Identifier;
 use crate::template::Template;
 
@@ -141,8 +140,8 @@ impl Translations {
     /// ```
     /// ````
     #[must_use]
-    pub fn markdown_preview(&self) -> Option<String1> {
-        let preview = self.main.preview()?;
+    pub fn markdown_preview(&self, config: &mulan_config::Config) -> Option<String1> {
+        let preview = self.main.preview(config)?;
         let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
         Some(
             formatdoc! {"
@@ -159,7 +158,7 @@ impl Translations {
 
     /// The set of all parameters this message requires.
     #[must_use]
-    pub fn parameter_set(&self) -> Option<BTreeSet1<&Parameter>> {
+    pub fn parameter_set(&self) -> Option<BTreeSet1<&Identifier>> {
         self.main
             .parameter_iter()
             .try_into_iter1()

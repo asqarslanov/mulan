@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
-use crate::{Parameter, RawKey};
+use crate::{Identifier, RawKey};
 
 /// Errors of [`crate::compose`].
 #[derive(Debug)]
@@ -108,7 +108,7 @@ pub struct NotAMessageError {
 pub struct UnknownParametersError {
     pub locale: Language,
     pub key: RawKey,
-    pub parameters: BTreeSet1<Parameter>,
+    pub parameters: BTreeSet1<Identifier>,
 }
 
 /// The error type of [`crate::chumsky_parse::ChumskyParser::mulan_parse`].

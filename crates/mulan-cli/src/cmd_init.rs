@@ -1,5 +1,5 @@
 use std::fs::{self, File};
-use std::io::{self, Write};
+use std::io::{self, Write as _};
 use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::process::ExitCode;

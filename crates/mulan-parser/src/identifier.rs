@@ -2,6 +2,7 @@
 
 use std::convert::identity;
 
+use compact_str::format_compact;
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Case;
@@ -21,6 +22,12 @@ pub struct Identifier {
 }
 
 impl Identifier {
+    /// Formats this identifier as a message template parameter (e.g., `{foo}`).
+    pub fn parameter_preview(&self, config: &mulan_config::Config) -> CompactString1 {
+        let preview = format_compact!("{{{}}}", self.to_compact_string1(config.key_case));
+        CompactString1::try_from(preview).expect("non-empty")
+    }
+
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         use Case as C;
         match case {

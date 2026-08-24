@@ -194,7 +194,7 @@ impl<'src> Module<'src> {
 #[derive(Debug)]
 struct Struct<'src> {
     translations: &'src mulan_parser::Translations,
-    fields: Option<BTreeSet1<&'src mulan_parser::Parameter>>,
+    fields: Option<BTreeSet1<&'src mulan_parser::Identifier>>,
 }
 
 impl<'src> Struct<'src> {
@@ -222,7 +222,7 @@ impl<'src> Struct<'src> {
     }
 
     fn doc_comment(&self, config: &mulan_config::Config, key: &mulan_parser::Key) -> String {
-        let preview = self.translations.markdown_preview();
+        let preview = self.translations.markdown_preview(config);
         let preview = preview.as_ref().map_or("_empty message_", AsRef::as_ref);
         formatdoc! {"
             /// `{key}`
