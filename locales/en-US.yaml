@@ -14,7 +14,7 @@ cmd-init:
   created-config: "Created config at `{path}`"
   prompt-create-locales: "Create locale files?"
   defined-locales: "Defined sample locales at `locales/`"
-  outro: |-
+  outro: |- # 3 spaces are needed for alignment
     Done!
 
        Feel free to modify the generated config to your liking.
