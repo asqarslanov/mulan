@@ -932,7 +932,6 @@ dependencies = [
  "clap",
  "cliclack",
  "compact_str",
- "either",
  "figment2",
  "itertools 0.15.0",
  "miette",

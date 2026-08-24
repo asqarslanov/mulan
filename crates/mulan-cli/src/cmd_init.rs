@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use compact_str::format_compact;
-use either::Either;
 use itertools::Itertools as _;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::errors::{LocateError, NotFoundError};
@@ -33,18 +32,22 @@ pub fn execute() -> miette::Result<ExitCode> {
     }
     match prompt_and_init() {
         Ok(()) => Ok(ExitCode::SUCCESS),
-        Err(Either::Right(miette_report)) => Err(miette_report),
-        Err(Either::Left(io_err)) if matches!(io_err.kind(), io::ErrorKind::Interrupted) => {
+        Err(PromptAndInitError::Cancel) => {
+            // Cancelled at the end.
+            Ok(ExitCode::from(SIGINT))
+        }
+        Err(PromptAndInitError::Io(err)) if matches!(err.kind(), io::ErrorKind::Interrupted) => {
             // Ctrl+C interrupt.
             Ok(ExitCode::from(SIGINT))
         }
-        Err(Either::Left(io_err)) => {
+        Err(PromptAndInitError::Io(err)) => {
             // A `cliclack` error indicates that we couldn't print to the console.
             // There's no meaningful recovery strategy, so we just `panic!`.
             // There's no point in creating rich Miette reports---
             // we won't probably be able to print them anyway.
-            panic!("{io_err}");
+            panic!("{err}");
         }
+        Err(PromptAndInitError::Miette(report)) => Err(report),
     }
 }
 
@@ -80,23 +83,41 @@ pub struct WriteConfigError {
     pub path: RelativePathBuf,
 }
 
+///
+#[derive(Debug)]
+enum PromptAndInitError {
+    ///
+    Cancel,
+
+    ///
+    Io(io::Error),
+
+    ///
+    Miette(miette::Report),
+}
+
 /// Shows an interactive [`mod@cliclack`] menu and initializes Mulan
 /// in the current directory.
-fn prompt_and_init() -> Result<(), Either<io::Error, miette::Report>> {
-    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default())).map_err(Either::Left)?;
-    let init_options = InitConfig::interactive_prompt().map_err(Either::Left)?;
+fn prompt_and_init() -> Result<(), PromptAndInitError> {
+    cliclack::intro(t::cmd_init::Intro.get_in(Locale::default()))
+        .map_err(PromptAndInitError::Io)?;
+    let init_options = InitConfig::interactive_prompt().map_err(PromptAndInitError::Io)?;
     let confirm = {
         cliclack::confirm("Confirm?")
             .initial_value(true)
             .interact()
-            .map_err(Either::Left)?
+            .map_err(PromptAndInitError::Io)?
     };
+    if !confirm {
+        return Err(PromptAndInitError::Cancel);
+    }
     init_options
         .write_to_file()
-        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
+        .map_err(|err| PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy())))?;
     create_locale_files(&init_options.locales)
-        .map_err(|err| Either::Right(err.to_report(&mulan_config::Config::dummy())))?;
-    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default())).map_err(Either::Left)?;
+        .map_err(|err| PromptAndInitError::Miette(err.to_report(&mulan_config::Config::dummy())))?;
+    cliclack::outro(t::cmd_init::Outro.get_in(Locale::default()))
+        .map_err(PromptAndInitError::Io)?;
     Ok(())
 }
 
