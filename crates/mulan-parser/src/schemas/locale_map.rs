@@ -1,4 +1,5 @@
-//! Defines the [`LocaleMap`] struct and the logic to read it from the filesystem.
+//! Defines the [`LocaleMap`] struct and the logic to read it
+//! from the filesystem.
 
 use std::borrow::Cow;
 use std::fs;
