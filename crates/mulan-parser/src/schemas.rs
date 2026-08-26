@@ -1,6 +1,6 @@
-//! The parent module of [`mod@input`] and [`mod@bundle`].
+//! The parent module of [`mod@locale_map`] and [`mod@bundle`].
 //!
-//! Defines the transformation logic from [`Input`] to [`Bundle`]
+//! Defines the transformation logic from [`LocaleMap`] to [`Bundle`]
 //! (see the [`transform`] function).
 
 use std::collections::BTreeMap;
@@ -10,7 +10,9 @@ use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
 use self::bundle::{Bundle, Namespace, Node, Translations};
-use self::input::{Definition, DefinitionAtError, Input, RawDottedKey, RawNamespace, RawNode};
+use self::locale_map::{
+    Definition, DefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
+};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
     InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
@@ -19,11 +21,11 @@ use crate::errors::{
 use crate::{Identifier, Template};
 
 pub mod bundle;
-pub mod input;
+pub mod locale_map;
 
-/// Tries to transform an [`Input`] to a validated [`Bundle`].
+/// Tries to transform a [`LocaleMap`] to a validated [`Bundle`].
 pub fn transform<'input>(
-    input: &'input Input,
+    locale_map: &'input LocaleMap,
     main_locale: &'input Definition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
@@ -32,7 +34,7 @@ pub fn transform<'input>(
     let root = traverse_namespace(
         None,
         &main_locale.root,
-        input,
+        locale_map,
         ident_parser,
         template_parser,
         config,
@@ -46,7 +48,7 @@ pub fn transform<'input>(
 fn handle_node<'input>(
     raw_node: &'input RawNode,
     key: &RawDottedKey,
-    input: &'input Input,
+    locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
@@ -64,12 +66,18 @@ fn handle_node<'input>(
                         })
                     })?
             };
-            Node::Message(translations(input, key, template, template_parser, config)?)
+            Node::Message(translations(
+                locale_map,
+                key,
+                template,
+                template_parser,
+                config,
+            )?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             Some(key),
             inner_namespace,
-            input,
+            locale_map,
             ident_parser,
             template_parser,
             config,
@@ -81,7 +89,7 @@ fn handle_node<'input>(
 /// Given a [`Template`] from the main locale, collects its counterparts from
 /// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
-    input: &'input Input,
+    locale_map: &'input LocaleMap,
     key: &RawDottedKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
@@ -91,7 +99,7 @@ fn translations<'input>(
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
         let definition = {
-            input
+            locale_map
                 .locales
                 .get(&locale)
                 .expect("all locales should've been read when parsing `input`")
@@ -153,7 +161,7 @@ fn translations<'input>(
 fn traverse_namespace<'input>(
     namespace_key: Option<&RawDottedKey>,
     namespace: &'input RawNamespace,
-    input: &'input Input,
+    locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
@@ -179,7 +187,14 @@ fn traverse_namespace<'input>(
                                        * we're sure `raw_key_part` is valid */
             ),
         };
-        let node = handle_node(raw_node, &key, input, ident_parser, template_parser, config)?;
+        let node = handle_node(
+            raw_node,
+            &key,
+            locale_map,
+            ident_parser,
+            template_parser,
+            config,
+        )?;
         map.insert(key_part, node);
     }
     Ok(Namespace { map })

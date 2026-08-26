@@ -33,7 +33,7 @@ pub struct Bundle {
 /// Key parts from different namespaces don't collide and can take
 /// the same values.
 ///
-/// See [`RawNamespace`](crate::schemas::input::RawNamespace)
+/// See [`RawNamespace`](crate::schemas::locale_map::RawNamespace)
 /// for visual examples.
 #[derive(Debug)]
 pub struct Namespace {

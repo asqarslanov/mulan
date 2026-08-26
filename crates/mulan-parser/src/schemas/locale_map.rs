@@ -1,4 +1,4 @@
-//! Defines the [`Input`] struct and the logic to read it from the filesystem.
+//! Defines the [`LocaleMap`] struct and the logic to read it from the filesystem.
 
 use std::borrow::Cow;
 use std::fs;
@@ -12,15 +12,15 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
-use crate::errors::{InputError, ReadFileError, YamlError};
+use crate::errors::{LocaleMapError, ReadFileError, YamlError};
 
 /// A simple collection of locale [`Definition`]s parsed with [`serde`].
 ///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
-/// (crate::Bundle) type.
+/// [`crate::Bundle`] type.
 #[derive(Debug)]
-pub struct Input {
+pub struct LocaleMap {
     /// Maps a language tag to the contents of the corresponding locale.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
@@ -98,9 +98,9 @@ pub enum RawNode {
     Namespace(RawNamespace),
 }
 
-impl Input {
+impl LocaleMap {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn read(config: &mulan_config::Config) -> Result<Self, InputError> {
+    pub fn from_fs(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
@@ -159,16 +159,16 @@ pub enum DefinitionAtError {
 
 impl Definition {
     /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: Cow<'_, Path>) -> Result<Self, InputError> {
+    fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
         let file_contents = match fs::read_to_string(&path) {
             Ok(contents) => contents,
             Err(error) => {
                 let path = path.into_owned();
-                return Err(InputError::ReadFile(ReadFileError { path, error }));
+                return Err(LocaleMapError::ReadFile(ReadFileError { path, error }));
             }
         };
         serde_saphyr::from_str(&file_contents).map_err(|err| {
-            InputError::Yaml(YamlError {
+            LocaleMapError::Yaml(YamlError {
                 inner: Box::new(err),
                 filename: path.into_owned(),
                 source_code: file_contents,

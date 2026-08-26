@@ -21,8 +21,8 @@
 pub use self::identifier::Identifier;
 use self::identifier::Word;
 pub use self::schemas::bundle::{Bundle, DottedKey, Namespace, Node, Translations};
-use self::schemas::input::Input;
-pub use self::schemas::input::RawDottedKey;
+use self::schemas::locale_map::LocaleMap;
+pub use self::schemas::locale_map::RawDottedKey;
 pub use self::template::{Tag, Template, TemplatePart};
 use crate::errors::BundleFromFsError;
 
@@ -36,12 +36,12 @@ impl Bundle {
     /// Does all the heavy-lifting (locating locales, parsing, transforming).
     /// The result of this function can be used to generate bindings.
     pub fn from_fs(config: &mulan_config::Config) -> Result<Self, BundleFromFsError> {
-        let mut input = Input::read(config).map_err(BundleFromFsError::Read)?;
+        let mut locale_map = LocaleMap::from_fs(config).map_err(BundleFromFsError::Read)?;
         let main_locale = {
-            input
+            locale_map
                 .locales
                 .remove(&config.main_locale)
-                .expect("all locales should've been read when parsing `input`")
+                .expect("all locales should've been read when building `locale_map`")
         };
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
@@ -50,7 +50,7 @@ impl Bundle {
         let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let template_parser = Template::chumsky_parser(&template_part_parser);
         self::schemas::transform(
-            &input,
+            &locale_map,
             &main_locale,
             &ident_parser,
             &template_parser,
