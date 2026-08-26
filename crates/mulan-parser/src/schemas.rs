@@ -25,19 +25,19 @@ pub mod locale_map;
 
 /// Tries to transform a [`LocaleMap`] to a validated [`Bundle`].
 pub fn transform<'input>(
+    config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
     main_locale: &'input Definition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
-    config: &mulan_config::Config,
 ) -> Result<Bundle, TransformError> {
     let root = traverse_namespace(
+        config,
         None,
         &main_locale.root,
         locale_map,
         ident_parser,
         template_parser,
-        config,
     )?;
     Ok(Bundle { root })
 }
@@ -46,12 +46,12 @@ pub fn transform<'input>(
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
+    config: &mulan_config::Config,
     raw_node: &'input RawNode,
     key: &RawDottedKey,
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
-    config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
     let node = match raw_node {
         RawNode::Message(raw_template) => {
@@ -67,20 +67,20 @@ fn handle_node<'input>(
                     })?
             };
             Node::Message(translations(
+                config,
                 locale_map,
                 key,
                 template,
                 template_parser,
-                config,
             )?)
         }
         RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
+            config,
             Some(key),
             inner_namespace,
             locale_map,
             ident_parser,
             template_parser,
-            config,
         )?),
     };
     Ok(node)
@@ -89,11 +89,11 @@ fn handle_node<'input>(
 /// Given a [`Template`] from the main locale, collects its counterparts from
 /// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
+    config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
     key: &RawDottedKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
-    config: &mulan_config::Config,
 ) -> Result<Translations, TransformError> {
     let main_params: HashSet<&Identifier> = main_translation.parameter_iter().collect();
     let mut other_translations = BTreeMap::new();
@@ -159,12 +159,12 @@ fn translations<'input>(
 ///
 /// If traversing the root namespace, set `namespace_key` to [`None`].
 fn traverse_namespace<'input>(
+    config: &mulan_config::Config,
     namespace_key: Option<&RawDottedKey>,
     namespace: &'input RawNamespace,
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
-    config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
     for (raw_key_part, raw_node) in &namespace.map {
@@ -188,12 +188,12 @@ fn traverse_namespace<'input>(
             ),
         };
         let node = handle_node(
+            config,
             raw_node,
             &key,
             locale_map,
             ident_parser,
             template_parser,
-            config,
         )?;
         map.insert(key_part, node);
     }

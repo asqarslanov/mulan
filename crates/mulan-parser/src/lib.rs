@@ -50,11 +50,11 @@ impl Bundle {
         let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let template_parser = Template::chumsky_parser(&template_part_parser);
         self::schemas::transform(
+            config,
             &locale_map,
             &main_locale,
             &ident_parser,
             &template_parser,
-            config,
         )
         .map_err(BundleFromFsError::Transform)
     }
