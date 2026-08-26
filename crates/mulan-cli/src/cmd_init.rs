@@ -111,7 +111,7 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         Ok(config_path) => {
             let path = config_path.as_str();
             let message = t::cmd_init::CreatedConfig { path }.get_in(Locale::default());
-            cliclack::note("", message).map_err(E::Cliclack)?;
+            cliclack::log::info(message).map_err(E::Cliclack)?;
         }
         Err(e) => {
             let report = e.to_report(&mulan_config::Config::dummy());
@@ -129,7 +129,7 @@ fn prompt_and_init() -> Result<(), PromptAndInitError> {
         create_locale_files(&init_options.locales)
             .map_err(|e| E::Miette(e.to_report(&mulan_config::Config::dummy())))?;
         let message = t::cmd_init::DefinedLocales.get_in(Locale::default());
-        cliclack::note("", message).map_err(E::Cliclack)?;
+        cliclack::log::info(message).map_err(E::Cliclack)?;
     }
     let outro_message = t::cmd_init::Outro.get_in(Locale::default());
     cliclack::outro(outro_message).map_err(E::Cliclack)?;
