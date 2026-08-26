@@ -10,7 +10,6 @@ use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::{Case, Language};
 
-use crate::Parameter;
 use crate::identifier::Identifier;
 use crate::template::Template;
 
@@ -31,76 +30,63 @@ pub struct Output {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// [`Subkey`]s from different namespaces don't collide and can take
+/// Key parts from different namespaces don't collide and can take
 /// the same values.
 ///
 /// See [`RawNamespace`](crate::schemas::input::RawNamespace)
 /// for visual examples.
 #[derive(Debug)]
 pub struct Namespace {
-    /// Maps raw keys to namespace nodes (see [`Node`]).
+    /// Maps key parts to namespace nodes (see [`Node`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: BTreeMap<Subkey, Node>,
+    pub(super) map: BTreeMap<Identifier, Node>,
 }
 
 impl Namespace {
     /// Returns an iterator over all nodes of this namespace with their
-    /// corresponding key.
+    /// corresponding [`DottedKey`].
     ///
     /// To return these keys, you are required to pass the key of the parent
     /// namespace. Pass `None` if you are iterating over the root namespace.
-    pub fn iter(&self, parent_path: Option<&Key>) -> impl Iterator<Item = (Key, &Node)> {
-        let rtail = parent_path.map(|k| k.segments.to_vec()).unwrap_or_default();
-        self.map.iter().map(move |(subkey, node)| {
-            let segments = Vec1::from_rtail_and_head(rtail.clone(), subkey.clone());
-            let key = Key { segments };
+    pub fn iter(
+        &self,
+        parent_path: Option<&DottedKey>,
+    ) -> impl Iterator<Item = (DottedKey, &Node)> {
+        let rtail = parent_path.map(|k| k.parts.to_vec()).unwrap_or_default();
+        self.map.iter().map(move |(key_part, node)| {
+            let parts = Vec1::from_rtail_and_head(rtail.clone(), key_part.clone());
+            let key = DottedKey { parts };
             (key, node)
         })
     }
 }
 
-/// A single segment of a message [`Key`].
+/// A full path to a [`Node`] composed of one or more key parts.
 ///
-/// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
-/// `frontend`, `user-settings`, `account`.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Subkey {
-    value: Identifier,
-}
-
-impl Subkey {
-    #[must_use]
-    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
-        self.value.to_compact_string1(case)
-    }
-}
-
-/// A full path to a [`Node`] composed of one or more [`Subkey`]s.
-///
-/// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
+/// E.g., the dotted key `frontend.user-settings.account` has parts
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Key {
-    pub(crate) segments: Vec1<Subkey>,
+pub struct DottedKey {
+    pub(crate) parts: Vec1<Identifier>,
 }
 
-impl Key {
-    /// Returns the last subkey.
+impl DottedKey {
+    /// Returns the last key part.
     ///
     /// E.g., for `settings.profile.title`, this method returns `title`.
     #[must_use]
-    pub fn name(&self) -> &Subkey {
-        self.segments.last()
+    pub fn name(&self) -> &Identifier {
+        self.parts.last()
     }
 
-    /// Converts this key to a dot-separated string.
+    /// Converts this dotted key to a dot-separated string.
     #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
-        self.segments
+        self.parts
             .iter1()
-            .map(|subkey| subkey.to_compact_string1(case))
+            .map(|part| part.to_compact_string1(case))
             .join_compact1(".")
     }
 }
@@ -141,8 +127,8 @@ impl Translations {
     /// ```
     /// ````
     #[must_use]
-    pub fn markdown_preview(&self) -> Option<String1> {
-        let preview = self.main.preview()?;
+    pub fn markdown_preview(&self, config: &mulan_config::Config) -> Option<String1> {
+        let preview = self.main.preview(config)?;
         let backticks_n = self.main.max_consecutive_backticks().max(2) + 1;
         Some(
             formatdoc! {"
@@ -159,7 +145,7 @@ impl Translations {
 
     /// The set of all parameters this message requires.
     #[must_use]
-    pub fn parameter_set(&self) -> Option<BTreeSet1<&Parameter>> {
+    pub fn parameter_set(&self) -> Option<BTreeSet1<&Identifier>> {
         self.main
             .parameter_iter()
             .try_into_iter1()
@@ -172,31 +158,22 @@ impl Translations {
 mod parser {
     use chumsky::prelude::*;
 
-    use super::{Key, Subkey};
+    use super::DottedKey;
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
-    impl Key {
-        #[must_use]
-        pub(crate) fn chumsky_parser<'src>(
-            subkey_parser: &impl ChumskyParser<'src, Subkey>,
-        ) -> impl ChumskyParser<'src, Self> {
-            subkey_parser
-                .separated_by(just('.'))
-                .at_least(1)
-                .collect()
-                .map(|segments: Vec<_>| Self {
-                    segments: segments.try_into().expect(".at_least(1)"),
-                })
-        }
-    }
-
-    impl Subkey {
+    impl DottedKey {
         #[must_use]
         pub(crate) fn chumsky_parser<'src>(
             ident_parser: &impl ChumskyParser<'src, Identifier>,
         ) -> impl ChumskyParser<'src, Self> {
-            ident_parser.map(|value| Self { value })
+            ident_parser
+                .separated_by(just('.'))
+                .at_least(1)
+                .collect()
+                .map(|segments: Vec<_>| Self {
+                    parts: segments.try_into().expect(".at_least(1)"),
+                })
         }
     }
 }
@@ -226,22 +203,21 @@ mod tests {
     #[case("foo1. bar2", None)]
     #[case("foo1 .bar2", None)]
     #[case("foo1 bar2", None)]
-    fn parse_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
+    fn parse_dotted_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let subkey_parser = Subkey::chumsky_parser(&ident_parser);
-        let key_parser = Key::chumsky_parser(&subkey_parser);
+        let key_parser = DottedKey::chumsky_parser(&ident_parser);
         let actual_output = key_parser.mulan_parse(input).ok();
-        let expected_output = expected_output.map(|raw_segments| {
-            let segments = {
-                raw_segments
+        let expected_output = expected_output.map(|raw_parts| {
+            let parts = {
+                raw_parts
                     .iter()
                     .try_into_iter1()
                     .unwrap()
-                    .map(|subkey| subkey_parser.mulan_parse(subkey).unwrap())
+                    .map(|part| ident_parser.mulan_parse(part).unwrap())
                     .collect1()
             };
-            Key { segments }
+            DottedKey { parts }
         });
         assert_eq!(actual_output, expected_output);
     }

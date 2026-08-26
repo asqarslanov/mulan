@@ -865,7 +865,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
 impl self::ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
-            Self::InvalidSubkey(e) => e.to_report(config),
+            Self::InvalidKey(e) => e.to_report(config),
             Self::InvalidTemplate(e) => e.to_report(config),
             Self::NotANamespace(e) => e.to_report(config),
             Self::NotAMessage(e) => e.to_report(config),
@@ -874,7 +874,7 @@ impl self::ToReport for mulan_parser::errors::TransformError {
     }
 }
 
-impl self::Reportable for mulan_parser::errors::InvalidSubkeyError {
+impl self::Reportable for mulan_parser::errors::InvalidKeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let parent_key = &self.parent_key.as_ref().map_or_else(

@@ -18,11 +18,12 @@
     )
 )]
 
-use self::identifier::{Identifier, Word};
+pub use self::identifier::Identifier;
+use self::identifier::Word;
 use self::schemas::input::Input;
-pub use self::schemas::input::RawKey;
-pub use self::schemas::output::{Key, Namespace, Node, Output, Subkey, Translations};
-pub use self::template::{Parameter, Tag, Template, TemplatePart};
+pub use self::schemas::input::RawDottedKey;
+pub use self::schemas::output::{DottedKey, Namespace, Node, Output, Translations};
+pub use self::template::{Tag, Template, TemplatePart};
 use crate::errors::ComposeError;
 
 mod chumsky_parse;
@@ -43,16 +44,14 @@ pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     };
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
-    let subkey_parser = Subkey::chumsky_parser(&ident_parser);
-    let _key_parser = Key::chumsky_parser(&subkey_parser);
-    let param_parser = Parameter::chumsky_parser(&ident_parser);
-    let tag_parser = Tag::chumsky_parser(&param_parser);
+    let _key_parser = DottedKey::chumsky_parser(&ident_parser);
+    let tag_parser = Tag::chumsky_parser(&ident_parser);
     let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
     let template_parser = Template::chumsky_parser(&template_part_parser);
     self::schemas::transform(
         &input,
         &main_locale,
-        &subkey_parser,
+        &ident_parser,
         &template_parser,
         config,
     )

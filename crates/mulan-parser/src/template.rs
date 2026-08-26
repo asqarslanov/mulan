@@ -3,9 +3,8 @@
 use std::sync::LazyLock;
 
 use aho_corasick::AhoCorasick;
-use compact_str::{CompactString, format_compact};
+use compact_str::CompactString;
 use mitsein::compact_string1::CompactString1;
-use mulan_config::Case;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
 
@@ -35,7 +34,7 @@ impl Template {
     /// E.g., it can literally return a string such as `"Hello, {name}!"`.
     /// Or `None`, if the template is empty.
     #[must_use]
-    pub(super) fn preview(&self) -> Option<CompactString1> {
+    pub(super) fn preview(&self, config: &mulan_config::Config) -> Option<CompactString1> {
         static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
             AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
         });
@@ -44,7 +43,7 @@ impl Template {
             use crate::TemplatePart as P;
             match part {
                 P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
-                P::Tag(Tag::Parameter(parameter)) => buffer.push_str(&parameter.preview()),
+                P::Tag(Tag::Parameter(name)) => buffer.push_str(&name.parameter_preview(config)),
             }
         }
         buffer.try_into().ok()
@@ -57,7 +56,7 @@ impl Template {
 
     /// An iterator over [`TemplatePart::Tag`]/[`Tag::Parameter`] parts
     /// in the order they appear in the message (so duplicates can be present).
-    pub fn parameter_iter(&self) -> impl Iterator<Item = &Parameter> {
+    pub fn parameter_iter(&self) -> impl Iterator<Item = &Identifier> {
         self.parts
             .iter()
             .filter_map(TemplatePart::try_as_tag_ref)
@@ -112,39 +111,18 @@ pub enum TemplatePart {
     Tag(Tag),
 }
 
-/// A special expression enclosed in `{` `}` (e.g., a [`Parameter`]).
+/// A special expression enclosed in `{` `}` (e.g., a parameter).
 #[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
 pub enum Tag {
     /// A stand-in for a variable (`{foo}`).
-    Parameter(Parameter),
-}
-
-/// A variable placeholder in a message template (e.g., `{foo}`).
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Parameter {
-    name: Identifier,
-}
-
-impl Parameter {
-    #[must_use]
-    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
-        self.name.to_compact_string1(case)
-    }
-
-    /// Returns the name of this parameter wrapped in `{` `}`.
-    #[must_use]
-    fn preview(&self) -> CompactString1 {
-        format_compact!("{{{}}}", self.to_compact_string1(Case::Kebab))
-            .try_into()
-            .expect("not empty")
-    }
+    Parameter(Identifier),
 }
 
 /// Defines parsers with [`mod@chumsky`].
 mod parser {
     use chumsky::prelude::*;
 
-    use super::{Parameter, Tag, Template, TemplatePart};
+    use super::{Tag, Template, TemplatePart};
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
@@ -181,22 +159,12 @@ mod parser {
         /// tag types.
         #[must_use]
         pub fn chumsky_parser<'src>(
-            param_parser: &impl ChumskyParser<'src, Parameter>,
+            ident_parser: &impl ChumskyParser<'src, Identifier>,
         ) -> impl ChumskyParser<'src, Self> {
-            param_parser
+            ident_parser
                 .padded()
                 .delimited_by(just('{'), just('}'))
                 .map(Self::Parameter)
-        }
-    }
-
-    impl Parameter {
-        /// Reuses the identifier parser.
-        #[must_use]
-        pub fn chumsky_parser<'src>(
-            ident_parser: &impl ChumskyParser<'src, Identifier>,
-        ) -> impl ChumskyParser<'src, Self> {
-            ident_parser.map(|name| Self { name })
         }
     }
 }
@@ -257,8 +225,7 @@ mod tests {
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let param_parser = Parameter::chumsky_parser(&ident_parser);
-        let tag_parser = Tag::chumsky_parser(&param_parser);
+        let tag_parser = Tag::chumsky_parser(&ident_parser);
         let msg_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let msg_parser = Template::chumsky_parser(&msg_part_parser);
         let actual_output = msg_parser.mulan_parse(input).ok();
@@ -268,9 +235,9 @@ mod tests {
                     .iter()
                     .map(|part| match part {
                         Txt(it) => TemplatePart::Text(CompactString::new(it)),
-                        Var(it) => TemplatePart::Tag(Tag::Parameter(Parameter {
-                            name: ident_parser.mulan_parse(it).unwrap(),
-                        })),
+                        Var(it) => {
+                            TemplatePart::Tag(Tag::Parameter(ident_parser.mulan_parse(it).unwrap()))
+                        }
                     })
                     .collect()
             },

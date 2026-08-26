@@ -2,25 +2,31 @@
 
 use std::convert::identity;
 
+use compact_str::format_compact;
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Case;
 
-/// A generic name that can be converted to an
+/// A name that can be converted to an
 /// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
 /// in any major programming language.
 ///
 /// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace,
 /// every word starts with a Latin letter, etc.
-///
-/// This type serves as the underlying representation of
-/// [`Parameter`](crate::template::Parameter) or [`Subkey`](crate::Subkey).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Identifier {
     words: SmallVec1<[Word; 2]>,
 }
 
 impl Identifier {
+    /// Formats this identifier as a message template parameter (e.g., `{foo}`).
+    #[must_use]
+    pub fn parameter_preview(&self, config: &mulan_config::Config) -> CompactString1 {
+        let preview = format_compact!("{{{}}}", self.to_compact_string1(config.key_case));
+        CompactString1::try_from(preview).expect("non-empty")
+    }
+
+    #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         use Case as C;
         match case {
