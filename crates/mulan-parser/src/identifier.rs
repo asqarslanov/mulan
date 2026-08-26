@@ -20,11 +20,13 @@ pub struct Identifier {
 
 impl Identifier {
     /// Formats this identifier as a message template parameter (e.g., `{foo}`).
+    #[must_use]
     pub fn parameter_preview(&self, config: &mulan_config::Config) -> CompactString1 {
         let preview = format_compact!("{{{}}}", self.to_compact_string1(config.key_case));
         CompactString1::try_from(preview).expect("non-empty")
     }
 
+    #[must_use]
     pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
         use Case as C;
         match case {
