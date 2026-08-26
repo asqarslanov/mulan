@@ -9,11 +9,11 @@ use foldhash::HashSet;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
-use self::input::{Definition, DefinitionAtError, Input, RawKey, RawNamespace, RawNode};
+use self::input::{Definition, DefinitionAtError, Input, RawDottedKey, RawNamespace, RawNode};
 use self::output::{Namespace, Node, Output, Translations};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
-    InvalidSubkeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
+    InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
     UnknownParametersError,
 };
 use crate::{Identifier, Template};
@@ -45,7 +45,7 @@ pub fn transform<'input>(
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
     raw_node: &'input RawNode,
-    key: &RawKey,
+    key: &RawDottedKey,
     input: &'input Input,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
@@ -82,7 +82,7 @@ fn handle_node<'input>(
 /// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
     input: &'input Input,
-    key: &RawKey,
+    key: &RawDottedKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
@@ -105,9 +105,9 @@ fn translations<'input>(
                     continue;
                 }
                 DefinitionAtError::NotANamespace { index } => {
-                    let segments = Vec1::try_from(&key.segments[..=index])
+                    let segments = Vec1::try_from(&key.parts[..=index])
                         .expect("`..=n` slices are always non-empty");
-                    let key = RawKey { segments };
+                    let key = RawDottedKey { parts: segments };
                     let err = NotANamespaceError { locale, key };
                     return Err(TransformError::NotANamespace(err));
                 }
@@ -151,7 +151,7 @@ fn translations<'input>(
 ///
 /// If traversing the root namespace, set `namespace_key` to [`None`].
 fn traverse_namespace<'input>(
-    namespace_key: Option<&RawKey>,
+    namespace_key: Option<&RawDottedKey>,
     namespace: &'input RawNamespace,
     input: &'input Input,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
@@ -159,9 +159,9 @@ fn traverse_namespace<'input>(
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
-    for (raw_subkey, raw_node) in &namespace.map {
-        let subkey = ident_parser.mulan_parse(raw_subkey).map_err(|errors| {
-            TransformError::InvalidSubkey(InvalidSubkeyError {
+    for (raw_key_part, raw_node) in &namespace.map {
+        let key_part = ident_parser.mulan_parse(raw_key_part).map_err(|errors| {
+            TransformError::InvalidKey(InvalidKeyError {
                 locale: config.main_locale,
                 parent_key: namespace_key.cloned(),
                 errors,
@@ -169,17 +169,18 @@ fn traverse_namespace<'input>(
         })?;
         let rtail = {
             namespace_key
-                .map(|key| key.segments.to_vec())
+                .map(|key| key.parts.to_vec())
                 .unwrap_or_default()
         };
-        let key = RawKey {
-            segments: Vec1::from_rtail_and_head(
+        let key = RawDottedKey {
+            parts: Vec1::from_rtail_and_head(
                 rtail,
-                raw_subkey.clone(), // after obtaining `subkey`, we're sure `raw_subkey` is valid
+                raw_key_part.clone(), // after obtaining `key_part`,
+                                      // we're sure `raw_key_part` is valid
             ),
         };
         let node = handle_node(raw_node, &key, input, ident_parser, template_parser, config)?;
-        map.insert(subkey, node);
+        map.insert(key_part, node);
     }
     Ok(Namespace { map })
 }

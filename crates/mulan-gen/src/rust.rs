@@ -108,14 +108,14 @@ impl Bindings<'_> {
 
 #[derive(Debug)]
 struct Module<'src> {
-    structs: BTreeMap<mulan_parser::Key, Struct<'src>>,
-    submodules: BTreeMap<mulan_parser::Key, Self>,
+    structs: BTreeMap<mulan_parser::DottedKey, Struct<'src>>,
+    submodules: BTreeMap<mulan_parser::DottedKey, Self>,
 }
 
 impl<'src> Module<'src> {
     fn new(
         namespace: &'src mulan_parser::Namespace,
-        parent_key: Option<&mulan_parser::Key>,
+        parent_key: Option<&mulan_parser::DottedKey>,
     ) -> Self {
         let mut structs = BTreeMap::new();
         let mut submodules = BTreeMap::new();
@@ -137,7 +137,11 @@ impl<'src> Module<'src> {
         }
     }
 
-    fn generate(&self, config: &mulan_config::Config, key: Option<&mulan_parser::Key>) -> String {
+    fn generate(
+        &self,
+        config: &mulan_config::Config,
+        key: Option<&mulan_parser::DottedKey>,
+    ) -> String {
         let mut module_contents = Vec::new();
         if !self.structs.is_empty() {
             module_contents.push(self.gen_structs(config));
@@ -205,7 +209,7 @@ impl<'src> Struct<'src> {
         }
     }
 
-    fn generate(&self, config: &mulan_config::Config, key: &mulan_parser::Key) -> String {
+    fn generate(&self, config: &mulan_config::Config, key: &mulan_parser::DottedKey) -> String {
         let name = &key.name().to_compact_string1(TYPE_CASE);
         formatdoc! {"
             {doc_comment}
@@ -221,7 +225,7 @@ impl<'src> Struct<'src> {
         }
     }
 
-    fn doc_comment(&self, config: &mulan_config::Config, key: &mulan_parser::Key) -> String {
+    fn doc_comment(&self, config: &mulan_config::Config, key: &mulan_parser::DottedKey) -> String {
         let preview = self.translations.markdown_preview(config);
         let preview = preview.as_ref().map_or("_empty message_", AsRef::as_ref);
         formatdoc! {"
@@ -242,9 +246,9 @@ impl<'src> Struct<'src> {
             "<{}>",
             fields
                 .iter1()
-                .map(|subkey| format_compact!(
+                .map(|key_part| format_compact!(
                     "'{name}",
-                    name = subkey.to_compact_string1(VARIABLE_CASE),
+                    name = key_part.to_compact_string1(VARIABLE_CASE),
                 ))
                 .join_compact(", "),
         )
@@ -272,9 +276,9 @@ impl<'src> Struct<'src> {
             fields = indent::indent_by(INDENT, {
                 fields
                     .iter1()
-                    .map(|subkey| format_compact!(
+                    .map(|key_part| format_compact!(
                         "pub {name}: &'{name} str,",
-                        name = subkey.to_compact_string1(VARIABLE_CASE),
+                        name = key_part.to_compact_string1(VARIABLE_CASE),
                     ))
                     .into_iter()
                     .join("\n")

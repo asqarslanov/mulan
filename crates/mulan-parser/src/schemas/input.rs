@@ -53,7 +53,7 @@ pub struct Definition {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// Subkeys from different namespaces don't collide and can take
+/// Key parts from different namespaces don't collide and can take
 /// the same values.
 ///
 /// ```yaml
@@ -76,7 +76,7 @@ pub struct Definition {
 /// ```
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct RawNamespace {
-    /// Maps raw keys to namespace nodes (see [`RawNode`]).
+    /// Maps raw key parts to namespace nodes (see [`RawNode`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
@@ -122,21 +122,21 @@ impl Input {
     }
 }
 
-/// Represents a path to a node. A "dumber" counterpart to [`crate::Key`].
+/// Represents a path to a node. A "dumber" counterpart to [`crate::DottedKey`].
 #[derive(Debug, Clone)]
-pub struct RawKey {
-    /// For simplicity, segments are stored as plain strings
+pub struct RawDottedKey {
+    /// For simplicity, key parts are stored as plain strings
     /// rather than wrapped in newtypes with invariants.
-    pub(super) segments: Vec1<CompactString1>,
+    pub(super) parts: Vec1<CompactString1>,
 }
 
-impl RawKey {
+impl RawDottedKey {
     /// Returns a dot-separated string representation.
     ///
     /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
     #[must_use]
     pub fn to_compact_string1(&self) -> CompactString1 {
-        (&self.segments).join_compact1(".")
+        (&self.parts).join_compact1(".")
     }
 }
 
@@ -145,14 +145,14 @@ impl RawKey {
 pub enum DefinitionAtError {
     /// The path doesn't exist.
     NotFound {
-        /// The index (0-based) of the first subkey we couldn't find.
+        /// The index (0-based) of the first key part we couldn't find.
         index: usize,
     },
 
-    /// Tried to access a subkey as a namespace, but it turned out
+    /// Tried to access a key part as a namespace, but it turned out
     /// to point at a message.
     NotANamespace {
-        /// The index (0-based) of the misinterpreted subkey.
+        /// The index (0-based) of the misinterpreted key part.
         index: usize,
     },
 }
@@ -211,15 +211,15 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &RawKey) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &RawDottedKey) -> Result<&RawNode, DefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
-        let (subkeys, last_subkey) = path.segments.iter1().into_rtail_and_head();
-        for subkey in subkeys {
+        let (key_parts, last_key_part) = path.parts.iter1().into_rtail_and_head();
+        for key_part in key_parts {
             let node = {
                 namespace
                     .map
-                    .get(subkey.as_str())
+                    .get(key_part.as_str())
                     .ok_or(DefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -230,7 +230,7 @@ impl Definition {
         }
         namespace
             .map
-            .get(last_subkey.as_str())
+            .get(last_key_part.as_str())
             .ok_or(DefinitionAtError::NotFound { index })
     }
 }
@@ -248,7 +248,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use super::*;
-    use crate::Key;
+    use crate::DottedKey;
     use crate::chumsky_parse::ChumskyParser as _;
     use crate::identifier::{Identifier, Word};
 
@@ -401,18 +401,18 @@ mod tests {
 
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let key_parser = Key::chumsky_parser(&ident_parser);
+        let key_parser = DottedKey::chumsky_parser(&ident_parser);
         let key = key_parser.mulan_parse(input).unwrap();
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
             Definition::read(file.path().into()).unwrap()
         };
-        let key = RawKey {
-            segments: {
-                key.segments
+        let key = RawDottedKey {
+            parts: {
+                key.parts
                     .iter1()
-                    .map(|subkey| subkey.to_compact_string1(Case::Kebab))
+                    .map(|part| part.to_compact_string1(Case::Kebab))
                     .collect1()
             },
         };

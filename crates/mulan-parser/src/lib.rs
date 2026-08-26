@@ -21,8 +21,8 @@
 pub use self::identifier::Identifier;
 use self::identifier::Word;
 use self::schemas::input::Input;
-pub use self::schemas::input::RawKey;
-pub use self::schemas::output::{Key, Namespace, Node, Output, Translations};
+pub use self::schemas::input::RawDottedKey;
+pub use self::schemas::output::{DottedKey, Namespace, Node, Output, Translations};
 pub use self::template::{Tag, Template, TemplatePart};
 use crate::errors::ComposeError;
 
@@ -44,7 +44,7 @@ pub fn compose(config: &mulan_config::Config) -> Result<Output, ComposeError> {
     };
     let word_parser = Word::chumsky_parser();
     let ident_parser = Identifier::chumsky_parser(&word_parser);
-    let _key_parser = Key::chumsky_parser(&ident_parser);
+    let _key_parser = DottedKey::chumsky_parser(&ident_parser);
     let tag_parser = Tag::chumsky_parser(&ident_parser);
     let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
     let template_parser = Template::chumsky_parser(&template_part_parser);

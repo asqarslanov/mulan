@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
-use crate::{Identifier, RawKey};
+use crate::{Identifier, RawDottedKey};
 
 /// Errors of [`crate::compose`].
 #[derive(Debug)]
@@ -49,8 +49,8 @@ pub struct YamlError {
 /// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
-    /// A subkey was not parsed successfully (wrong syntax).
-    InvalidSubkey(InvalidSubkeyError),
+    /// A key was not parsed successfully (wrong syntax).
+    InvalidKey(InvalidKeyError),
 
     /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
     InvalidTemplate(InvalidTemplateError),
@@ -68,13 +68,13 @@ pub enum TransformError {
     UnknownParameters(UnknownParametersError),
 }
 
-/// See [`TransformError::InvalidSubkey`].
+/// See [`TransformError::InvalidKey`].
 #[derive(Debug)]
-pub struct InvalidSubkeyError {
+pub struct InvalidKeyError {
     pub locale: Language,
 
     /// [`None`] if no parent exists (i.e., the root namespace's node).
-    pub parent_key: Option<RawKey>,
+    pub parent_key: Option<RawDottedKey>,
 
     pub errors: ChumskyAllErrors,
 }
@@ -83,7 +83,7 @@ pub struct InvalidSubkeyError {
 #[derive(Debug)]
 pub struct InvalidTemplateError {
     pub locale: Language,
-    pub key: RawKey,
+    pub key: RawDottedKey,
     pub errors: ChumskyAllErrors,
 }
 
@@ -93,21 +93,21 @@ pub struct NotANamespaceError {
     pub locale: Language,
 
     /// The misinterpreted key that should point to a namespace.
-    pub key: RawKey,
+    pub key: RawDottedKey,
 }
 
 /// See [`TransformError::NotAMessage`].
 #[derive(Debug)]
 pub struct NotAMessageError {
     pub locale: Language,
-    pub key: RawKey,
+    pub key: RawDottedKey,
 }
 
 /// See [`TransformError::UnknownParameters`].
 #[derive(Debug)]
 pub struct UnknownParametersError {
     pub locale: Language,
-    pub key: RawKey,
+    pub key: RawDottedKey,
     pub parameters: BTreeSet1<Identifier>,
 }
 
