@@ -65,7 +65,7 @@ impl Namespace {
 
 /// A full path to a [`Node`] composed of one or more key parts.
 ///
-/// E.g., the [`Key`] `frontend.user-settings.account` has parts
+/// E.g., the dotted key `frontend.user-settings.account` has parts
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct DottedKey {
