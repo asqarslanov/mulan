@@ -30,7 +30,7 @@ pub struct Output {
 
 /// A "grouping" of messages to organize them conveniently.
 ///
-/// [`Subkey`]s from different namespaces don't collide and can take
+/// Subkeys from different namespaces don't collide and can take
 /// the same values.
 ///
 /// See [`RawNamespace`](crate::schemas::input::RawNamespace)
@@ -60,7 +60,7 @@ impl Namespace {
     }
 }
 
-/// A full path to a [`Node`] composed of one or more [`Subkey`]s.
+/// A full path to a [`Node`] composed of one or more subkeys.
 ///
 /// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
 /// `frontend`, `user-settings`, `account`.

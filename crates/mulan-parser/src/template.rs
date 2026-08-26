@@ -111,7 +111,7 @@ pub enum TemplatePart {
     Tag(Tag),
 }
 
-/// A special expression enclosed in `{` `}` (e.g., a [`Parameter`]).
+/// A special expression enclosed in `{` `}` (e.g., a parameter).
 #[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
 pub enum Tag {
     /// A stand-in for a variable (`{foo}`).

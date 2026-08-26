@@ -7,15 +7,12 @@ use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Case;
 
-/// A generic name that can be converted to an
+/// A name that can be converted to an
 /// [identifier](https://en.wikipedia.org/wiki/Identifier_(computer_languages))
 /// in any major programming language.
 ///
 /// Has a relatively strict lexical form: e.g., ASCII-only, no whitespace,
 /// every word starts with a Latin letter, etc.
-///
-/// This type serves as the underlying representation of
-/// [`Parameter`](crate::template::Parameter) or [`Subkey`](crate::Subkey).
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Identifier {
     words: SmallVec1<[Word; 2]>,

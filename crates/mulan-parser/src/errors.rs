@@ -49,7 +49,7 @@ pub struct YamlError {
 /// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
 pub enum TransformError {
-    /// A [`crate::Subkey`] was not parsed successfully (wrong syntax).
+    /// A subkey was not parsed successfully (wrong syntax).
     InvalidSubkey(InvalidSubkeyError),
 
     /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
