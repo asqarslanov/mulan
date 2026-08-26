@@ -41,7 +41,7 @@ pub struct Namespace {
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: BTreeMap<Subkey, Node>,
+    pub(super) map: BTreeMap<Identifier, Node>,
 }
 
 impl Namespace {
@@ -60,29 +60,13 @@ impl Namespace {
     }
 }
 
-/// A single segment of a message [`Key`].
-///
-/// E.g., the key `frontend.user-settings.account` has the [`Subkey`]s
-/// `frontend`, `user-settings`, `account`.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Subkey {
-    value: Identifier,
-}
-
-impl Subkey {
-    #[must_use]
-    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
-        self.value.to_compact_string1(case)
-    }
-}
-
 /// A full path to a [`Node`] composed of one or more [`Subkey`]s.
 ///
 /// E.g., the [`Key`] `frontend.user-settings.account` has the subkeys
 /// `frontend`, `user-settings`, `account`.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Key {
-    pub(crate) segments: Vec1<Subkey>,
+    pub(crate) segments: Vec1<Identifier>,
 }
 
 impl Key {
@@ -90,7 +74,7 @@ impl Key {
     ///
     /// E.g., for `settings.profile.title`, this method returns `title`.
     #[must_use]
-    pub fn name(&self) -> &Subkey {
+    pub fn name(&self) -> &Identifier {
         self.segments.last()
     }
 
@@ -171,31 +155,22 @@ impl Translations {
 mod parser {
     use chumsky::prelude::*;
 
-    use super::{Key, Subkey};
+    use super::Key;
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
     impl Key {
         #[must_use]
         pub(crate) fn chumsky_parser<'src>(
-            subkey_parser: &impl ChumskyParser<'src, Subkey>,
+            ident_parser: &impl ChumskyParser<'src, Identifier>,
         ) -> impl ChumskyParser<'src, Self> {
-            subkey_parser
+            ident_parser
                 .separated_by(just('.'))
                 .at_least(1)
                 .collect()
                 .map(|segments: Vec<_>| Self {
                     segments: segments.try_into().expect(".at_least(1)"),
                 })
-        }
-    }
-
-    impl Subkey {
-        #[must_use]
-        pub(crate) fn chumsky_parser<'src>(
-            ident_parser: &impl ChumskyParser<'src, Identifier>,
-        ) -> impl ChumskyParser<'src, Self> {
-            ident_parser.map(|value| Self { value })
         }
     }
 }
@@ -228,8 +203,7 @@ mod tests {
     fn parse_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let subkey_parser = Subkey::chumsky_parser(&ident_parser);
-        let key_parser = Key::chumsky_parser(&subkey_parser);
+        let key_parser = Key::chumsky_parser(&ident_parser);
         let actual_output = key_parser.mulan_parse(input).ok();
         let expected_output = expected_output.map(|raw_segments| {
             let segments = {
@@ -237,7 +211,7 @@ mod tests {
                     .iter()
                     .try_into_iter1()
                     .unwrap()
-                    .map(|subkey| subkey_parser.mulan_parse(subkey).unwrap())
+                    .map(|subkey| ident_parser.mulan_parse(subkey).unwrap())
                     .collect1()
             };
             Key { segments }

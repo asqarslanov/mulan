@@ -10,7 +10,7 @@ use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
 use self::input::{Definition, DefinitionAtError, Input, RawKey, RawNamespace, RawNode};
-use self::output::{Namespace, Node, Output, Subkey, Translations};
+use self::output::{Namespace, Node, Output, Translations};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
     InvalidSubkeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
@@ -25,7 +25,7 @@ pub mod output;
 pub fn transform<'input>(
     input: &'input Input,
     main_locale: &'input Definition,
-    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Output, TransformError> {
@@ -33,7 +33,7 @@ pub fn transform<'input>(
         None,
         &main_locale.root,
         input,
-        subkey_parser,
+        ident_parser,
         template_parser,
         config,
     )?;
@@ -47,7 +47,7 @@ fn handle_node<'input>(
     raw_node: &'input RawNode,
     key: &RawKey,
     input: &'input Input,
-    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Node, TransformError> {
@@ -70,7 +70,7 @@ fn handle_node<'input>(
             Some(key),
             inner_namespace,
             input,
-            subkey_parser,
+            ident_parser,
             template_parser,
             config,
         )?),
@@ -154,13 +154,13 @@ fn traverse_namespace<'input>(
     namespace_key: Option<&RawKey>,
     namespace: &'input RawNamespace,
     input: &'input Input,
-    subkey_parser: &impl ChumskyParser<'input, Subkey>,
+    ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
 ) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
     for (raw_subkey, raw_node) in &namespace.map {
-        let subkey = subkey_parser.mulan_parse(raw_subkey).map_err(|errors| {
+        let subkey = ident_parser.mulan_parse(raw_subkey).map_err(|errors| {
             TransformError::InvalidSubkey(InvalidSubkeyError {
                 locale: config.main_locale,
                 parent_key: namespace_key.cloned(),
@@ -178,14 +178,7 @@ fn traverse_namespace<'input>(
                 raw_subkey.clone(), // after obtaining `subkey`, we're sure `raw_subkey` is valid
             ),
         };
-        let node = handle_node(
-            raw_node,
-            &key,
-            input,
-            subkey_parser,
-            template_parser,
-            config,
-        )?;
+        let node = handle_node(raw_node, &key, input, ident_parser, template_parser, config)?;
         map.insert(subkey, node);
     }
     Ok(Namespace { map })

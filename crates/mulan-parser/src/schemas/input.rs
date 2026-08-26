@@ -248,9 +248,9 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use super::*;
+    use crate::Key;
     use crate::chumsky_parse::ChumskyParser as _;
     use crate::identifier::{Identifier, Word};
-    use crate::{Key, Subkey};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]
@@ -401,8 +401,7 @@ mod tests {
 
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let subkey_parser = Subkey::chumsky_parser(&ident_parser);
-        let key_parser = Key::chumsky_parser(&subkey_parser);
+        let key_parser = Key::chumsky_parser(&ident_parser);
         let key = key_parser.mulan_parse(input).unwrap();
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
