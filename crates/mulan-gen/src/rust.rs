@@ -23,9 +23,9 @@ const TYPE_CASE: mulan_config::Case = mulan_config::Case::Pascal;
 
 /// Returns a Rust source code string that can be used in a standalone file.
 #[must_use]
-pub fn generate(config: &mulan_config::Config, data: &mulan_parser::Output) -> String {
+pub fn generate(config: &mulan_config::Config, bundle: &mulan_parser::Bundle) -> String {
     Bindings {
-        t: Module::new(&data.root, None),
+        t: Module::new(&bundle.root, None),
     }
     .generate(config)
 }

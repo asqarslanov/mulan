@@ -1,6 +1,6 @@
-//! The parent module of [`mod@input`] and [`mod@output`].
+//! The parent module of [`mod@input`] and [`mod@bundle`].
 //!
-//! Defines the transformation logic from [`Input`] to [`Output`]
+//! Defines the transformation logic from [`Input`] to [`Bundle`]
 //! (see the [`transform`] function).
 
 use std::collections::BTreeMap;
@@ -9,8 +9,8 @@ use foldhash::HashSet;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
+use self::bundle::{Bundle, Namespace, Node, Translations};
 use self::input::{Definition, DefinitionAtError, Input, RawDottedKey, RawNamespace, RawNode};
-use self::output::{Namespace, Node, Output, Translations};
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
     InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
@@ -18,17 +18,17 @@ use crate::errors::{
 };
 use crate::{Identifier, Template};
 
+pub mod bundle;
 pub mod input;
-pub mod output;
 
-/// Tries to transform an [`Input`] to a validated [`Output`].
+/// Tries to transform an [`Input`] to a validated [`Bundle`].
 pub fn transform<'input>(
     input: &'input Input,
     main_locale: &'input Definition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
     config: &mulan_config::Config,
-) -> Result<Output, TransformError> {
+) -> Result<Bundle, TransformError> {
     let root = traverse_namespace(
         None,
         &main_locale.root,
@@ -37,7 +37,7 @@ pub fn transform<'input>(
         template_parser,
         config,
     )?;
-    Ok(Output { root })
+    Ok(Bundle { root })
 }
 
 /// A brancher that, given a [`RawNode`] from the main locale,

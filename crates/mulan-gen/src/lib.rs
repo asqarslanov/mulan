@@ -17,7 +17,7 @@ mod rust;
 /// and writes them to their corresponding files.
 pub fn write_files(
     config: &mulan_config::Config,
-    output: &mulan_parser::Output,
+    bundle: &mulan_parser::Bundle,
 ) -> Result<(), GenError> {
     let Some(targets) = &config.generate else {
         return Err(GenError::NoTargets(NoTargetsError));
@@ -25,7 +25,7 @@ pub fn write_files(
     for target in targets {
         use mulan_config::Target as T;
         let (relative_path, contents) = match target {
-            T::Rust(target_conf) => (&target_conf.file, self::rust::generate(config, output)),
+            T::Rust(target_conf) => (&target_conf.file, self::rust::generate(config, bundle)),
         };
         if let Some(parent) = relative_path.parent() {
             let file_parent_dir_path = parent.to_path(config.meta.root_dir.as_str());

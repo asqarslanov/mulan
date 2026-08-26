@@ -1,4 +1,4 @@
-//! Defines the [`Output`] struct and its methods.
+//! Defines the [`Bundle`] struct and its methods.
 
 use std::collections::BTreeMap;
 
@@ -21,8 +21,8 @@ use crate::template::Template;
 /// Message nodes store all translations alongside each other.
 /// Data is stored alphabetically to ensure deterministic output.
 #[derive(Debug)]
-pub struct Output {
-    /// [`Output`] is ultimately a tree of nested namespaces
+pub struct Bundle {
+    /// [`Bundle`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
     /// It is always present, even if the main locale definition is empty.
     pub root: Namespace,

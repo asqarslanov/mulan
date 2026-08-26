@@ -652,7 +652,7 @@ impl self::Reportable for mulan_config::errors::LocateIoError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::ComposeError {
+impl self::ToReport for mulan_parser::errors::BundleFromFsError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::Read(e) => e.to_report(config),

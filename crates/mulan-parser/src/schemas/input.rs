@@ -18,7 +18,7 @@ use crate::errors::{InputError, ReadFileError, YamlError};
 ///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
-/// [`mulan_parser::Output`](crate::Output) type.
+/// (crate::Bundle) type.
 #[derive(Debug)]
 pub struct Input {
     /// Maps a language tag to the contents of the corresponding locale.

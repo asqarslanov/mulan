@@ -11,13 +11,13 @@ use mulan_config::Language;
 
 use crate::{Identifier, RawDottedKey};
 
-/// Errors of [`crate::compose`].
+/// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
-pub enum ComposeError {
+pub enum BundleFromFsError {
     /// Failed to build a [`crate::schemas::input::Input`].
     Read(InputError),
 
-    /// Failed to build a [`crate::Output`].
+    /// Failed to build a [`crate::Bundle`].
     Transform(TransformError),
 }
 
