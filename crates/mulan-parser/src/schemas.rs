@@ -175,8 +175,8 @@ fn traverse_namespace<'input>(
         let key = RawDottedKey {
             parts: Vec1::from_rtail_and_head(
                 rtail,
-                raw_key_part.clone(), // after obtaining `key_part`,
-                                      // we're sure `raw_key_part` is valid
+                raw_key_part.clone(), /* after obtaining `key_part`,
+                                       * we're sure `raw_key_part` is valid */
             ),
         };
         let node = handle_node(raw_node, &key, input, ident_parser, template_parser, config)?;
