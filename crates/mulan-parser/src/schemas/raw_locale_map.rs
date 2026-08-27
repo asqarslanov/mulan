@@ -15,7 +15,8 @@ use strum::EnumTryAs;
 
 use crate::errors::{RawLocaleMapError, ReadFileError, YamlError};
 
-/// A simple collection of locale [definition](RlmDefinition)s parsed with [`mod@serde`].
+/// A simple collection of locale [definition](RlmDefinition)s
+/// parsed with [`mod@serde`].
 ///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
@@ -91,7 +92,8 @@ pub struct RlmNamespace {
 
 /// [`RawLocaleMap`]-node.
 ///
-/// A value in a [namespace](RlmNamespace) of a locale [definition](RlmDefinition).
+/// A value in a [namespace](RlmNamespace)
+/// of a locale [definition](RlmDefinition).
 ///
 /// Can either be a message template or another namespace.
 #[derive(Debug, Deserialize, PartialEq, Eq, EnumTryAs)]

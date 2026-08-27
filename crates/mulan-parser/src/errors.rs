@@ -18,7 +18,7 @@ pub enum BundleFromFsError {
     Read(RawLocaleMapError),
 
     /// Failed to build a [`crate::Bundle`].
-    Transform(TransformError),
+    Transform(TransposeError),
 }
 
 /// Errors of [`crate::schemas::raw_locale_map::RawLocaleMap::from_fs`].
@@ -46,9 +46,9 @@ pub struct YamlError {
     pub source_code: String,
 }
 
-/// Errors of [`crate::schemas::transform`].
+/// Errors of [`crate::schemas::transpose`].
 #[derive(Debug)]
-pub enum TransformError {
+pub enum TransposeError {
     /// A key was not parsed successfully (wrong syntax).
     InvalidKey(InvalidKeyError),
 
