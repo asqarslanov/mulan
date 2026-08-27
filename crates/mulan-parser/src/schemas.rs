@@ -45,7 +45,7 @@ pub fn transpose<'input>(
     Ok(Bundle { root })
 }
 
-/// A brancher that, given a [`RlmNode`] from the main locale,
+/// A brancher that, given an [`RlmNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
@@ -156,7 +156,7 @@ fn translations<'input>(
     })
 }
 
-/// Recursively goes over a [`RlmNamespace`] of the main locale,
+/// Recursively goes over an [`RlmNamespace`] of the main locale,
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 ///
