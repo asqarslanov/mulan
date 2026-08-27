@@ -1,6 +1,6 @@
-//! The parent module of [`mod@locale_map`] and [`mod@bundle`].
+//! The parent module of [`mod@raw_locale_map`] and [`mod@bundle`].
 //!
-//! Defines the transformation logic from [`LocaleMap`] to [`Bundle`]
+//! Defines the transformation logic from [`RawLocaleMap`] to [`Bundle`]
 //! (see the [`transform`] function).
 
 use std::collections::BTreeMap;
@@ -10,8 +10,8 @@ use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
 use self::bundle::{Bundle, Namespace, Node, Translations};
-use self::locale_map::{
-    Definition, DefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
+use self::raw_locale_map::{
+    RawDottedKey, RawLocaleMap, RlmDefinition, RlmDefinitionAtError, RlmNamespace, RlmNode,
 };
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
@@ -21,13 +21,13 @@ use crate::errors::{
 use crate::{Identifier, Template};
 
 pub mod bundle;
-pub mod locale_map;
+pub mod raw_locale_map;
 
-/// Tries to transform a [`LocaleMap`] to a validated [`Bundle`].
+/// Tries to transform a [`RawLocaleMap`] to a validated [`Bundle`].
 pub fn transform<'input>(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
-    main_locale: &'input Definition,
+    locale_map: &'input RawLocaleMap,
+    main_locale: &'input RlmDefinition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
 ) -> Result<Bundle, TransformError> {
@@ -42,19 +42,19 @@ pub fn transform<'input>(
     Ok(Bundle { root })
 }
 
-/// A brancher that, given a [`RawNode`] from the main locale,
+/// A brancher that, given a [`RlmNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
     config: &mulan_config::Config,
-    raw_node: &'input RawNode,
+    raw_node: &'input RlmNode,
     key: &RawDottedKey,
-    locale_map: &'input LocaleMap,
+    locale_map: &'input RawLocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
 ) -> Result<Node, TransformError> {
     let node = match raw_node {
-        RawNode::Message(raw_template) => {
+        RlmNode::Message(raw_template) => {
             let template = {
                 template_parser
                     .mulan_parse(raw_template)
@@ -74,7 +74,7 @@ fn handle_node<'input>(
                 template_parser,
             )?)
         }
-        RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
+        RlmNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             config,
             Some(key),
             inner_namespace,
@@ -90,7 +90,7 @@ fn handle_node<'input>(
 /// other locales and builds a proper instance of [`Translations`].
 fn translations<'input>(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
+    locale_map: &'input RawLocaleMap,
     key: &RawDottedKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
@@ -107,12 +107,12 @@ fn translations<'input>(
         let raw_node = match definition.at(key) {
             Ok(node) => node,
             Err(e) => match e {
-                DefinitionAtError::NotFound { index: _ } => {
+                RlmDefinitionAtError::NotFound { index: _ } => {
                     // If a locale doesn't have a message that exists in the main locale,
                     // we just skip this message. The main locale will later act as a fallback.
                     continue;
                 }
-                DefinitionAtError::NotANamespace { index } => {
+                RlmDefinitionAtError::NotANamespace { index } => {
                     let segments = Vec1::try_from(&key.parts[..=index])
                         .expect("`..=n` slices are always non-empty");
                     let key = RawDottedKey { parts: segments };
@@ -153,7 +153,7 @@ fn translations<'input>(
     })
 }
 
-/// Recursively goes over a [`RawNamespace`] of the main locale,
+/// Recursively goes over a [`RlmNamespace`] of the main locale,
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 ///
@@ -161,8 +161,8 @@ fn translations<'input>(
 fn traverse_namespace<'input>(
     config: &mulan_config::Config,
     namespace_key: Option<&RawDottedKey>,
-    namespace: &'input RawNamespace,
-    locale_map: &'input LocaleMap,
+    namespace: &'input RlmNamespace,
+    locale_map: &'input RawLocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
 ) -> Result<Namespace, TransformError> {

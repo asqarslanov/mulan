@@ -1,4 +1,4 @@
-//! Defines the [`LocaleMap`] struct and the logic to read it
+//! Defines the [`RawLocaleMap`] struct and the logic to read it
 //! from the filesystem.
 
 use std::borrow::Cow;
@@ -13,27 +13,29 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
-use crate::errors::{LocaleMapError, ReadFileError, YamlError};
+use crate::errors::{RawLocaleMapError, ReadFileError, YamlError};
 
-/// A simple collection of locale [`Definition`]s parsed with [`serde`].
+/// A simple collection of locale [definition](RlmDefinition)s parsed with [`mod@serde`].
 ///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
 /// [`crate::Bundle`] type.
 #[derive(Debug)]
-pub struct LocaleMap {
+pub struct RawLocaleMap {
     /// Maps a language tag to the contents of the corresponding locale.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub locales: HashMap<Language, Definition>,
+    pub locales: HashMap<Language, RlmDefinition>,
 }
 
+/// [`RawLocaleMap`]-definition.
+///
 /// A single-language definition of a locale read from a locale file
 /// (e.g., `locales/en-US/locale.yaml`).
 ///
 /// This structure uses basic data types and is constructed
 /// with [`serde::Deserialize`]. Later, a more strongly typed tree
-/// can be constructed from a collection of [`Definition`]s.
+/// can be constructed from a collection of [`RlmDefinition`]s.
 ///
 /// ## Example Definition
 ///
@@ -44,14 +46,16 @@ pub struct LocaleMap {
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
 #[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct Definition {
+pub struct RlmDefinition {
     /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]). The `root` namespace is the outermost
+    /// (see [`RlmNamespace`]). The `root` namespace is the outermost
     /// namespace. It is always present, even if the locale definition is empty.
     #[serde(flatten)]
-    pub(super) root: RawNamespace,
+    pub(super) root: RlmNamespace,
 }
 
+/// [`RawLocaleMap`]-namespace.
+///
 /// A "grouping" of messages to organize them conveniently.
 ///
 /// Key parts from different namespaces don't collide and can take
@@ -76,32 +80,34 @@ pub struct Definition {
 ///     baz: "Dolor"
 /// ```
 #[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct RawNamespace {
-    /// Maps raw key parts to namespace nodes (see [`RawNode`]).
+pub struct RlmNamespace {
+    /// Maps raw key parts to namespace nodes (see [`RlmNode`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
     #[serde(flatten)]
-    pub(super) map: HashMap<CompactString1, RawNode>,
+    pub(super) map: HashMap<CompactString1, RlmNode>,
 }
 
-/// A value in a [namespace](RawNamespace) of a locale [`Definition`].
+/// [`RawLocaleMap`]-node.
+///
+/// A value in a [namespace](RlmNamespace) of a locale [definition](RlmDefinition).
 ///
 /// Can either be a message template or another namespace.
 #[derive(Debug, Deserialize, PartialEq, Eq, EnumTryAs)]
 #[serde(untagged)]
-pub enum RawNode {
+pub enum RlmNode {
     /// Raw text that will later be properly parsed
     /// to a [`Template`](crate::Template).
     Message(CompactString),
 
     /// A nested namespace.
-    Namespace(RawNamespace),
+    Namespace(RlmNamespace),
 }
 
-impl LocaleMap {
+impl RawLocaleMap {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn from_fs(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
+    pub fn from_fs(config: &mulan_config::Config) -> Result<Self, RawLocaleMapError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
@@ -114,7 +120,7 @@ impl LocaleMap {
                             .with_extension("yaml")
                     };
                     let path = path.to_path(""); // doesn't add a prefix
-                    let definition = Definition::read(path.into())?;
+                    let definition = RlmDefinition::read(path.into())?;
                     Ok((locale, definition))
                 })
                 .collect::<Result<_, _>>()?
@@ -141,9 +147,9 @@ impl RawDottedKey {
     }
 }
 
-/// Errors of [`Definition::at`].
+/// Errors of [`RlmDefinition::at`].
 #[derive(Debug, PartialEq, Eq)]
-pub enum DefinitionAtError {
+pub enum RlmDefinitionAtError {
     /// The path doesn't exist.
     NotFound {
         /// The index (0-based) of the first key part we couldn't find.
@@ -158,18 +164,18 @@ pub enum DefinitionAtError {
     },
 }
 
-impl Definition {
+impl RlmDefinition {
     /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
+    fn read(path: Cow<'_, Path>) -> Result<Self, RawLocaleMapError> {
         let file_contents = match fs::read_to_string(&path) {
             Ok(contents) => contents,
             Err(error) => {
                 let path = path.into_owned();
-                return Err(LocaleMapError::ReadFile(ReadFileError { path, error }));
+                return Err(RawLocaleMapError::ReadFile(ReadFileError { path, error }));
             }
         };
         serde_saphyr::from_str(&file_contents).map_err(|err| {
-            LocaleMapError::Yaml(YamlError {
+            RawLocaleMapError::Yaml(YamlError {
                 inner: Box::new(err),
                 filename: path.into_owned(),
                 source_code: file_contents,
@@ -179,7 +185,7 @@ impl Definition {
 
     /// Returns a reference to the node at the given path.
     ///
-    /// For example, let `definition: Definiton` be
+    /// For example, let `definition: RlmDefiniton` be
     ///
     /// ```yaml
     /// foo:
@@ -198,7 +204,7 @@ impl Definition {
     /// => "Lorem"
     ///
     /// definition.at(["foo", "a", "x"])
-    /// => DefinitionAtError::NotANamespace
+    /// => RlmDefinitionAtError::NotANamespace
     ///
     /// definition.at(["foo", "bar"])
     /// => { a: "Dolor", b: "Sit", c: "Amet" }
@@ -207,12 +213,12 @@ impl Definition {
     /// => "Amet"
     ///
     /// definition.at(["foo", "doesnt-exist"])
-    /// => DefinitionAtError::NotFound
+    /// => RlmDefinitionAtError::NotFound
     ///
     /// definition.at(["baz"])
-    /// => DefinitionAtError::NotFound
+    /// => RlmDefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &RawDottedKey) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &RawDottedKey) -> Result<&RlmNode, RlmDefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
         let (key_parts, last_key_part) = path.parts.iter1().into_rtail_and_head();
@@ -221,18 +227,18 @@ impl Definition {
                 namespace
                     .map
                     .get(key_part.as_str())
-                    .ok_or(DefinitionAtError::NotFound { index })?
+                    .ok_or(RlmDefinitionAtError::NotFound { index })?
             };
             namespace = {
                 node.try_as_namespace_ref()
-                    .ok_or(DefinitionAtError::NotANamespace { index })?
+                    .ok_or(RlmDefinitionAtError::NotANamespace { index })?
             };
             index += 1;
         }
         namespace
             .map
             .get(last_key_part.as_str())
-            .ok_or(DefinitionAtError::NotFound { index })
+            .ok_or(RlmDefinitionAtError::NotFound { index })
     }
 }
 
@@ -261,8 +267,8 @@ mod tests {
             bar: "Hi"
         "#},
         Some([
-            (str1!("foo").into(), RawNode::Message("Hello".into())),
-            (str1!("bar").into(), RawNode::Message("Hi".into())),
+            (str1!("foo").into(), RlmNode::Message("Hello".into())),
+            (str1!("bar").into(), RlmNode::Message("Hi".into())),
         ]),
     )]
     #[case(
@@ -296,17 +302,17 @@ mod tests {
         Some([
             (
                 str1!("foo").into(),
-                RawNode::Namespace(RawNamespace {
+                RlmNode::Namespace(RlmNamespace {
                     map: HashMap::from_iter([
-                        (str1!("a").into(), RawNode::Message("Lorem".into())),
-                        (str1!("b").into(), RawNode::Message("Ipsum".into())),
+                        (str1!("a").into(), RlmNode::Message("Lorem".into())),
+                        (str1!("b").into(), RlmNode::Message("Ipsum".into())),
                         (
                             str1!("bar").into(),
-                            RawNode::Namespace(RawNamespace {
+                            RlmNode::Namespace(RlmNamespace {
                                 map: HashMap::from_iter([
-                                    (str1!("a").into(), RawNode::Message("Dolor".into())),
-                                    (str1!("b").into(), RawNode::Message("Sit".into())),
-                                    (str1!("c").into(), RawNode::Message("Amet".into())),
+                                    (str1!("a").into(), RlmNode::Message("Dolor".into())),
+                                    (str1!("b").into(), RlmNode::Message("Sit".into())),
+                                    (str1!("c").into(), RlmNode::Message("Amet".into())),
                                 ]),
                             }),
                         ),
@@ -315,10 +321,10 @@ mod tests {
             ),
             (
                 str1!("baz").into(),
-                RawNode::Namespace(RawNamespace {
+                RlmNode::Namespace(RlmNamespace {
                     map: HashMap::from_iter([
-                        (str1!("a").into(), RawNode::Message("Lorem Ipsum".into())),
-                        (str1!("b").into(), RawNode::Message("Dolor Sit Amet".into())),
+                        (str1!("a").into(), RlmNode::Message("Lorem Ipsum".into())),
+                        (str1!("b").into(), RlmNode::Message("Dolor Sit Amet".into())),
                     ]),
                 }),
             ),
@@ -326,13 +332,13 @@ mod tests {
     )]
     fn read_definition(
         #[case] input: &str,
-        #[case] expected_output: Option<impl IntoIterator<Item = (CompactString1, RawNode)>>,
+        #[case] expected_output: Option<impl IntoIterator<Item = (CompactString1, RlmNode)>>,
     ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
-        let actual_output = Definition::read(file.path().into()).ok();
-        let expected_output = expected_output.map(|pairs| Definition {
-            root: RawNamespace {
+        let actual_output = RlmDefinition::read(file.path().into()).ok();
+        let expected_output = expected_output.map(|pairs| RlmDefinition {
+            root: RlmNamespace {
                 map: pairs.into_iter().collect(),
             },
         });
@@ -378,14 +384,14 @@ mod tests {
     )]
     #[case("baz.a", Ok(PseudoNode::Message("Lorem Ipsum")))]
     #[case("baz.b", Ok(PseudoNode::Message("Dolor Sit Amet")))]
-    #[case("bar", Err(DefinitionAtError::NotFound { index: 0 }))]
-    #[case("foo.a.x", Err(DefinitionAtError::NotANamespace { index: 1 }))]
-    #[case("foo.bar.a.x.y", Err(DefinitionAtError::NotANamespace { index: 2 }))]
-    #[case("foo.c", Err(DefinitionAtError::NotFound { index: 1 }))]
-    #[case("foo.bar.baz", Err(DefinitionAtError::NotFound { index: 2 }))]
+    #[case("bar", Err(RlmDefinitionAtError::NotFound { index: 0 }))]
+    #[case("foo.a.x", Err(RlmDefinitionAtError::NotANamespace { index: 1 }))]
+    #[case("foo.bar.a.x.y", Err(RlmDefinitionAtError::NotANamespace { index: 2 }))]
+    #[case("foo.c", Err(RlmDefinitionAtError::NotFound { index: 1 }))]
+    #[case("foo.bar.baz", Err(RlmDefinitionAtError::NotFound { index: 2 }))]
     fn definition_at(
         #[case] input: &str,
-        #[case] expected_output: Result<PseudoNode<'_>, DefinitionAtError>,
+        #[case] expected_output: Result<PseudoNode<'_>, RlmDefinitionAtError>,
     ) {
         const DEFINITION_RAW: &str = indoc! {r#"
             foo:
@@ -407,7 +413,7 @@ mod tests {
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            Definition::read(file.path().into()).unwrap()
+            RlmDefinition::read(file.path().into()).unwrap()
         };
         let key = RawDottedKey {
             parts: {
@@ -419,12 +425,12 @@ mod tests {
         };
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
-            PseudoNode::Message(contents) => RawNode::Message(contents.into()),
+            PseudoNode::Message(contents) => RlmNode::Message(contents.into()),
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let definition = Definition::read(file.path().into()).unwrap();
-                RawNode::Namespace(definition.root)
+                let definition = RlmDefinition::read(file.path().into()).unwrap();
+                RlmNode::Namespace(definition.root)
             }
         });
         assert_eq!(

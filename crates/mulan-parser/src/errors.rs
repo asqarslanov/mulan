@@ -14,16 +14,16 @@ use crate::{Identifier, RawDottedKey};
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
 pub enum BundleFromFsError {
-    /// Failed to build a [`crate::schemas::locale_map::LocaleMap`].
-    Read(LocaleMapError),
+    /// Failed to build a [`crate::schemas::raw_locale_map::RawLocaleMap`].
+    Read(RawLocaleMapError),
 
     /// Failed to build a [`crate::Bundle`].
     Transform(TransformError),
 }
 
-/// Errors of [`crate::schemas::locale_map::LocaleMap::from_fs`].
+/// Errors of [`crate::schemas::raw_locale_map::RawLocaleMap::from_fs`].
 #[derive(Debug)]
-pub enum LocaleMapError {
+pub enum RawLocaleMapError {
     /// Failed to read a file.
     ReadFile(ReadFileError),
 
@@ -31,14 +31,14 @@ pub enum LocaleMapError {
     Yaml(YamlError),
 }
 
-/// See [`LocaleMapError::ReadFile`].
+/// See [`RawLocaleMapError::ReadFile`].
 #[derive(Debug)]
 pub struct ReadFileError {
     pub path: PathBuf,
     pub error: io::Error,
 }
 
-/// See [`LocaleMapError::Yaml`].
+/// See [`RawLocaleMapError::Yaml`].
 #[derive(Debug)]
 pub struct YamlError {
     pub inner: Box<serde_saphyr::Error>,
