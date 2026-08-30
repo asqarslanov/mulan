@@ -37,8 +37,9 @@ pub fn execute() -> miette::Result<ExitCode> {
             Ok(ExitCode::from(SIGINT))
         }
         Err(PromptAndInitError::Cliclack(err)) => {
-            // A `cliclack` error indicates that we couldn't print to the console.
-            // There's no meaningful recovery strategy, so we just `panic!`.
+            // A `cliclack` error indicates that we couldn't print
+            // to the console. There's no meaningful recovery strategy,
+            // so we just `panic!`.
             // There's no point in creating rich Miette reports---
             // we won't probably be able to print them anyway.
             panic!("{err}");
@@ -64,7 +65,8 @@ fn verify_no_config_exists() -> ControlFlow<miette::Report> {
             ControlFlow::Break(report)
         }
         Err(LocateError::Io(e)) => {
-            // If we can't know whether a config exists, it's another beast of an error.
+            // If we can't know whether a config exists,
+            // it's another beast of an error.
             let report = e.to_report(&mulan_config::Config::dummy());
             ControlFlow::Break(report)
         }

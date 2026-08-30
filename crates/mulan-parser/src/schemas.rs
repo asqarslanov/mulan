@@ -108,8 +108,9 @@ fn translations<'input>(
             Ok(node) => node,
             Err(e) => match e {
                 DefinitionAtError::NotFound { index: _ } => {
-                    // If a locale doesn't have a message that exists in the main locale,
-                    // we just skip this message. The main locale will later act as a fallback.
+                    // If a locale doesn't have a message that exists
+                    // in the main locale, we just skip this message.
+                    // The main locale will later act as a fallback.
                     continue;
                 }
                 DefinitionAtError::NotANamespace { index } => {

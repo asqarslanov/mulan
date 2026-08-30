@@ -4,14 +4,12 @@ use std::collections::BTreeMap;
 
 use indoc::formatdoc;
 use mitsein::btree_set1::BTreeSet1;
-use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
 use mitsein::iter1::{Iterator1, IteratorExt as _};
 use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
-use mulan_config::{Case, Language};
+use mulan_config::Language;
 
-use crate::identifier::Identifier;
-use crate::template::Template;
+use crate::{DottedKey, Identifier, Template};
 
 /// All messages from all user locales, strictly-typed, validated, and
 /// organized. The final parsing result used to generate locale bindings.
@@ -60,34 +58,6 @@ impl Namespace {
             let key = DottedKey { parts };
             (key, node)
         })
-    }
-}
-
-/// A full path to a [`Node`] composed of one or more key parts.
-///
-/// E.g., the dotted key `frontend.user-settings.account` has parts
-/// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct DottedKey {
-    pub(crate) parts: Vec1<Identifier>,
-}
-
-impl DottedKey {
-    /// Returns the last key part.
-    ///
-    /// E.g., for `settings.profile.title`, this method returns `title`.
-    #[must_use]
-    pub fn name(&self) -> &Identifier {
-        self.parts.last()
-    }
-
-    /// Converts this dotted key to a dot-separated string.
-    #[must_use]
-    pub fn to_compact_string1(&self, case: Case) -> CompactString1 {
-        self.parts
-            .iter1()
-            .map(|part| part.to_compact_string1(case))
-            .join_compact1(".")
     }
 }
 
@@ -151,74 +121,5 @@ impl Translations {
             .try_into_iter1()
             .ok()
             .map(Iterator1::collect1)
-    }
-}
-
-/// Defines parsers with [`mod@chumsky`].
-mod parser {
-    use chumsky::prelude::*;
-
-    use super::DottedKey;
-    use crate::chumsky_parse::ChumskyParser;
-    use crate::identifier::Identifier;
-
-    impl DottedKey {
-        #[must_use]
-        pub(crate) fn chumsky_parser<'src>(
-            ident_parser: &impl ChumskyParser<'src, Identifier>,
-        ) -> impl ChumskyParser<'src, Self> {
-            ident_parser
-                .separated_by(just('.'))
-                .at_least(1)
-                .collect()
-                .map(|segments: Vec<_>| Self {
-                    parts: segments.try_into().expect(".at_least(1)"),
-                })
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use rstest::rstest;
-
-    use super::*;
-    use crate::chumsky_parse::ChumskyParser as _;
-    use crate::identifier::Word;
-
-    #[rstest]
-    #[case("", None)]
-    #[case(" ", None)]
-    #[case(".", None)]
-    #[case(".a", None)]
-    #[case("a.", None)]
-    #[case("a ", None)]
-    #[case(" a", None)]
-    #[case("a", Some(["a"].as_slice()))]
-    #[case("a1", Some(["a1"].as_slice()))]
-    #[case("foo.bar", Some(["foo", "bar"].as_slice()))]
-    #[case("foo1.bar2", Some(["foo1", "bar2"].as_slice()))]
-    #[case("foo1.bar2.baz", Some(["foo1", "bar2", "baz"].as_slice()))]
-    #[case("foo-1.bar-2", None)]
-    #[case("foo1. bar2", None)]
-    #[case("foo1 .bar2", None)]
-    #[case("foo1 bar2", None)]
-    fn parse_dotted_key(#[case] input: &str, #[case] expected_output: Option<&[&str]>) {
-        let word_parser = Word::chumsky_parser();
-        let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let key_parser = DottedKey::chumsky_parser(&ident_parser);
-        let actual_output = key_parser.mulan_parse(input).ok();
-        let expected_output = expected_output.map(|raw_parts| {
-            let parts = {
-                raw_parts
-                    .iter()
-                    .try_into_iter1()
-                    .unwrap()
-                    .map(|part| ident_parser.mulan_parse(part).unwrap())
-                    .collect1()
-            };
-            DottedKey { parts }
-        });
-        assert_eq!(actual_output, expected_output);
     }
 }
