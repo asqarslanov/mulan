@@ -14,16 +14,16 @@ use crate::{Identifier, RawDottedKey};
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
 pub enum BundleFromFsError {
-    /// Failed to build a [`crate::schemas::raw_locale_map::RawLocaleMap`].
-    Read(RawLocaleMapError),
+    /// Failed to build a [`crate::schemas::locale_map::LocaleMap`].
+    Read(LocaleMapError),
 
     /// Failed to build a [`crate::Bundle`].
-    Transform(TransposeError),
+    Transform(TransformError),
 }
 
-/// Errors of [`crate::schemas::raw_locale_map::RawLocaleMap::from_fs`].
+/// Errors of [`crate::schemas::locale_map::LocaleMap::from_fs`].
 #[derive(Debug)]
-pub enum RawLocaleMapError {
+pub enum LocaleMapError {
     /// Failed to read a file.
     ReadFile(ReadFileError),
 
@@ -31,14 +31,14 @@ pub enum RawLocaleMapError {
     Yaml(YamlError),
 }
 
-/// See [`RawLocaleMapError::ReadFile`].
+/// See [`LocaleMapError::ReadFile`].
 #[derive(Debug)]
 pub struct ReadFileError {
     pub path: PathBuf,
     pub error: io::Error,
 }
 
-/// See [`RawLocaleMapError::Yaml`].
+/// See [`LocaleMapError::Yaml`].
 #[derive(Debug)]
 pub struct YamlError {
     pub inner: Box<serde_saphyr::Error>,
@@ -46,9 +46,9 @@ pub struct YamlError {
     pub source_code: String,
 }
 
-/// Errors of [`crate::schemas::transpose`].
+/// Errors of [`crate::schemas::transform`].
 #[derive(Debug)]
-pub enum TransposeError {
+pub enum TransformError {
     /// A key was not parsed successfully (wrong syntax).
     InvalidKey(InvalidKeyError),
 

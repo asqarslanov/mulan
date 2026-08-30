@@ -661,7 +661,7 @@ impl self::ToReport for mulan_parser::errors::BundleFromFsError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::RawLocaleMapError {
+impl self::ToReport for mulan_parser::errors::LocaleMapError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::ReadFile(e) => e.to_report(config),
@@ -862,7 +862,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::TransposeError {
+impl self::ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::InvalidKey(e) => e.to_report(config),
