@@ -18,9 +18,9 @@
     )
 )]
 
-pub use self::identifier::Identifier;
 use self::identifier::Word;
-pub use self::schemas::bundle::{Bundle, DottedKey, Namespace, Node, Translations};
+pub use self::identifier::{DottedKey, Identifier};
+pub use self::schemas::bundle::{Bundle, Namespace, Node, Translations};
 use self::schemas::locale_map::LocaleMap;
 pub use self::schemas::locale_map::RawDottedKey;
 pub use self::template::{Tag, Template, TemplatePart};
