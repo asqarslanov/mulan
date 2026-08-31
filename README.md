@@ -1,13 +1,9 @@
 # Mulan
 
-A multi-language i18n framework.
+An i18n tool that **generates type-safe bindings** to **various programming
+languages**.
 
-## What is it?
-
-**Mulan** is an i18n tool that generates type-safe bindings to various
-programming languages
-
-> Internationalization (i18n) refers to the process of translating an
+> _Internationalization (i18n)_ refers to the process of translating an
 > application (of any type) to various human languages.
 
 ## Get Started
