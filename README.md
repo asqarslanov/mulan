@@ -95,5 +95,5 @@ poorer developer experience.
 
 My approach is to utilize static analysis to its fullest to generate real
 functions in target programming languages, using common platform-agnostic
-definitions. You may think of it as [Protobuf](https://protobuf.dev/), but for
-human-text templates.
+definitions. You may practically think of it as
+[Protobuf](https://protobuf.dev/), but for human-text templates.
