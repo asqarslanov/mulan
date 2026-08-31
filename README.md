@@ -1,4 +1,4 @@
-# Mulan
+# Mulan :globe_with_meridians:
 
 An i18n tool that **generates type-safe bindings** to **various programming
 languages**.
