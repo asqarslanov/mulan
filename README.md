@@ -24,6 +24,10 @@ mulan init
 
 ## Showcase
 
+> For now, the only supported compilation target is [Rust](https://rust-lang.org/).
+
+Suppose you have such locale files.
+
 - `locales/en.yaml`
 
   ```yaml
@@ -42,4 +46,34 @@ mulan init
     greeting: "Bonjour, {name}!"
   general:
     author: "Fabriqué par {t.app-name} SA"
+  ```
+
+You can generate i18n bindings with this command.
+
+```sh
+mulan gen
+```
+
+Then, you can import and use the generated bindings in your code.
+
+```rs
+use mulan::{Locale, t};
+
+let name_en: &'static str = t::AppName.get_in(Locale::default());
+println!("{name_en}");
+
+for locale in [Locale::En, Locale::Fr] {
+    let greeting: String = t::ui::Greeting { name: "Mushu" }.get_in(locale);
+    println!("{greeting}");
+}
+
+let author_fr: &'static str = t::general::Author.get_in(Locale::Fr);
+println!("{author_fr}");
+```
+
+- ```stdout
+  Foo
+  Hello, Mushu!
+  Bonjour, Mushu!
+  Fabriqué par Toto SA
   ```
