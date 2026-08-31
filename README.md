@@ -2,6 +2,14 @@
 
 A multi-language i18n framework.
 
+## What is it?
+
+**Mulan** is an i18n tool that generates type-safe bindings to various
+programming languages
+
+> Internationalization (i18n) refers to the process of translating an
+> application (of any type) to various human languages.
+
 ## Get Started
 
 Use
@@ -24,7 +32,8 @@ mulan init
 
 ## Showcase
 
-> For now, the only supported compilation target is [Rust](https://rust-lang.org/).
+> For now, the only supported compilation target is
+> [Rust](https://rust-lang.org/).
 
 Suppose you have such locale files.
 
@@ -77,3 +86,18 @@ println!("{author_fr}");
   Bonjour, Mushu!
   Fabriqué par Toto SA
   ```
+
+## Why?
+
+There are many i18n frameworks. However, most of them are designed to only
+support one ecosystem (e.g., JS, Python, Android). Different frameworks have
+different developer workflows and vary by their quality and capabilies.
+
+Although programming-language-agnostic tool exist, they are not not type-safe.
+Most frameworks depend on runtime lookups, which may be error-prone and lead to
+poorer developer experience.
+
+My approach is to utilize static analysis to its fullest to generate real
+functions in target programming languages, using common platform-agnostic
+definitions. You may think of it as [Protobuf](https://protobuf.dev/), but for
+human-text templates.
