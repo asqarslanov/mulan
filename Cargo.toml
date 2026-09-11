@@ -58,7 +58,7 @@ smallvec = "1.16.0"
 strum = "0.28.0"
 tempfile = "3.27.0"
 thiserror = "2.0.20"
-toml = { version = "1.1.5", features = ["fast_hash"] }
+toml = { version = "1.1.6", features = ["fast_hash"] }
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
