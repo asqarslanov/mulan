@@ -89,7 +89,7 @@ There are many i18n frameworks. However, most of them are designed to only
 support one ecosystem (e.g., JS, Python, Android). Different frameworks have
 different developer workflows and vary by their quality and capabilies.
 
-Although programming-language-agnostic tool exist, they are not not type-safe.
+Although programming-language-agnostic tools exist, they are not not type-safe.
 Most frameworks depend on runtime lookups, which may be error-prone and lead to
 poorer developer experience.
 
