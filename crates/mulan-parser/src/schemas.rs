@@ -9,7 +9,7 @@ use foldhash::HashSet;
 use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
-use self::bundle::{BMessage, BNamespace, BNode, Bundle};
+use self::bundle::{Bundle, Namespace, Node, Translations};
 use self::locale_map::{
     Definition, DefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
 };
@@ -52,7 +52,7 @@ fn handle_node<'input>(
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<BNode, TransformError> {
+) -> Result<Node, TransformError> {
     let node = match raw_node {
         RawNode::Message(raw_template) => {
             let template = {
@@ -66,7 +66,7 @@ fn handle_node<'input>(
                         })
                     })?
             };
-            BNode::Message(translations(
+            Node::Message(translations(
                 config,
                 locale_map,
                 key,
@@ -74,7 +74,7 @@ fn handle_node<'input>(
                 template_parser,
             )?)
         }
-        RawNode::Namespace(inner_namespace) => BNode::Namespace(traverse_namespace(
+        RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             config,
             Some(key),
             inner_namespace,
@@ -94,7 +94,7 @@ fn translations<'input>(
     key: &RawDottedKey,
     main_translation: Template,
     template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<BMessage, TransformError> {
+) -> Result<Translations, TransformError> {
     let main_params: HashSet<&Identifier> = main_translation.parameter_iter().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
@@ -148,7 +148,7 @@ fn translations<'input>(
         }
         other_translations.insert(locale, template);
     }
-    Ok(BMessage {
+    Ok(Translations {
         main: main_translation,
         others: other_translations,
     })
@@ -166,7 +166,7 @@ fn traverse_namespace<'input>(
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<BNamespace, TransformError> {
+) -> Result<Namespace, TransformError> {
     let mut map = BTreeMap::new();
     for (raw_key_part, raw_node) in &namespace.map {
         let key_part = ident_parser.mulan_parse(raw_key_part).map_err(|errors| {
@@ -198,5 +198,5 @@ fn traverse_namespace<'input>(
         )?;
         map.insert(key_part, node);
     }
-    Ok(BNamespace { map })
+    Ok(Namespace { map })
 }

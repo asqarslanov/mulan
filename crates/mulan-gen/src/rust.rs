@@ -114,13 +114,13 @@ struct Module<'src> {
 
 impl<'src> Module<'src> {
     fn new(
-        namespace: &'src mulan_parser::BNamespace,
+        namespace: &'src mulan_parser::Namespace,
         parent_key: Option<&mulan_parser::DottedKey>,
     ) -> Self {
         let mut structs = BTreeMap::new();
         let mut submodules = BTreeMap::new();
         for (key, node) in namespace.iter(parent_key) {
-            use mulan_parser::BNode as N;
+            use mulan_parser::Node as N;
             match node {
                 N::Message(msg) => {
                     structs.insert(key, Struct::new(msg));
@@ -197,12 +197,12 @@ impl<'src> Module<'src> {
 
 #[derive(Debug)]
 struct Struct<'src> {
-    translations: &'src mulan_parser::BMessage,
+    translations: &'src mulan_parser::Translations,
     fields: Option<BTreeSet1<&'src mulan_parser::Identifier>>,
 }
 
 impl<'src> Struct<'src> {
-    fn new(translations: &'src mulan_parser::BMessage) -> Self {
+    fn new(translations: &'src mulan_parser::Translations) -> Self {
         Self {
             translations,
             fields: translations.parameter_set(),

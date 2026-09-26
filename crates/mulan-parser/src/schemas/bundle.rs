@@ -23,7 +23,7 @@ pub struct Bundle {
     /// [`Bundle`] is ultimately a tree of nested namespaces
     /// (see [`Namespace`]). The `root` namespace is the outermost namespace.
     /// It is always present, even if the main locale definition is empty.
-    pub root: BNamespace,
+    pub root: Namespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.
@@ -34,15 +34,15 @@ pub struct Bundle {
 /// See [`RawNamespace`](crate::schemas::locale_map::RawNamespace)
 /// for visual examples.
 #[derive(Debug)]
-pub struct BNamespace {
+pub struct Namespace {
     /// Maps key parts to namespace nodes (see [`Node`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: BTreeMap<Identifier, BNode>,
+    pub(super) map: BTreeMap<Identifier, Node>,
 }
 
-impl BNamespace {
+impl Namespace {
     /// Returns an iterator over all nodes of this namespace with their
     /// corresponding [`DottedKey`].
     ///
@@ -51,7 +51,7 @@ impl BNamespace {
     pub fn iter(
         &self,
         parent_path: Option<&DottedKey>,
-    ) -> impl Iterator<Item = (DottedKey, &BNode)> {
+    ) -> impl Iterator<Item = (DottedKey, &Node)> {
         let rtail = parent_path.map(|k| k.parts.to_vec()).unwrap_or_default();
         self.map.iter().map(move |(key_part, node)| {
             let parts = Vec1::from_rtail_and_head(rtail.clone(), key_part.clone());
@@ -65,12 +65,12 @@ impl BNamespace {
 ///
 /// Can either be a message template's [`Translations`] or another namespace.
 #[derive(Debug)]
-pub enum BNode {
+pub enum Node {
     /// All translations of a single message.
-    Message(BMessage),
+    Message(Translations),
 
     /// A nested namespace.
-    Namespace(BNamespace),
+    Namespace(Namespace),
 }
 
 /// All user-defined translations of a single message.
@@ -78,7 +78,7 @@ pub enum BNode {
 /// Data is stored alphabetically to ensure deterministic output.
 /// The main translation is always present.
 #[derive(Debug)]
-pub struct BMessage {
+pub struct Translations {
     /// The message written in the main locale.
     pub main: Template,
 
@@ -88,7 +88,7 @@ pub struct BMessage {
     pub others: BTreeMap<Language, Template>,
 }
 
-impl BMessage {
+impl Translations {
     /// Returns a preview of the main translation in Markdown.
     ///
     /// ````txt
