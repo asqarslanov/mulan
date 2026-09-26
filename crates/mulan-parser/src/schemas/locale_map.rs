@@ -13,7 +13,7 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
-use crate::legacy::errors::{LocaleMapError, ReadFileError, YamlError};
+use crate::errors::{LocaleMapError, ReadFileError, YamlError};
 
 /// A simple collection of [`RawDefinition`]s parsed with [`serde`].
 ///
@@ -249,9 +249,9 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use super::*;
-    use crate::legacy::DottedKey;
-    use crate::legacy::chumsky_parse::ChumskyParser as _;
-    use crate::legacy::identifier::{Identifier, Word};
+    use crate::DottedKey;
+    use crate::chumsky_parse::ChumskyParser as _;
+    use crate::identifier::{Identifier, Word};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]

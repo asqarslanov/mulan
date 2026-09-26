@@ -5,7 +5,7 @@
 use chumsky::prelude::*;
 use mitsein::iter1::IteratorExt as _;
 
-use crate::legacy::errors::{ChumskyAllErrors, ChumskySingleError};
+use crate::errors::{ChumskyAllErrors, ChumskySingleError};
 
 /// A trait alias to a Chumsky parser with rich error reporting.
 ///

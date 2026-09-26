@@ -17,7 +17,7 @@ mod rust;
 /// and writes them to their corresponding files.
 pub fn write_files(
     config: &mulan_config::Config,
-    bundle: &mulan_parser::legacy::Bundle,
+    bundle: &mulan_parser::Bundle,
 ) -> Result<(), GenError> {
     let Some(targets) = &config.generate else {
         return Err(GenError::NoTargets(NoTargetsError));

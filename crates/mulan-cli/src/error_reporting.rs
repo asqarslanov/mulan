@@ -652,7 +652,7 @@ impl self::Reportable for mulan_config::errors::LocateIoError {
     }
 }
 
-impl self::ToReport for mulan_parser::legacy::errors::BundleFromFsError {
+impl self::ToReport for mulan_parser::errors::BundleFromFsError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::Read(e) => e.to_report(config),
@@ -661,7 +661,7 @@ impl self::ToReport for mulan_parser::legacy::errors::BundleFromFsError {
     }
 }
 
-impl self::ToReport for mulan_parser::legacy::errors::LocaleMapError {
+impl self::ToReport for mulan_parser::errors::LocaleMapError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::ReadFile(e) => e.to_report(config),
@@ -670,7 +670,7 @@ impl self::ToReport for mulan_parser::legacy::errors::LocaleMapError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::ReadFileError {
+impl self::Reportable for mulan_parser::errors::ReadFileError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let os_error = &self.error.to_compact_string();
         let path = &self.path.to_string_lossy();
@@ -695,7 +695,7 @@ impl self::Reportable for mulan_parser::legacy::errors::ReadFileError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::YamlError {
+impl self::Reportable for mulan_parser::errors::YamlError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         use serde_saphyr::Error as E;
         match self.inner.without_snippet() {
@@ -862,7 +862,7 @@ impl self::Reportable for mulan_parser::legacy::errors::YamlError {
     }
 }
 
-impl self::ToReport for mulan_parser::legacy::errors::TransformError {
+impl self::ToReport for mulan_parser::errors::TransformError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::InvalidKey(e) => e.to_report(config),
@@ -874,7 +874,7 @@ impl self::ToReport for mulan_parser::legacy::errors::TransformError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::InvalidKeyError {
+impl self::Reportable for mulan_parser::errors::InvalidKeyError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let parent_key = &self.parent_key.as_ref().map_or_else(
@@ -903,7 +903,7 @@ impl self::Reportable for mulan_parser::legacy::errors::InvalidKeyError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::InvalidTemplateError {
+impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let key = &self.key.to_compact_string1();
@@ -928,7 +928,7 @@ impl self::Reportable for mulan_parser::legacy::errors::InvalidTemplateError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::NotANamespaceError {
+impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let key = &self.key.to_compact_string1();
@@ -956,7 +956,7 @@ impl self::Reportable for mulan_parser::legacy::errors::NotANamespaceError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::NotAMessageError {
+impl self::Reportable for mulan_parser::errors::NotAMessageError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let key = &self.key.to_compact_string1();
@@ -984,7 +984,7 @@ impl self::Reportable for mulan_parser::legacy::errors::NotAMessageError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::UnknownParametersError {
+impl self::Reportable for mulan_parser::errors::UnknownParametersError {
     fn message(&self, _config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let key = &self.key.to_compact_string1();
@@ -1040,7 +1040,7 @@ impl self::Reportable for mulan_parser::legacy::errors::UnknownParametersError {
     }
 }
 
-impl self::Reportable for mulan_parser::legacy::errors::ChumskyAllErrors {
+impl self::Reportable for mulan_parser::errors::ChumskyAllErrors {
     fn message(&self, config: &mulan_config::Config) -> String {
         let error = self.errors.first();
         let source = &self.source;
@@ -1072,12 +1072,12 @@ impl self::Reportable for mulan_parser::legacy::errors::ChumskyAllErrors {
     }
 }
 
-/// References a [`mulan_parser::legacy::errors::ChumskySingleError`]
+/// References a [`mulan_parser::errors::ChumskySingleError`]
 /// with its corresponding source code, which makes this type
 /// convertible to [`miette::Report`].
 #[derive(Debug)]
 struct ChumskyErrorWrapper<'err> {
-    error: &'err mulan_parser::legacy::errors::ChumskySingleError,
+    error: &'err mulan_parser::errors::ChumskySingleError,
 
     /// The original string we failed to parse.
     source: &'err str,

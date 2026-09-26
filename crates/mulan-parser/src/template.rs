@@ -8,7 +8,7 @@ use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
 
-use crate::legacy::identifier::Identifier;
+use crate::identifier::Identifier;
 
 /// A message template that consists of raw text and variable placeholders.
 /// For example:
@@ -40,7 +40,7 @@ impl Template {
         });
         let mut buffer = CompactString::default();
         for part in self.iter() {
-            use crate::legacy::TemplatePart as P;
+            use crate::TemplatePart as P;
             match part {
                 P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
                 P::Tag(Tag::Parameter(name)) => buffer.push_str(&name.parameter_preview(config)),
@@ -123,8 +123,8 @@ mod parser {
     use chumsky::prelude::*;
 
     use super::{Tag, Template, TemplatePart};
-    use crate::legacy::chumsky_parse::ChumskyParser;
-    use crate::legacy::identifier::Identifier;
+    use crate::chumsky_parse::ChumskyParser;
+    use crate::identifier::Identifier;
 
     impl Template {
         /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
@@ -175,8 +175,8 @@ mod tests {
 
     use self::PseudoTemplatePart::{Txt, Var};
     use super::*;
-    use crate::legacy::chumsky_parse::ChumskyParser as _;
-    use crate::legacy::identifier::Word;
+    use crate::chumsky_parse::ChumskyParser as _;
+    use crate::identifier::Word;
 
     enum PseudoTemplatePart {
         Txt(&'static str),
