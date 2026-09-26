@@ -8,7 +8,7 @@ use mitsein::compact_string1::CompactString1;
 use smallvec::SmallVec;
 use strum::EnumTryAs;
 
-use crate::identifier::Identifier;
+use crate::legacy::identifier::Identifier;
 
 /// A message template that consists of raw text and variable placeholders.
 /// For example:
@@ -123,8 +123,8 @@ mod parser {
     use chumsky::prelude::*;
 
     use super::{Tag, Template, TemplatePart};
-    use crate::chumsky_parse::ChumskyParser;
-    use crate::identifier::Identifier;
+    use crate::legacy::chumsky_parse::ChumskyParser;
+    use crate::legacy::identifier::Identifier;
 
     impl Template {
         /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
@@ -175,8 +175,8 @@ mod tests {
 
     use self::PseudoTemplatePart::{Txt, Var};
     use super::*;
-    use crate::chumsky_parse::ChumskyParser as _;
-    use crate::identifier::Word;
+    use crate::legacy::chumsky_parse::ChumskyParser as _;
+    use crate::legacy::identifier::Word;
 
     enum PseudoTemplatePart {
         Txt(&'static str),

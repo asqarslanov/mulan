@@ -249,9 +249,9 @@ mod tests {
     use tempfile::NamedTempFile;
 
     use super::*;
-    use crate::chumsky_parse::ChumskyParser as _;
-    use crate::identifier::{Identifier, Word};
     use crate::legacy::DottedKey;
+    use crate::legacy::chumsky_parse::ChumskyParser as _;
+    use crate::legacy::identifier::{Identifier, Word};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]

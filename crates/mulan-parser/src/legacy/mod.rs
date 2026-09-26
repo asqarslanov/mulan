@@ -18,15 +18,17 @@
     )
 )]
 
+use self::identifier::Word;
+pub use self::identifier::{DottedKey, Identifier};
 pub use self::schemas::bundle::{BMessage, BNamespace, BNode, Bundle};
 use self::schemas::locale_map::LocaleMap;
 pub use self::schemas::locale_map::RawDottedKey;
 pub use self::template::{Tag, Template, TemplatePart};
-use crate::identifier::Word;
-pub use crate::identifier::{DottedKey, Identifier};
 use crate::legacy::errors::BundleFromFsError;
 
+mod chumsky_parse;
 pub mod errors;
+mod identifier;
 mod schemas;
 mod template;
 
