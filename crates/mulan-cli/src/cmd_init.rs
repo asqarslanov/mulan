@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use itertools::Itertools as _;
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 use mulan_config::errors::{LocateError, NotFoundError};
 use mulan_config::{Language, RustTarget, Target};
 use relative_path::RelativePathBuf;
@@ -150,7 +150,7 @@ struct InitConfig {
     main_locale: Language,
 
     /// Maps to [`mulan_config::Config::generate`].
-    generate: Option<SmallVec1<[Target; 1]>>,
+    generate: Option<Vec1<Target>>,
 }
 
 /// Couldn't create a new Mulan config.
@@ -184,7 +184,7 @@ impl InitConfig {
     fn interactive_prompt() -> io::Result<Self> {
         let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
-        let generate = Self::prompt_generate()?.map(SmallVec1::from_one);
+        let generate = Self::prompt_generate()?.map(Vec1::from_one);
         Ok(Self {
             locales,
             main_locale,

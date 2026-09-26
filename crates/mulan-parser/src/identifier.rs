@@ -4,7 +4,6 @@ use std::convert::identity;
 
 use compact_str::format_compact;
 use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
-use mitsein::small_vec1::SmallVec1;
 use mitsein::vec1::Vec1;
 use mulan_config::Case;
 
@@ -16,7 +15,7 @@ use mulan_config::Case;
 /// every word starts with a Latin letter, etc.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Identifier {
-    words: SmallVec1<[Word; 2]>,
+    words: Vec1<Word>,
 }
 
 impl Identifier {
@@ -111,7 +110,6 @@ impl DottedKey {
 mod parser {
     use chumsky::prelude::*;
     use mitsein::iter1::IteratorExt as _;
-    use smallvec::SmallVec;
 
     use super::{DottedKey, Identifier, Word};
     use crate::chumsky_parse::ChumskyParser;
@@ -125,7 +123,7 @@ mod parser {
                 .map(|part| part.inner)
                 .separated_by(just('-'))
                 .at_least(1)
-                .collect::<SmallVec<[_; 2]>>()
+                .collect::<Vec<_>>()
                 .map(|raw_words| Self {
                     words: raw_words
                         .into_iter()

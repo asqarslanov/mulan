@@ -5,7 +5,6 @@ use std::sync::LazyLock;
 use aho_corasick::AhoCorasick;
 use compact_str::CompactString;
 use mitsein::compact_string1::CompactString1;
-use smallvec::SmallVec;
 use strum::EnumTryAs;
 
 use crate::identifier::Identifier;
@@ -25,7 +24,7 @@ use crate::identifier::Identifier;
 /// ```
 #[derive(Debug, PartialEq, Eq)]
 pub struct Template {
-    parts: SmallVec<[TemplatePart; 1]>,
+    parts: Vec<TemplatePart>,
 }
 
 impl Template {

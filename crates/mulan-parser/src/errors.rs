@@ -6,7 +6,7 @@ use std::range::Range;
 
 use compact_str::CompactString;
 use mitsein::btree_set1::BTreeSet1;
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
 use crate::{Identifier, RawDottedKey};
@@ -117,7 +117,7 @@ pub struct ChumskyAllErrors {
     /// The original string we were trying to parse.
     pub source: CompactString,
 
-    pub errors: SmallVec1<[ChumskySingleError; 1]>,
+    pub errors: Vec1<ChumskySingleError>,
 }
 
 /// A single error in [`ChumskyAllErrors`].
