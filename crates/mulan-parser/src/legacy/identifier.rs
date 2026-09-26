@@ -114,7 +114,7 @@ mod parser {
     use smallvec::SmallVec;
 
     use super::{DottedKey, Identifier, Word};
-    use crate::chumsky_parse::ChumskyParser;
+    use crate::legacy::chumsky_parse::ChumskyParser;
 
     impl Identifier {
         #[must_use]
@@ -173,7 +173,7 @@ mod tests {
     use rstest::rstest;
 
     use super::*;
-    use crate::chumsky_parse::ChumskyParser as _;
+    use crate::legacy::chumsky_parse::ChumskyParser as _;
 
     #[rstest]
     #[case("e", Some(["e"].as_slice()))]

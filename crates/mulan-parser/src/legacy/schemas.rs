@@ -13,12 +13,12 @@ use self::bundle::{BMessage, BNamespace, BNode, Bundle};
 use self::locale_map::{
     LocaleMap, RawDefinition, RawDefinitionAtError, RawDottedKey, RawNamespace, RawNode,
 };
-use crate::chumsky_parse::ChumskyParser;
-use crate::errors::{
+use crate::legacy::chumsky_parse::ChumskyParser;
+use crate::legacy::errors::{
     InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
     UnknownParametersError,
 };
-use crate::{Identifier, Template};
+use crate::legacy::{Identifier, Template};
 
 pub mod bundle;
 pub mod locale_map;

@@ -9,7 +9,7 @@ use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::{DottedKey, Identifier, Template};
+use crate::legacy::{DottedKey, Identifier, Template};
 
 /// All messages from all user locales, strictly-typed, validated, and
 /// organized. The final parsing result used to generate locale bindings.

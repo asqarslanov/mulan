@@ -23,7 +23,7 @@ const TYPE_CASE: mulan_config::Case = mulan_config::Case::Pascal;
 
 /// Returns a Rust source code string that can be used in a standalone file.
 #[must_use]
-pub fn generate(config: &mulan_config::Config, bundle: &mulan_parser::Bundle) -> String {
+pub fn generate(config: &mulan_config::Config, bundle: &mulan_parser::legacy::Bundle) -> String {
     Bindings {
         t: Module::new(&bundle.root, None),
     }
@@ -108,19 +108,19 @@ impl Bindings<'_> {
 
 #[derive(Debug)]
 struct Module<'src> {
-    structs: BTreeMap<mulan_parser::DottedKey, Struct<'src>>,
-    submodules: BTreeMap<mulan_parser::DottedKey, Self>,
+    structs: BTreeMap<mulan_parser::legacy::DottedKey, Struct<'src>>,
+    submodules: BTreeMap<mulan_parser::legacy::DottedKey, Self>,
 }
 
 impl<'src> Module<'src> {
     fn new(
-        namespace: &'src mulan_parser::BNamespace,
-        parent_key: Option<&mulan_parser::DottedKey>,
+        namespace: &'src mulan_parser::legacy::BNamespace,
+        parent_key: Option<&mulan_parser::legacy::DottedKey>,
     ) -> Self {
         let mut structs = BTreeMap::new();
         let mut submodules = BTreeMap::new();
         for (key, node) in namespace.iter(parent_key) {
-            use mulan_parser::BNode as N;
+            use mulan_parser::legacy::BNode as N;
             match node {
                 N::Message(msg) => {
                     structs.insert(key, Struct::new(msg));
@@ -140,7 +140,7 @@ impl<'src> Module<'src> {
     fn generate(
         &self,
         config: &mulan_config::Config,
-        key: Option<&mulan_parser::DottedKey>,
+        key: Option<&mulan_parser::legacy::DottedKey>,
     ) -> String {
         let mut module_contents = Vec::new();
         if !self.structs.is_empty() {
@@ -197,19 +197,23 @@ impl<'src> Module<'src> {
 
 #[derive(Debug)]
 struct Struct<'src> {
-    translations: &'src mulan_parser::BMessage,
-    fields: Option<BTreeSet1<&'src mulan_parser::Identifier>>,
+    translations: &'src mulan_parser::legacy::BMessage,
+    fields: Option<BTreeSet1<&'src mulan_parser::legacy::Identifier>>,
 }
 
 impl<'src> Struct<'src> {
-    fn new(translations: &'src mulan_parser::BMessage) -> Self {
+    fn new(translations: &'src mulan_parser::legacy::BMessage) -> Self {
         Self {
             translations,
             fields: translations.parameter_set(),
         }
     }
 
-    fn generate(&self, config: &mulan_config::Config, key: &mulan_parser::DottedKey) -> String {
+    fn generate(
+        &self,
+        config: &mulan_config::Config,
+        key: &mulan_parser::legacy::DottedKey,
+    ) -> String {
         let name = &key.name().to_compact_string1(TYPE_CASE);
         formatdoc! {"
             {doc_comment}
@@ -225,7 +229,11 @@ impl<'src> Struct<'src> {
         }
     }
 
-    fn doc_comment(&self, config: &mulan_config::Config, key: &mulan_parser::DottedKey) -> String {
+    fn doc_comment(
+        &self,
+        config: &mulan_config::Config,
+        key: &mulan_parser::legacy::DottedKey,
+    ) -> String {
         let preview = self.translations.markdown_preview(config);
         let preview = preview.as_ref().map_or("_empty message_", AsRef::as_ref);
         formatdoc! {"
@@ -334,7 +342,7 @@ impl<'src> Struct<'src> {
     }
 }
 
-fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> CompactString {
+fn generate_message(template: &mulan_parser::legacy::Template, allow_str: bool) -> CompactString {
     if let Some(text) = template.try_as_plain_text() {
         return format_compact!(
             "\"{contents}\"{tail}",
@@ -343,7 +351,7 @@ fn generate_message(template: &mulan_parser::Template, allow_str: bool) -> Compa
         );
     }
     let contents = {
-        use mulan_parser::{Tag as T, TemplatePart as P};
+        use mulan_parser::legacy::{Tag as T, TemplatePart as P};
         static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
             AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
         });

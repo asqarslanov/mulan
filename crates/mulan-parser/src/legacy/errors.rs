@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::small_vec1::SmallVec1;
 use mulan_config::Language;
 
-use crate::{Identifier, RawDottedKey};
+use crate::legacy::{Identifier, RawDottedKey};
 
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
