@@ -342,10 +342,7 @@ impl<'src> Struct<'src> {
     }
 }
 
-fn generate_message(
-    template: &mulan_parser::legacy::TemplateBuf,
-    allow_str: bool,
-) -> CompactString {
+fn generate_message(template: &mulan_parser::legacy::Template, allow_str: bool) -> CompactString {
     if let Some(text) = template.try_as_plain_text() {
         return format_compact!(
             "\"{contents}\"{tail}",
@@ -354,7 +351,7 @@ fn generate_message(
         );
     }
     let contents = {
-        use mulan_parser::legacy::{TagBuf as T, TemplateBufPart as P};
+        use mulan_parser::legacy::{Tag as T, TemplatePart as P};
         static AC: LazyLock<AhoCorasick> = LazyLock::new(|| {
             AhoCorasick::new(["{", "}"]).expect("valid aho-corasick patterns and config")
         });
