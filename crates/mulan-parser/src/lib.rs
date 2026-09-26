@@ -20,7 +20,7 @@
 
 use self::identifier::Word;
 pub use self::identifier::{DottedKey, Identifier};
-pub use self::schemas::bundle::{Bundle, Namespace, Node, Translations};
+pub use self::schemas::bundle::{BMessage, BNamespace, BNode, Bundle};
 use self::schemas::locale_map::LocaleMap;
 pub use self::schemas::locale_map::RawDottedKey;
 pub use self::template::{Tag, Template, TemplatePart};
