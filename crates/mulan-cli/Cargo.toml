@@ -25,6 +25,7 @@ mulan-parser = { workspace = true }
 relative-path = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde-saphyr = { workspace = true }
+sorted-vec = "0.8.11"
 thiserror = { workspace = true }
 toml = { workspace = true }
 

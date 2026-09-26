@@ -13,7 +13,7 @@ use self::bundle::{BMessage, BNamespace, BNode, Bundle};
 use self::locale_map::{
     LocaleMap, RawDefinition, RawDefinitionAtError, RawDottedKey, RawNamespace, RawNode,
 };
-use crate::legacy::chumsky_parse::ChumskyParser;
+use crate::chumsky_parse::ChumskyParser;
 use crate::legacy::errors::{
     InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
     UnknownParametersError,
