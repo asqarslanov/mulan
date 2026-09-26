@@ -15,7 +15,7 @@ use strum::EnumTryAs;
 
 use crate::errors::{LocaleMapError, ReadFileError, YamlError};
 
-/// A simple collection of locale [`Definition`]s parsed with [`serde`].
+/// A simple collection of [`RawDefinition`]s parsed with [`serde`].
 ///
 /// This type is used to quickly map the contents of locale files
 /// to Rust values. Later, it will be converted into the more useful
@@ -25,7 +25,7 @@ pub struct LocaleMap {
     /// Maps a language tag to the contents of the corresponding locale.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub locales: HashMap<Language, Definition>,
+    pub locales: HashMap<Language, RawDefinition>,
 }
 
 /// A single-language definition of a locale read from a locale file
@@ -44,7 +44,7 @@ pub struct LocaleMap {
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
 #[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct Definition {
+pub struct RawDefinition {
     /// A locale definition is ultimately a tree of nested namespaces
     /// (see [`RawNamespace`]). The `root` namespace is the outermost
     /// namespace. It is always present, even if the locale definition is empty.
@@ -114,7 +114,7 @@ impl LocaleMap {
                             .with_extension("yaml")
                     };
                     let path = path.to_path(""); // doesn't add a prefix
-                    let definition = Definition::read(path.into())?;
+                    let definition = RawDefinition::read(path.into())?;
                     Ok((locale, definition))
                 })
                 .collect::<Result<_, _>>()?
@@ -141,9 +141,9 @@ impl RawDottedKey {
     }
 }
 
-/// Errors of [`Definition::at`].
+/// Errors of [`RawDefinition::at`].
 #[derive(Debug, PartialEq, Eq)]
-pub enum DefinitionAtError {
+pub enum RawDefinitionAtError {
     /// The path doesn't exist.
     NotFound {
         /// The index (0-based) of the first key part we couldn't find.
@@ -158,7 +158,7 @@ pub enum DefinitionAtError {
     },
 }
 
-impl Definition {
+impl RawDefinition {
     /// Parses a YAML locale definition file to a Rust value.
     fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
         let file_contents = match fs::read_to_string(&path) {
@@ -179,7 +179,7 @@ impl Definition {
 
     /// Returns a reference to the node at the given path.
     ///
-    /// For example, let `definition: Definiton` be
+    /// For example, let `definition: RawDefiniton` be
     ///
     /// ```yaml
     /// foo:
@@ -212,7 +212,7 @@ impl Definition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &RawDottedKey) -> Result<&RawNode, DefinitionAtError> {
+    pub fn at(&self, path: &RawDottedKey) -> Result<&RawNode, RawDefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
         let (key_parts, last_key_part) = path.parts.iter1().into_rtail_and_head();
@@ -221,18 +221,18 @@ impl Definition {
                 namespace
                     .map
                     .get(key_part.as_str())
-                    .ok_or(DefinitionAtError::NotFound { index })?
+                    .ok_or(RawDefinitionAtError::NotFound { index })?
             };
             namespace = {
                 node.try_as_namespace_ref()
-                    .ok_or(DefinitionAtError::NotANamespace { index })?
+                    .ok_or(RawDefinitionAtError::NotANamespace { index })?
             };
             index += 1;
         }
         namespace
             .map
             .get(last_key_part.as_str())
-            .ok_or(DefinitionAtError::NotFound { index })
+            .ok_or(RawDefinitionAtError::NotFound { index })
     }
 }
 
@@ -330,8 +330,8 @@ mod tests {
     ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
-        let actual_output = Definition::read(file.path().into()).ok();
-        let expected_output = expected_output.map(|pairs| Definition {
+        let actual_output = RawDefinition::read(file.path().into()).ok();
+        let expected_output = expected_output.map(|pairs| RawDefinition {
             root: RawNamespace {
                 map: pairs.into_iter().collect(),
             },
@@ -378,14 +378,14 @@ mod tests {
     )]
     #[case("baz.a", Ok(PseudoNode::Message("Lorem Ipsum")))]
     #[case("baz.b", Ok(PseudoNode::Message("Dolor Sit Amet")))]
-    #[case("bar", Err(DefinitionAtError::NotFound { index: 0 }))]
-    #[case("foo.a.x", Err(DefinitionAtError::NotANamespace { index: 1 }))]
-    #[case("foo.bar.a.x.y", Err(DefinitionAtError::NotANamespace { index: 2 }))]
-    #[case("foo.c", Err(DefinitionAtError::NotFound { index: 1 }))]
-    #[case("foo.bar.baz", Err(DefinitionAtError::NotFound { index: 2 }))]
+    #[case("bar", Err(RawDefinitionAtError::NotFound { index: 0 }))]
+    #[case("foo.a.x", Err(RawDefinitionAtError::NotANamespace { index: 1 }))]
+    #[case("foo.bar.a.x.y", Err(RawDefinitionAtError::NotANamespace { index: 2 }))]
+    #[case("foo.c", Err(RawDefinitionAtError::NotFound { index: 1 }))]
+    #[case("foo.bar.baz", Err(RawDefinitionAtError::NotFound { index: 2 }))]
     fn definition_at(
         #[case] input: &str,
-        #[case] expected_output: Result<PseudoNode<'_>, DefinitionAtError>,
+        #[case] expected_output: Result<PseudoNode<'_>, RawDefinitionAtError>,
     ) {
         const DEFINITION_RAW: &str = indoc! {r#"
             foo:
@@ -407,7 +407,7 @@ mod tests {
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            Definition::read(file.path().into()).unwrap()
+            RawDefinition::read(file.path().into()).unwrap()
         };
         let key = RawDottedKey {
             parts: {
@@ -423,7 +423,7 @@ mod tests {
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let definition = Definition::read(file.path().into()).unwrap();
+                let definition = RawDefinition::read(file.path().into()).unwrap();
                 RawNode::Namespace(definition.root)
             }
         });
