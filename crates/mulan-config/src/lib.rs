@@ -13,7 +13,7 @@ use std::collections::BTreeSet;
 
 use figment2::Figment;
 use figment2::providers::{Format as _, Toml};
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 use relative_path::RelativePathBuf;
 use serde::{Deserialize, Serialize};
 use serde_with::{SetPreventDuplicates, serde_as};
@@ -60,7 +60,7 @@ pub struct Config {
 
     /// The list of targets (i.e., programming languages) for which
     /// i18n bindings should be generated.
-    pub generate: Option<SmallVec1<[Target; 1]>>,
+    pub generate: Option<Vec1<Target>>,
 
     /// Your preferred convention to name keys in locale definitions.
     ///

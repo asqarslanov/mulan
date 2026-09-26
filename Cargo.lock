@@ -332,7 +332,6 @@ dependencies = [
  "cfg-if",
  "itoa",
  "serde",
- "smallvec",
  "static_assertions",
  "zmij",
 ]
@@ -1088,7 +1087,6 @@ dependencies = [
  "rstest",
  "serde",
  "serde-saphyr",
- "smallvec",
  "strum",
  "tempfile",
 ]
@@ -1424,7 +1422,6 @@ dependencies = [
  "ref-cast",
  "serde",
  "serde_json",
- "smallvec",
 ]
 
 [[package]]

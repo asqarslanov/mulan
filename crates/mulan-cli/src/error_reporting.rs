@@ -12,7 +12,7 @@ use std::range::Range;
 use compact_str::{CompactStringExt as _, ToCompactString as _, format_compact};
 use itertools::Itertools as _;
 use mitsein::iter1::{IntoIterator1 as _, IteratorExt as _};
-use mitsein::small_vec1::SmallVec1;
+use mitsein::vec1::Vec1;
 
 use crate::i18n::{Locale, t};
 
@@ -85,7 +85,7 @@ struct AnnotationBlock {
     /// Annotations that point to specific parts of the text with arrows.
     ///
     /// At least one label must be present for the block to render.
-    labels: SmallVec1<[self::SourceLabel; 1]>,
+    labels: Vec1<self::SourceLabel>,
 }
 
 /// See [`self::AnnotationBlock::file_data`].
@@ -142,7 +142,7 @@ impl<E: self::Reportable> self::ToReport for E {
         let (source_code, labels) = match self.annotation_block(config) {
             None => (None, None),
             Some(data) => {
-                let labels: SmallVec1<[miette::LabeledSpan; 1]> = {
+                let labels: Vec1<miette::LabeledSpan> = {
                     let to_label_span = |label: self::SourceLabel| -> miette::LabeledSpan {
                         use self::SpanKind as S;
                         let span: miette::SourceSpan = match label.span {
@@ -205,10 +205,10 @@ struct ReportData {
     source_code: Option<self::SourceKind>,
 
     /// The value for [`miette::Diagnostic::labels`].
-    labels: Option<SmallVec1<[miette::LabeledSpan; 1]>>,
+    labels: Option<Vec1<miette::LabeledSpan>>,
 
     /// The value for [`miette::Diagnostic::related`].
-    related: Option<SmallVec1<[miette::Report; 1]>>,
+    related: Option<Vec1<miette::Report>>,
 }
 
 /// Represents different kinds of values that implement [`miette::SourceCode`].
@@ -848,7 +848,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
                 name: self.filename.clone(),
                 language: self::SourceLanguage::Yaml,
             }),
-            labels: SmallVec1::from_one(self::SourceLabel {
+            labels: Vec1::from_one(self::SourceLabel {
                 text: t::errors::parser::read::yaml::annotation_block::Here
                     .get_in(Locale::default())
                     .to_owned(),
@@ -1100,7 +1100,7 @@ impl self::Reportable for self::ChumskyErrorWrapper<'_> {
         Some(self::AnnotationBlock {
             text: self.source.to_owned(),
             file_data: None,
-            labels: SmallVec1::from_one(self::SourceLabel {
+            labels: Vec1::from_one(self::SourceLabel {
                 text: t::errors::parser::syntax::annotation_block::Here
                     .get_in(Locale::default())
                     .to_owned(),
