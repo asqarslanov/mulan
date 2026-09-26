@@ -18,7 +18,7 @@ use crate::legacy::errors::{
     InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
     UnknownParametersError,
 };
-use crate::legacy::{Identifier, Template};
+use crate::legacy::{Identifier, TemplateBuf};
 
 pub mod bundle;
 pub mod locale_map;
@@ -29,7 +29,7 @@ pub fn transform<'input>(
     locale_map: &'input LocaleMap,
     main_locale: &'input RawDefinition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
+    template_parser: &impl ChumskyParser<'input, TemplateBuf>,
 ) -> Result<Bundle, TransformError> {
     let root = traverse_namespace(
         config,
@@ -51,7 +51,7 @@ fn handle_node<'input>(
     key: &RawDottedKey,
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
+    template_parser: &impl ChumskyParser<'input, TemplateBuf>,
 ) -> Result<BNode, TransformError> {
     let node = match raw_node {
         RawNode::Message(raw_template) => {
@@ -92,8 +92,8 @@ fn translations<'input>(
     config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
     key: &RawDottedKey,
-    main_translation: Template,
-    template_parser: &impl ChumskyParser<'input, Template>,
+    main_translation: TemplateBuf,
+    template_parser: &impl ChumskyParser<'input, TemplateBuf>,
 ) -> Result<BMessage, TransformError> {
     let main_params: HashSet<&Identifier> = main_translation.parameter_iter().collect();
     let mut other_translations = BTreeMap::new();
@@ -165,7 +165,7 @@ fn traverse_namespace<'input>(
     namespace: &'input RawNamespace,
     locale_map: &'input LocaleMap,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
+    template_parser: &impl ChumskyParser<'input, TemplateBuf>,
 ) -> Result<BNamespace, TransformError> {
     let mut map = BTreeMap::new();
     for (raw_key_part, raw_node) in &namespace.map {

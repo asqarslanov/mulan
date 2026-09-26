@@ -24,11 +24,11 @@ use crate::identifier::Identifier;
 /// `Hello, ${name}!`
 /// ```
 #[derive(Debug, PartialEq, Eq)]
-pub struct Template {
-    parts: SmallVec<[TemplatePart; 1]>,
+pub struct TemplateBuf {
+    parts: SmallVec<[TemplateBufPart; 1]>,
 }
 
-impl Template {
+impl TemplateBuf {
     /// Returns what this message (approximately) looks like in the locale file.
     ///
     /// E.g., it can literally return a string such as `"Hello, {name}!"`.
@@ -40,17 +40,17 @@ impl Template {
         });
         let mut buffer = CompactString::default();
         for part in self.iter() {
-            use crate::legacy::TemplatePart as P;
+            use crate::legacy::TemplateBufPart as P;
             match part {
                 P::Text(text) => buffer.push_str(&AC.replace_all(text, &["{{", "}}"])),
-                P::Tag(Tag::Parameter(name)) => buffer.push_str(&name.parameter_preview(config)),
+                P::Tag(TagBuf::Parameter(name)) => buffer.push_str(&name.parameter_preview(config)),
             }
         }
         buffer.try_into().ok()
     }
 
     /// An iterator over all parts in the order they appear in the message.
-    pub fn iter(&self) -> impl Iterator<Item = &TemplatePart> {
+    pub fn iter(&self) -> impl Iterator<Item = &TemplateBufPart> {
         self.parts.iter()
     }
 
@@ -59,8 +59,8 @@ impl Template {
     pub fn parameter_iter(&self) -> impl Iterator<Item = &Identifier> {
         self.parts
             .iter()
-            .filter_map(TemplatePart::try_as_tag_ref)
-            .filter_map(Tag::try_as_parameter_ref)
+            .filter_map(TemplateBufPart::try_as_tag_ref)
+            .filter_map(TagBuf::try_as_parameter_ref)
     }
 
     /// Returns a plain text string without dynamic parameters
@@ -69,7 +69,7 @@ impl Template {
     pub fn try_as_plain_text(&self) -> Option<&str> {
         match self.parts.as_slice() {
             [] => Some(<&str>::default()),
-            [TemplatePart::Text(text)] => Some(text),
+            [TemplateBufPart::Text(text)] => Some(text),
             _ => None,
         }
     }
@@ -84,7 +84,7 @@ impl Template {
         let mut count = 0;
         self.parts
             .iter()
-            .filter_map(TemplatePart::try_as_text_ref)
+            .filter_map(TemplateBufPart::try_as_text_ref)
             .for_each(|text| {
                 let mut current_count = 0;
                 for c in text.chars() {
@@ -103,17 +103,17 @@ impl Template {
 
 /// A part of a [`Template`].
 #[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
-pub enum TemplatePart {
+pub enum TemplateBufPart {
     /// Plain text to be used verbatim.
     Text(CompactString),
 
     /// See [`Tag`].
-    Tag(Tag),
+    Tag(TagBuf),
 }
 
 /// A special expression enclosed in `{` `}` (e.g., a parameter).
 #[derive(Debug, Clone, PartialEq, Eq, EnumTryAs)]
-pub enum Tag {
+pub enum TagBuf {
     /// A stand-in for a variable (`{foo}`).
     Parameter(Identifier),
 }
@@ -122,25 +122,25 @@ pub enum Tag {
 mod parser {
     use chumsky::prelude::*;
 
-    use super::{Tag, Template, TemplatePart};
+    use super::{TagBuf, TemplateBuf, TemplateBufPart};
     use crate::chumsky_parse::ChumskyParser;
     use crate::identifier::Identifier;
 
-    impl Template {
+    impl TemplateBuf {
         /// Parses `Hello, {name}!` to `["Hello, ", #name, "!"]`.
         #[must_use]
         pub fn chumsky_parser<'src>(
-            part_parser: &impl ChumskyParser<'src, TemplatePart>,
+            part_parser: &impl ChumskyParser<'src, TemplateBufPart>,
         ) -> impl ChumskyParser<'src, Self> {
             part_parser.repeated().collect().map(|parts| Self { parts })
         }
     }
 
-    impl TemplatePart {
+    impl TemplateBufPart {
         /// Differentiates between different template part types.
         #[must_use]
         pub fn chumsky_parser<'src>(
-            tag_parser: &impl ChumskyParser<'src, Tag>,
+            tag_parser: &impl ChumskyParser<'src, TagBuf>,
         ) -> impl ChumskyParser<'src, Self> {
             let text = {
                 choice((just("{{").to('{'), just("}}").to('}'), none_of("{}")))
@@ -154,7 +154,7 @@ mod parser {
         }
     }
 
-    impl Tag {
+    impl TagBuf {
         /// Extracts `x` from `{x}` and dfferentiates between different
         /// tag types.
         #[must_use]
@@ -225,19 +225,19 @@ mod tests {
     fn parse(#[case] input: &str, #[case] expected_output: Option<&[PseudoTemplatePart]>) {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let tag_parser = Tag::chumsky_parser(&ident_parser);
-        let msg_part_parser = TemplatePart::chumsky_parser(&tag_parser);
-        let msg_parser = Template::chumsky_parser(&msg_part_parser);
+        let tag_parser = TagBuf::chumsky_parser(&ident_parser);
+        let msg_part_parser = TemplateBufPart::chumsky_parser(&tag_parser);
+        let msg_parser = TemplateBuf::chumsky_parser(&msg_part_parser);
         let actual_output = msg_parser.mulan_parse(input).ok();
-        let expected_output = expected_output.map(|raw_parts| Template {
+        let expected_output = expected_output.map(|raw_parts| TemplateBuf {
             parts: {
                 raw_parts
                     .iter()
                     .map(|part| match part {
-                        Txt(it) => TemplatePart::Text(CompactString::new(it)),
-                        Var(it) => {
-                            TemplatePart::Tag(Tag::Parameter(ident_parser.mulan_parse(it).unwrap()))
-                        }
+                        Txt(it) => TemplateBufPart::Text(CompactString::new(it)),
+                        Var(it) => TemplateBufPart::Tag(TagBuf::Parameter(
+                            ident_parser.mulan_parse(it).unwrap(),
+                        )),
                     })
                     .collect()
             },

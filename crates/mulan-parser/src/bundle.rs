@@ -31,9 +31,9 @@ pub enum BNode {
 ///
 #[derive(Debug)]
 pub struct BMessage {
-    ///
-    pub main: Template,
+    // ///
+    // pub main: Template,
 
-    ///
-    pub others: BTreeMap<Language, Template>,
+    // ///
+    // pub others: BTreeMap<Language, Template>,
 }

@@ -9,7 +9,7 @@ use mitsein::string1::String1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::legacy::{DottedKey, Identifier, Template};
+use crate::legacy::{DottedKey, Identifier, TemplateBuf};
 
 /// All messages from all user locales, strictly-typed, validated, and
 /// organized. The final parsing result used to generate locale bindings.
@@ -80,12 +80,12 @@ pub enum BNode {
 #[derive(Debug)]
 pub struct BMessage {
     /// The message written in the main locale.
-    pub main: Template,
+    pub main: TemplateBuf,
 
     /// Other translations of the message.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub others: BTreeMap<Language, Template>,
+    pub others: BTreeMap<Language, TemplateBuf>,
 }
 
 impl BMessage {

@@ -21,14 +21,13 @@
 pub use self::schemas::bundle::{BMessage, BNamespace, BNode, Bundle};
 use self::schemas::locale_map::LocaleMap;
 pub use self::schemas::locale_map::RawDottedKey;
-pub use self::template::{Tag, Template, TemplatePart};
 use crate::identifier::Word;
 pub use crate::identifier::{DottedKey, Identifier};
 use crate::legacy::errors::BundleFromFsError;
+pub use crate::template::{TagBuf, TemplateBuf, TemplateBufPart};
 
 pub mod errors;
 mod schemas;
-mod template;
 
 impl Bundle {
     /// Does all the heavy-lifting (locating locales, parsing, transforming).
@@ -44,9 +43,9 @@ impl Bundle {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
         let _key_parser = DottedKey::chumsky_parser(&ident_parser);
-        let tag_parser = Tag::chumsky_parser(&ident_parser);
-        let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
-        let template_parser = Template::chumsky_parser(&template_part_parser);
+        let tag_parser = TagBuf::chumsky_parser(&ident_parser);
+        let template_part_parser = TemplateBufPart::chumsky_parser(&tag_parser);
+        let template_parser = TemplateBuf::chumsky_parser(&template_part_parser);
         self::schemas::transform(
             config,
             &locale_map,
