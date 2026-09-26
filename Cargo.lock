@@ -1040,7 +1040,6 @@ dependencies = [
  "relative-path 2.0.1",
  "serde",
  "serde-saphyr",
- "sorted-vec",
  "thiserror",
  "toml",
 ]
@@ -1090,6 +1089,7 @@ dependencies = [
  "serde",
  "serde-saphyr",
  "smallvec",
+ "sorted-vec",
  "strum",
  "tempfile",
 ]
