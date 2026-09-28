@@ -862,7 +862,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::TransformError {
+impl self::ToReport for mulan_parser::errors::TransposeError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::InvalidKey(e) => e.to_report(config),

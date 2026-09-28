@@ -49,7 +49,7 @@ impl Bundle {
         let tag_parser = Tag::chumsky_parser(&ident_parser);
         let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let template_parser = Template::chumsky_parser(&template_part_parser);
-        self::schemas::transform(
+        self::schemas::transpose(
             config,
             &locale_map,
             &main_locale,
