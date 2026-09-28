@@ -876,11 +876,11 @@ impl self::ToReport for mulan_parser::errors::TransposeError {
 }
 
 impl self::Reportable for mulan_parser::errors::InvalidKeyError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
         let parent_key = &self.parent_key.as_ref().map_or_else(
             || "root namespace".to_compact_string(),
-            |key| format_compact!("namespace: `{}`", key.to_compact_string1()),
+            |key| format_compact!("namespace: `{}`", key.to_compact_string1(config.key_case)),
         );
         t::errors::parser::validate::invalid_key::Message { locale, parent_key }
             .get_in(Locale::default())
@@ -905,9 +905,9 @@ impl self::Reportable for mulan_parser::errors::InvalidKeyError {
 }
 
 impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         t::errors::parser::validate::invalid_template::Message { locale, key }
             .get_in(Locale::default())
     }
@@ -930,9 +930,9 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
 }
 
 impl self::Reportable for mulan_parser::errors::NotANamespaceError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         t::errors::parser::validate::not_a_namespace::Message { locale, key }
             .get_in(Locale::default())
     }
@@ -942,7 +942,7 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         let main_locale = config.main_locale.tag();
         let message = t::errors::parser::validate::not_a_namespace::Help { key, main_locale };
         Some(message.get_in(Locale::default()))
@@ -958,9 +958,9 @@ impl self::Reportable for mulan_parser::errors::NotANamespaceError {
 }
 
 impl self::Reportable for mulan_parser::errors::NotAMessageError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         t::errors::parser::validate::not_a_message::Message { locale, key }
             .get_in(Locale::default())
     }
@@ -970,7 +970,7 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
     }
 
     fn help(&self, config: &mulan_config::Config) -> Option<String> {
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         let main_locale = config.main_locale.tag();
         let message = t::errors::parser::validate::not_a_message::Help { key, main_locale };
         Some(message.get_in(Locale::default()))
@@ -986,9 +986,9 @@ impl self::Reportable for mulan_parser::errors::NotAMessageError {
 }
 
 impl self::Reportable for mulan_parser::errors::UnknownParametersError {
-    fn message(&self, _config: &mulan_config::Config) -> String {
+    fn message(&self, config: &mulan_config::Config) -> String {
         let locale = self.locale.tag();
-        let key = &self.key.to_compact_string1();
+        let key = &self.key.to_compact_string1(config.key_case);
         t::errors::parser::validate::unknown_parameters::Message { locale, key }
             .get_in(Locale::default())
     }

@@ -7,8 +7,7 @@ use std::path::Path;
 
 use compact_str::CompactString;
 use foldhash::HashMap;
-use mitsein::compact_string1::{CompactString1, CompactString1Ext as _};
-use mitsein::vec1::Vec1;
+use mitsein::compact_string1::CompactString1;
 use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
