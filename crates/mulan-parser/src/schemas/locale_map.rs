@@ -100,6 +100,16 @@ struct RawNamespace {
     map: HashMap<CompactString1, RawNode>,
 }
 
+impl LNamespace {
+    fn from_raw(
+        raw: RawNamespace,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, InvalidSyntaxError> {
+        todo!();
+    }
+}
+
 /// A value in an [`LNamespace`] in an [`LDefinition`].
 ///
 /// Can either be a message template or another namespace.
@@ -215,7 +225,7 @@ impl LDefinition {
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
         let root = LNamespace::from_raw(raw_definition.root, ident_parser, template_parser)?;
-        Self { root }
+        Ok(Self { root })
     }
 
     /// Returns a reference to the node at the given path.
