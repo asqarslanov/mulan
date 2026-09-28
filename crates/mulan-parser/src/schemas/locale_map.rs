@@ -101,7 +101,7 @@ struct RawNamespace {
 }
 
 impl LNamespace {
-    fn from_raw(
+    fn from_raw<'input>(
         raw: RawNamespace,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
