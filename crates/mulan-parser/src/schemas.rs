@@ -11,7 +11,7 @@ use mitsein::vec1::Vec1;
 
 use self::bundle::{Bundle, Namespace, Node, Translations};
 use self::locale_map::{
-    Definition, DefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
+    LDefinition, LDefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
 };
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
@@ -27,7 +27,7 @@ pub mod locale_map;
 pub fn transform<'input>(
     config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
-    main_locale: &'input Definition,
+    main_locale: &'input LDefinition,
     ident_parser: &impl ChumskyParser<'input, Identifier>,
     template_parser: &impl ChumskyParser<'input, Template>,
 ) -> Result<Bundle, TransformError> {
@@ -107,13 +107,13 @@ fn translations<'input>(
         let raw_node = match definition.at(key) {
             Ok(node) => node,
             Err(e) => match e {
-                DefinitionAtError::NotFound { index: _ } => {
+                LDefinitionAtError::NotFound { index: _ } => {
                     // If a locale doesn't have a message that exists
                     // in the main locale, we just skip this message.
                     // The main locale will later act as a fallback.
                     continue;
                 }
-                DefinitionAtError::NotANamespace { index } => {
+                LDefinitionAtError::NotANamespace { index } => {
                     let segments = Vec1::try_from(&key.parts[..=index])
                         .expect("`..=n` slices are always non-empty");
                     let key = RawDottedKey { parts: segments };
