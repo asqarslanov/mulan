@@ -33,7 +33,7 @@ pub fn transpose<'input>(
 fn handle_node<'input>(
     config: &mulan_config::Config,
     l_node: LNode,
-    key: &DottedKey,
+    key: DottedKey,
     locale_map: &'input LocaleMap,
 ) -> Result<Node, TransposeError> {
     let node = match l_node {
@@ -42,7 +42,7 @@ fn handle_node<'input>(
         }
         LNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             config,
-            Some(key),
+            Some(&key),
             inner_namespace,
             locale_map,
         )?),
@@ -55,7 +55,7 @@ fn handle_node<'input>(
 fn translations<'input>(
     config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
-    key: &DottedKey,
+    key: DottedKey,
     main_translation: Template,
 ) -> Result<Translations, TransposeError> {
     let main_params: HashSet<&Identifier> = main_translation.parameter_iter().collect();
@@ -67,7 +67,7 @@ fn translations<'input>(
                 .get(&locale)
                 .expect("all locales should've been read when parsing `input`")
         };
-        let l_node = match definition.at(key) {
+        let l_node = match definition.at(&key) {
             Ok(node) => node,
             Err(e) => match e {
                 LDefinitionAtError::NotFound { index: _ } => {
@@ -86,7 +86,6 @@ fn translations<'input>(
             },
         };
         let Some(template) = l_node.try_as_message_ref() else {
-            let key = key.clone();
             let err = NotAMessageError { locale, key };
             return Err(TransposeError::NotAMessage(err));
         };
@@ -95,7 +94,7 @@ fn translations<'input>(
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
             return Err(TransposeError::UnknownParameters(UnknownParametersError {
                 locale,
-                key: key.clone(),
+                key,
                 parameters: unknown_params.cloned().collect1(),
             }));
         }
@@ -128,7 +127,7 @@ fn traverse_namespace<'input>(
         let key = DottedKey {
             parts: Vec1::from_rtail_and_head(rtail, key_part.clone()),
         };
-        let node = handle_node(config, l_node, &key, locale_map)?;
+        let node = handle_node(config, l_node, key, locale_map)?;
         map.insert(key_part, node);
     }
     Ok(Namespace { map })
