@@ -43,9 +43,9 @@ pub struct LocaleMap {
 /// ```
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct LDefinition {
-    /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]). The `root` namespace is the outermost
-    /// namespace. It is always present, even if the locale definition is empty.
+    /// A locale definition is ultimately a tree of nested namespaces.
+    /// The `root` namespace is the outermost namespace.
+    /// It is always present, even if the locale definition is empty.
     pub(super) root: (),
 }
 
