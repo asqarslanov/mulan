@@ -48,7 +48,7 @@ pub struct LDefinition {
     /// A locale definition is ultimately a tree of nested namespaces.
     /// The `root` namespace is the outermost namespace.
     /// It is always present, even if the locale definition is empty.
-    pub(super) root: (),
+    pub(super) root: LNamespace,
 }
 
 /// [`LDefinition`]'s deserializer.
@@ -59,10 +59,12 @@ struct RawDefinition {
     root: RawNamespace,
 }
 
-/// A "grouping" of messages to organize them conveniently.
+/// A strongly-typed "grouping" of messages to organize them conveniently.
 ///
 /// Key parts from different namespaces don't collide and can take
 /// the same values.
+///
+/// Loosely-typed counterpart: [`RawNamespace`].
 ///
 /// ```yaml
 /// ns1:
@@ -82,14 +84,21 @@ struct RawDefinition {
 ///   another-namespace:
 ///     baz: "Dolor"
 /// ```
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct RawNamespace {
-    /// Maps raw key parts to namespace nodes (see [`RawNode`]).
+#[derive(Debug, PartialEq, Eq)]
+pub struct LNamespace {
+    /// Maps raw key parts to namespace nodes (see [`LNode`]).
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
+    pub(super) map: HashMap<Identifier, RawNode>,
+}
+
+/// [`LNamespace`]'s deserializer.
+#[derive(Debug, Deserialize)]
+struct RawNamespace {
+    /// Maps to [`LNamespace::map`].
     #[serde(flatten)]
-    pub(super) map: HashMap<CompactString1, RawNode>,
+    map: HashMap<CompactString1, RawNode>,
 }
 
 /// A value in a [`RawNamespace`] of an [`LDefinition`].
