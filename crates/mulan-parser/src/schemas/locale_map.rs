@@ -28,12 +28,17 @@ pub struct LocaleMap {
     pub locales: HashMap<Language, LDefinition>,
 }
 
-/// A single-language definition of a locale read from a locale file
-/// (e.g., `locales/en-US/locale.yaml`).
-///
-/// This structure uses basic data types and is constructed
-/// with [`serde::Deserialize`]. Later, a more strongly typed tree
-/// can be constructed from a collection of [`LDefinition`]s.
+/// A single-language definition of a locale
+/// (read from a locale file such as `locales/en-US/locale.yaml`).
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+pub struct LDefinition {
+    /// A locale definition is ultimately a tree of nested namespaces
+    /// (see [`RawNamespace`]). The `root` namespace is the outermost
+    /// namespace. It is always present, even if the locale definition is empty.
+    pub(super) root: (),
+}
+
+/// [`LDefinition`]'s deserializer.
 ///
 /// ## Example Definition
 ///
@@ -43,13 +48,11 @@ pub struct LocaleMap {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct LDefinition {
-    /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]). The `root` namespace is the outermost
-    /// namespace. It is always present, even if the locale definition is empty.
+#[derive(Debug, Deserialize)]
+struct RawDefinition {
+    /// Maps to [`LDefinition::root`].
     #[serde(flatten)]
-    pub(super) root: RawNamespace,
+    root: RawNamespace,
 }
 
 /// A "grouping" of messages to organize them conveniently.
