@@ -11,11 +11,7 @@ use mitsein::vec1::Vec1;
 
 use self::bundle::{Bundle, Namespace, Node, Translations};
 use self::locale_map::{LDefinition, LDefinitionAtError, LNamespace, LNode, LocaleMap};
-use crate::chumsky_parse::ChumskyParser;
-use crate::errors::{
-    InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransposeError,
-    UnknownParametersError,
-};
+use crate::errors::{NotAMessageError, NotANamespaceError, TransposeError, UnknownParametersError};
 use crate::{DottedKey, Identifier, Template};
 
 pub mod bundle;
@@ -83,11 +79,8 @@ fn translations<'input>(
                 LDefinitionAtError::NotANamespace { index } => {
                     let segments = Vec1::try_from(&key.parts[..=index])
                         .expect("`..=n` slices are always non-empty");
-                    // let key = RawDottedKey { parts: segments };
-                    let err = NotANamespaceError {
-                        locale,
-                        key: key.clone(),
-                    };
+                    let key = DottedKey { parts: segments };
+                    let err = NotANamespaceError { locale, key };
                     return Err(TransposeError::NotANamespace(err));
                 }
             },
@@ -96,16 +89,6 @@ fn translations<'input>(
             let key = key.clone();
             let err = NotAMessageError { locale, key };
             return Err(TransposeError::NotAMessage(err));
-        };
-        let template = match template_parser.mulan_parse(template) {
-            Ok(template) => template,
-            Err(errors) => {
-                return Err(TransposeError::InvalidTemplate(InvalidTemplateError {
-                    locale,
-                    key: key.clone(),
-                    errors,
-                }));
-            }
         };
         let params = template.parameter_iter().collect::<HashSet<_>>();
         let unknown_params = params.difference(&main_params).copied();
@@ -116,7 +99,7 @@ fn translations<'input>(
                 parameters: unknown_params.cloned().collect1(),
             }));
         }
-        other_translations.insert(locale, template);
+        other_translations.insert(locale, template.clone());
     }
     Ok(Translations {
         main: main_translation,
@@ -142,15 +125,11 @@ fn traverse_namespace<'input>(
                 .map(|key| key.parts.to_vec())
                 .unwrap_or_default()
         };
-        let key = RawDottedKey {
-            parts: Vec1::from_rtail_and_head(
-                rtail,
-                raw_key_part.clone(), /* after obtaining `key_part`,
-                                       * we're sure `raw_key_part` is valid */
-            ),
+        let key = DottedKey {
+            parts: Vec1::from_rtail_and_head(rtail, key_part.clone()),
         };
         let node = handle_node(config, raw_node, &key, locale_map)?;
-        map.insert(key_part, node);
+        map.insert(key_part.clone(), node);
     }
     Ok(Namespace { map })
 }
