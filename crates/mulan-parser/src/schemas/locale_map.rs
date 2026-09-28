@@ -15,7 +15,7 @@ use strum::EnumTryAs;
 
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError};
-use crate::{Identifier, Template};
+use crate::{DottedKey, Identifier, Template};
 
 /// A simple collection of locale [`LDefinition`]s parsed with [`serde`].
 ///
@@ -154,24 +154,6 @@ impl LocaleMap {
     }
 }
 
-/// Represents a path to a node. A "dumber" counterpart to [`crate::DottedKey`].
-#[derive(Debug, Clone)]
-pub struct RawDottedKey {
-    /// For simplicity, key parts are stored as plain strings
-    /// rather than wrapped in newtypes with invariants.
-    pub(super) parts: Vec1<CompactString1>,
-}
-
-impl RawDottedKey {
-    /// Returns a dot-separated string representation.
-    ///
-    /// E.g., `["quick", "brown", "fox"]` will become `"quick.brown.fox"`.
-    #[must_use]
-    pub fn to_compact_string1(&self) -> CompactString1 {
-        (&self.parts).join_compact1(".")
-    }
-}
-
 /// Errors of [`LDefinition::at`].
 #[derive(Debug, PartialEq, Eq)]
 pub enum LDefinitionAtError {
@@ -271,7 +253,7 @@ impl LDefinition {
     /// definition.at(["baz"])
     /// => DefinitionAtError::NotFound
     /// ```
-    pub fn at(&self, path: &RawDottedKey) -> Result<&RawNode, LDefinitionAtError> {
+    pub fn at(&self, path: &DottedKey) -> Result<&LNode, LDefinitionAtError> {
         let mut index = 0;
         let mut namespace = &self.root;
         let (key_parts, last_key_part) = path.parts.iter1().into_rtail_and_head();

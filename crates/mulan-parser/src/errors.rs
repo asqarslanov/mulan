@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::{Identifier, RawDottedKey};
+use crate::{DottedKey, Identifier, RawDottedKey};
 
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
@@ -100,21 +100,21 @@ pub struct NotANamespaceError {
     pub locale: Language,
 
     /// The misinterpreted key that should point to a namespace.
-    pub key: RawDottedKey,
+    pub key: DottedKey,
 }
 
 /// See [`TransposeError::NotAMessage`].
 #[derive(Debug)]
 pub struct NotAMessageError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
 }
 
 /// See [`TransposeError::UnknownParameters`].
 #[derive(Debug)]
 pub struct UnknownParametersError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
     pub parameters: BTreeSet1<Identifier>,
 }
 

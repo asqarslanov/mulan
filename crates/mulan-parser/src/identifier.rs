@@ -82,7 +82,7 @@ pub struct Word {
 ///
 /// E.g., the dotted key `frontend.user-settings.account` has parts
 /// `frontend`, `user-settings`, `account`.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct DottedKey {
     pub(crate) parts: Vec1<Identifier>,
 }
