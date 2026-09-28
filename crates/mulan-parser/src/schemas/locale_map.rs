@@ -13,7 +13,9 @@ use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
+use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{LocaleMapError, ReadFileError, YamlError};
+use crate::{Identifier, Template};
 
 /// A simple collection of locale [`LDefinition`]s parsed with [`serde`].
 ///
@@ -106,7 +108,11 @@ pub enum RawNode {
 
 impl LocaleMap {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn from_fs(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
+    pub fn from_fs<'input>(
+        config: &mulan_config::Config,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, LocaleMapError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
@@ -178,7 +184,12 @@ impl RawDefinition {
 }
 
 impl LDefinition {
-    fn from_fs(locales_dir: &Path, locale: Language) -> Result<Self, LocaleMapError> {
+    fn from_fs(
+        locales_dir: &Path,
+        locale: Language,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, LocaleMapError> {
         let path = {
             locales_dir
                 .join(locale.tag().as_ref())
