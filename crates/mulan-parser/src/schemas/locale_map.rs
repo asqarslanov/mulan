@@ -28,17 +28,10 @@ pub struct LocaleMap {
     pub locales: HashMap<Language, LDefinition>,
 }
 
-/// A single-language definition of a locale
+/// A strongly-typed single-language definition of a locale
 /// (read from a locale file such as `locales/en-US/locale.yaml`).
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-pub struct LDefinition {
-    /// A locale definition is ultimately a tree of nested namespaces
-    /// (see [`RawNamespace`]). The `root` namespace is the outermost
-    /// namespace. It is always present, even if the locale definition is empty.
-    pub(super) root: (),
-}
-
-/// [`LDefinition`]'s deserializer.
+///
+/// Loosely-typed counterpart: [`RawDefinition`].
 ///
 /// ## Example Definition
 ///
@@ -48,6 +41,15 @@ pub struct LDefinition {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+pub struct LDefinition {
+    /// A locale definition is ultimately a tree of nested namespaces
+    /// (see [`RawNamespace`]). The `root` namespace is the outermost
+    /// namespace. It is always present, even if the locale definition is empty.
+    pub(super) root: (),
+}
+
+/// [`LDefinition`]'s deserializer.
 #[derive(Debug, Deserialize)]
 struct RawDefinition {
     /// Maps to [`LDefinition::root`].
