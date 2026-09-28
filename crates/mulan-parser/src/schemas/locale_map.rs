@@ -43,7 +43,7 @@ pub struct LocaleMap {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct LDefinition {
     /// A locale definition is ultimately a tree of nested namespaces.
     /// The `root` namespace is the outermost namespace.
@@ -52,7 +52,7 @@ pub struct LDefinition {
 }
 
 /// [`LDefinition`]'s deserializer.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 struct RawDefinition {
     /// Maps to [`LDefinition::root`].
     #[serde(flatten)]
@@ -84,7 +84,7 @@ struct RawDefinition {
 ///   another-namespace:
 ///     baz: "Dolor"
 /// ```
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct LNamespace {
     /// Maps raw key parts to namespace nodes (see [`LNode`]).
     ///
@@ -94,7 +94,7 @@ pub struct LNamespace {
 }
 
 /// [`LNamespace`]'s deserializer.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 struct RawNamespace {
     /// Maps to [`LNamespace::map`].
     #[serde(flatten)]
@@ -106,7 +106,7 @@ struct RawNamespace {
 /// Can either be a message template or another namespace.
 ///
 /// Loosely-typed counterpart: [`RawNode`].
-#[derive(Debug, PartialEq, Eq, EnumTryAs)]
+#[derive(Debug, EnumTryAs)]
 pub enum LNode {
     /// Raw text that will later be properly parsed
     /// to a [`Template`](crate::Template).
@@ -117,7 +117,7 @@ pub enum LNode {
 }
 
 /// [`LNode`]'s deserializer.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 enum RawNode {
     /// Maps to [`LNode::Message`].
@@ -378,8 +378,8 @@ mod tests {
     ) {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{input}").unwrap();
-        let actual_output = LDefinition::read(file.path().into()).ok();
-        let expected_output = expected_output.map(|pairs| LDefinition {
+        let actual_output = RawDefinition::read(file.path().into()).ok();
+        let expected_output = expected_output.map(|pairs| RawDefinition {
             root: RawNamespace {
                 map: pairs.into_iter().collect(),
             },
@@ -455,7 +455,7 @@ mod tests {
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            LDefinition::read(file.path().into()).unwrap()
+            RawDefinition::read(file.path().into()).unwrap()
         };
         let key = RawDottedKey {
             parts: {
@@ -471,7 +471,7 @@ mod tests {
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let definition = LDefinition::read(file.path().into()).unwrap();
+                let definition = RawDefinition::read(file.path().into()).unwrap();
                 RawNode::Namespace(definition.root)
             }
         });
