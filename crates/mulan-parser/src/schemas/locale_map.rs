@@ -41,7 +41,7 @@ pub struct LocaleMap {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct LDefinition {
     /// A locale definition is ultimately a tree of nested namespaces.
     /// The `root` namespace is the outermost namespace.
