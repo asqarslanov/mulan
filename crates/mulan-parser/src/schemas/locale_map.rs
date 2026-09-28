@@ -214,7 +214,8 @@ impl LDefinition {
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
-        todo!();
+        let root = LNamespace::from_raw(raw_definition.root, ident_parser, template_parser)?;
+        Self { root }
     }
 
     /// Returns a reference to the node at the given path.
