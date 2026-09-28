@@ -42,7 +42,7 @@ pub struct LocaleMap {
 /// namespace-foo:
 ///   lorem-upsum: "Dolor sit amet"
 /// ```
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct LDefinition {
     /// A locale definition is ultimately a tree of nested namespaces.
     /// The `root` namespace is the outermost namespace.
@@ -51,7 +51,7 @@ pub struct LDefinition {
 }
 
 /// [`LDefinition`]'s deserializer.
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Deserialize)]
 struct RawDefinition {
     /// Maps to [`LDefinition::root`].
     #[serde(flatten)]
@@ -83,7 +83,7 @@ struct RawDefinition {
 ///   another-namespace:
 ///     baz: "Dolor"
 /// ```
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct LNamespace {
     /// Maps raw key parts to namespace nodes (see [`LNode`]).
     ///
@@ -93,7 +93,7 @@ pub struct LNamespace {
 }
 
 /// [`LNamespace`]'s deserializer.
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Deserialize)]
 struct RawNamespace {
     /// Maps to [`LNamespace::map`].
     #[serde(flatten)]
@@ -105,7 +105,7 @@ struct RawNamespace {
 /// Can either be a message template or another namespace.
 ///
 /// Loosely-typed counterpart: [`RawNode`].
-#[derive(Debug, EnumTryAs)]
+#[derive(Debug, EnumTryAs, PartialEq, Eq)]
 pub enum LNode {
     /// Raw text that will later be properly parsed
     /// to a [`Template`](crate::Template).
@@ -116,7 +116,7 @@ pub enum LNode {
 }
 
 /// [`LNode`]'s deserializer.
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Deserialize)]
 #[serde(untagged)]
 enum RawNode {
     /// Maps to [`LNode::Message`].
@@ -285,13 +285,12 @@ mod tests {
     use foldhash::HashMap;
     use indoc::indoc;
     use mitsein::str1;
-    use mulan_config::Case;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
     use super::*;
-    use crate::DottedKey;
     use crate::identifier::{Identifier, Word};
+    use crate::{DottedKey, Tag, TemplatePart};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]
@@ -444,27 +443,28 @@ mod tests {
         let ident_parser = Identifier::chumsky_parser(&word_parser);
         let key_parser = DottedKey::chumsky_parser(&ident_parser);
         let key = key_parser.mulan_parse(input).unwrap();
-        let definition = {
+        let tag_parser = Tag::chumsky_parser(&ident_parser);
+        let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
+        let template_parser = Template::chumsky_parser(&template_part_parser);
+        let raw_definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
             RawDefinition::read(file.path().into()).unwrap()
         };
-        let key = DottedKey {
-            parts: {
-                key.parts
-                    .iter1()
-                    .map(|part| part.to_compact_string1(Case::Kebab))
-                    .collect1()
-            },
-        };
+        let definition =
+            LDefinition::from_raw(raw_definition, &ident_parser, &template_parser).unwrap();
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
-            PseudoNode::Message(contents) => RawNode::Message(contents.into()),
+            PseudoNode::Message(contents) => {
+                LNode::Message(template_parser.mulan_parse(contents).unwrap())
+            }
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let definition = RawDefinition::read(file.path().into()).unwrap();
-                RawNode::Namespace(definition.root)
+                let raw_definition = RawDefinition::read(file.path().into()).unwrap();
+                let l_definition =
+                    LDefinition::from_raw(raw_definition, &ident_parser, &template_parser).unwrap();
+                LNode::Namespace(l_definition.root)
             }
         });
         assert_eq!(
