@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::{DottedKey, Identifier, RawDottedKey};
+use crate::{DottedKey, Identifier};
 
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
@@ -81,7 +81,7 @@ pub struct InvalidKeyError {
     pub locale: Language,
 
     /// [`None`] if no parent exists (i.e., the root namespace's node).
-    pub parent_key: Option<RawDottedKey>,
+    pub parent_key: Option<DottedKey>,
 
     pub errors: ChumskyAllErrors,
 }
@@ -90,7 +90,7 @@ pub struct InvalidKeyError {
 #[derive(Debug)]
 pub struct InvalidTemplateError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
     pub errors: ChumskyAllErrors,
 }
 
