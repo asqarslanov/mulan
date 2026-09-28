@@ -666,6 +666,7 @@ impl self::ToReport for mulan_parser::errors::LocaleMapError {
         match self {
             Self::ReadFile(e) => e.to_report(config),
             Self::Yaml(e) => e.to_report(config),
+            Self::InvalidSyntax(e) => e.to_report(config),
         }
     }
 }
