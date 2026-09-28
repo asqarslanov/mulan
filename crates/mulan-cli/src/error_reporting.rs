@@ -863,14 +863,11 @@ impl self::Reportable for mulan_parser::errors::YamlError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::TransposeError {
+impl self::ToReport for mulan_parser::errors::InvalidSyntaxError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::InvalidKey(e) => e.to_report(config),
             Self::InvalidTemplate(e) => e.to_report(config),
-            Self::NotANamespace(e) => e.to_report(config),
-            Self::NotAMessage(e) => e.to_report(config),
-            Self::UnknownParameters(e) => e.to_report(config),
         }
     }
 }
@@ -926,6 +923,16 @@ impl self::Reportable for mulan_parser::errors::InvalidTemplateError {
 
     fn related(&self, config: &mulan_config::Config) -> impl Iterator<Item = miette::Report> {
         iter::once(self.errors.to_report(config))
+    }
+}
+
+impl self::ToReport for mulan_parser::errors::TransposeError {
+    fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
+        match self {
+            Self::NotANamespace(e) => e.to_report(config),
+            Self::NotAMessage(e) => e.to_report(config),
+            Self::UnknownParameters(e) => e.to_report(config),
+        }
     }
 }
 
