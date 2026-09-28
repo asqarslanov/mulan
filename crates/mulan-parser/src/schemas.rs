@@ -21,9 +21,9 @@ pub mod locale_map;
 pub fn transpose<'input>(
     config: &mulan_config::Config,
     locale_map: &'input LocaleMap,
-    main_locale: &'input LDefinition,
+    main_locale: LDefinition,
 ) -> Result<Bundle, TransposeError> {
-    let root = traverse_namespace(config, None, &main_locale.root, locale_map)?;
+    let root = traverse_namespace(config, None, main_locale.root, locale_map)?;
     Ok(Bundle { root })
 }
 
@@ -32,13 +32,13 @@ pub fn transpose<'input>(
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node<'input>(
     config: &mulan_config::Config,
-    raw_node: &'input LNode,
+    l_node: LNode,
     key: &DottedKey,
     locale_map: &'input LocaleMap,
 ) -> Result<Node, TransposeError> {
-    let node = match raw_node {
+    let node = match l_node {
         LNode::Message(l_template) => {
-            Node::Message(translations(config, locale_map, key, l_template.clone())?)
+            Node::Message(translations(config, locale_map, key, l_template)?)
         }
         LNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             config,
@@ -115,11 +115,11 @@ fn translations<'input>(
 fn traverse_namespace<'input>(
     config: &mulan_config::Config,
     namespace_key: Option<&DottedKey>,
-    namespace: &'input LNamespace,
+    namespace: LNamespace,
     locale_map: &'input LocaleMap,
 ) -> Result<Namespace, TransposeError> {
     let mut map = BTreeMap::new();
-    for (key_part, raw_node) in &namespace.map {
+    for (key_part, l_node) in namespace.map {
         let rtail = {
             namespace_key
                 .map(|key| key.parts.to_vec())
@@ -128,8 +128,8 @@ fn traverse_namespace<'input>(
         let key = DottedKey {
             parts: Vec1::from_rtail_and_head(rtail, key_part.clone()),
         };
-        let node = handle_node(config, raw_node, &key, locale_map)?;
-        map.insert(key_part.clone(), node);
+        let node = handle_node(config, l_node, &key, locale_map)?;
+        map.insert(key_part, node);
     }
     Ok(Namespace { map })
 }

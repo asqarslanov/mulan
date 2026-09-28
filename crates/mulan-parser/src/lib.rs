@@ -49,7 +49,7 @@ impl Bundle {
                 .remove(&config.main_locale)
                 .expect("all locales should've been read when building `locale_map`")
         };
-        self::schemas::transpose(config, &locale_map, &main_locale)
+        self::schemas::transpose(config, &locale_map, main_locale)
             .map_err(BundleFromFsError::Transform)
     }
 }
