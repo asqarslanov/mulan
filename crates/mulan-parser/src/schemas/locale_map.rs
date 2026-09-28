@@ -90,7 +90,7 @@ pub struct LNamespace {
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: HashMap<Identifier, RawNode>,
+    pub(super) map: HashMap<Identifier, LNode>,
 }
 
 /// [`LNamespace`]'s deserializer.
@@ -101,17 +101,29 @@ struct RawNamespace {
     map: HashMap<CompactString1, RawNode>,
 }
 
-/// A value in a [`RawNamespace`] of an [`LDefinition`].
+/// A value in an [`LNamespace`] in an [`LDefinition`].
 ///
 /// Can either be a message template or another namespace.
-#[derive(Debug, Deserialize, PartialEq, Eq, EnumTryAs)]
-#[serde(untagged)]
-pub enum RawNode {
+///
+/// Loosely-typed counterpart: [`RawNode`].
+#[derive(Debug, PartialEq, Eq, EnumTryAs)]
+pub enum LNode {
     /// Raw text that will later be properly parsed
     /// to a [`Template`](crate::Template).
-    Message(CompactString),
+    Message(Template),
 
     /// A nested namespace.
+    Namespace(LNamespace),
+}
+
+/// [`LNode`]'s deserializer.
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum RawNode {
+    /// Maps to [`LNode::Message`].
+    Message(CompactString),
+
+    /// Maps to [`LNode::Namespace`].
     Namespace(RawNamespace),
 }
 
@@ -128,7 +140,12 @@ impl LocaleMap {
                 .locales
                 .iter()
                 .map(|&locale| {
-                    let l_definition = LDefinition::from_fs(&locales_dir.to_path(""), locale)?;
+                    let l_definition = LDefinition::from_fs(
+                        &locales_dir.to_path(""),
+                        locale,
+                        ident_parser,
+                        template_parser,
+                    )?;
                     Ok((locale, l_definition))
                 })
                 .collect::<Result<_, _>>()?
@@ -193,7 +210,7 @@ impl RawDefinition {
 }
 
 impl LDefinition {
-    fn from_fs(
+    fn from_fs<'input>(
         locales_dir: &Path,
         locale: Language,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
