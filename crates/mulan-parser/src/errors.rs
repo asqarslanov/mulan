@@ -34,7 +34,7 @@ pub enum LocaleMapError {
     InvalidSyntax(InvalidSyntaxError),
 }
 
-///
+/// Errors of [`crate::schemas::locale_map::LDefinition::from_raw`].
 #[derive(Debug)]
 pub enum InvalidSyntaxError {
     /// A key was not parsed successfully (wrong syntax).
@@ -75,7 +75,7 @@ pub enum TransposeError {
     UnknownParameters(UnknownParametersError),
 }
 
-/// See [`TransformError::InvalidKey`].
+/// See [`InvalidSyntaxError::InvalidKey`].
 #[derive(Debug)]
 pub struct InvalidKeyError {
     pub locale: Language,
@@ -86,7 +86,7 @@ pub struct InvalidKeyError {
     pub errors: ChumskyAllErrors,
 }
 
-/// See [`TransformError::InvalidTemplate`].
+/// See [`InvalidSyntaxError::InvalidTemplate`].
 #[derive(Debug)]
 pub struct InvalidTemplateError {
     pub locale: Language,
@@ -94,7 +94,7 @@ pub struct InvalidTemplateError {
     pub errors: ChumskyAllErrors,
 }
 
-/// See [`TransformError::NotANamespace`].
+/// See [`TransposeError::NotANamespace`].
 #[derive(Debug)]
 pub struct NotANamespaceError {
     pub locale: Language,
@@ -103,14 +103,14 @@ pub struct NotANamespaceError {
     pub key: RawDottedKey,
 }
 
-/// See [`TransformError::NotAMessage`].
+/// See [`TransposeError::NotAMessage`].
 #[derive(Debug)]
 pub struct NotAMessageError {
     pub locale: Language,
     pub key: RawDottedKey,
 }
 
-/// See [`TransformError::UnknownParameters`].
+/// See [`TransposeError::UnknownParameters`].
 #[derive(Debug)]
 pub struct UnknownParametersError {
     pub locale: Language,

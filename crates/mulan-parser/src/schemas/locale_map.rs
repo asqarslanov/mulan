@@ -14,7 +14,7 @@ use serde::Deserialize;
 use strum::EnumTryAs;
 
 use crate::chumsky_parse::ChumskyParser;
-use crate::errors::{LocaleMapError, ReadFileError, YamlError};
+use crate::errors::{InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError};
 use crate::{Identifier, Template};
 
 /// A simple collection of locale [`LDefinition`]s parsed with [`serde`].
@@ -210,6 +210,7 @@ impl RawDefinition {
 }
 
 impl LDefinition {
+    ///
     fn from_fs<'input>(
         locales_dir: &Path,
         locale: Language,
@@ -222,6 +223,16 @@ impl LDefinition {
                 .with_extension("yaml")
         };
         let raw_definition = RawDefinition::read(path.into())?;
+        Self::from_raw(raw_definition, ident_parser, template_parser)
+            .map_err(LocaleMapError::InvalidSyntax)
+    }
+
+    ///
+    fn from_raw<'input>(
+        raw_definition: RawDefinition,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, InvalidSyntaxError> {
         todo!();
     }
 
