@@ -113,14 +113,8 @@ impl LocaleMap {
                 .locales
                 .iter()
                 .map(|&locale| {
-                    let path = {
-                        locales_dir
-                            .join(locale.tag().as_ref())
-                            .with_extension("yaml")
-                    };
-                    let path = path.to_path(""); // doesn't add a prefix
-                    let definition = LDefinition::read(path.into())?;
-                    Ok((locale, definition))
+                    let l_definition = LDefinition::from_fs(&locales_dir.to_path(""), locale)?;
+                    Ok((locale, l_definition))
                 })
                 .collect::<Result<_, _>>()?
         };
@@ -163,7 +157,7 @@ pub enum LDefinitionAtError {
     },
 }
 
-impl LDefinition {
+impl RawDefinition {
     /// Parses a YAML locale definition file to a Rust value.
     fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
         let file_contents = match fs::read_to_string(&path) {
@@ -180,6 +174,18 @@ impl LDefinition {
                 source_code: file_contents,
             })
         })
+    }
+}
+
+impl LDefinition {
+    fn from_fs(locales_dir: &Path, locale: Language) -> Result<Self, LocaleMapError> {
+        let path = {
+            locales_dir
+                .join(locale.tag().as_ref())
+                .with_extension("yaml")
+        };
+        let raw_definition = RawDefinition::read(path.into())?;
+        todo!();
     }
 
     /// Returns a reference to the node at the given path.

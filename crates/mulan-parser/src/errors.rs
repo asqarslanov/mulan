@@ -29,6 +29,19 @@ pub enum LocaleMapError {
 
     /// Failed to parse a YAML file according to the schema.
     Yaml(YamlError),
+
+    ///
+    InvalidSyntax(InvalidSyntaxError),
+}
+
+///
+#[derive(Debug)]
+pub enum InvalidSyntaxError {
+    /// A key was not parsed successfully (wrong syntax).
+    InvalidKey(InvalidKeyError),
+
+    /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
+    InvalidTemplate(InvalidTemplateError),
 }
 
 /// See [`LocaleMapError::ReadFile`].
@@ -49,12 +62,6 @@ pub struct YamlError {
 /// Errors of [`crate::schemas::transpose`].
 #[derive(Debug)]
 pub enum TransposeError {
-    /// A key was not parsed successfully (wrong syntax).
-    InvalidKey(InvalidKeyError),
-
-    /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
-    InvalidTemplate(InvalidTemplateError),
-
     /// A key corresponding to a namespace in the main locale
     /// points to a message in another locale.
     NotANamespace(NotANamespaceError),
