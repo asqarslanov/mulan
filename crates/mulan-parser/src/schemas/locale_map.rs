@@ -261,7 +261,7 @@ impl LDefinition {
             let node = {
                 namespace
                     .map
-                    .get(key_part.as_str())
+                    .get(key_part)
                     .ok_or(LDefinitionAtError::NotFound { index })?
             };
             namespace = {
@@ -272,7 +272,7 @@ impl LDefinition {
         }
         namespace
             .map
-            .get(last_key_part.as_str())
+            .get(last_key_part)
             .ok_or(LDefinitionAtError::NotFound { index })
     }
 }
@@ -291,7 +291,6 @@ mod tests {
 
     use super::*;
     use crate::DottedKey;
-    use crate::chumsky_parse::ChumskyParser as _;
     use crate::identifier::{Identifier, Word};
 
     #[rstest]
@@ -450,7 +449,7 @@ mod tests {
             write!(file, "{DEFINITION_RAW}").unwrap();
             RawDefinition::read(file.path().into()).unwrap()
         };
-        let key = RawDottedKey {
+        let key = DottedKey {
             parts: {
                 key.parts
                     .iter1()
