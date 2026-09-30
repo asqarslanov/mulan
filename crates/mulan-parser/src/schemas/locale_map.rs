@@ -13,7 +13,9 @@ use serde::Deserialize;
 use strum::EnumTryAs;
 
 use crate::chumsky_parse::ChumskyParser;
-use crate::errors::{InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError};
+use crate::errors::{
+    InvalidKeyError, InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError,
+};
 use crate::{DottedKey, Identifier, Template};
 
 /// A simple collection of locale [`LDefinition`]s parsed with [`serde`].
@@ -102,10 +104,21 @@ struct RawNamespace {
 
 impl LNamespace {
     fn from_raw<'input>(
-        raw: RawNamespace,
+        raw: &'input RawNamespace,
+        locale: Language,
+        parent_key: Option<&DottedKey>,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
+        for (key_raw, node_raw) in &raw.map {
+            let key = ident_parser.mulan_parse(key_raw).map_err(|errors| {
+                InvalidSyntaxError::InvalidKey(InvalidKeyError {
+                    locale,
+                    parent_key: parent_key.cloned(),
+                    errors,
+                })
+            })?;
+        }
         todo!();
     }
 }
@@ -214,17 +227,24 @@ impl LDefinition {
                 .with_extension("yaml")
         };
         let raw_definition = RawDefinition::read(path.into())?;
-        Self::from_raw(raw_definition, ident_parser, template_parser)
+        Self::from_raw(raw_definition, locale, ident_parser, template_parser)
             .map_err(LocaleMapError::InvalidSyntax)
     }
 
     ///
     fn from_raw<'input>(
-        raw_definition: RawDefinition,
+        raw_definition: &'input RawDefinition,
+        locale: Language,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
-        let root = LNamespace::from_raw(raw_definition.root, ident_parser, template_parser)?;
+        let root = LNamespace::from_raw(
+            &raw_definition.root,
+            locale,
+            None,
+            ident_parser,
+            template_parser,
+        )?;
         Ok(Self { root })
     }
 
@@ -456,13 +476,12 @@ mod tests {
         let tag_parser = Tag::chumsky_parser(&ident_parser);
         let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
         let template_parser = Template::chumsky_parser(&template_part_parser);
-        let raw_definition = {
+        let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            RawDefinition::read(file.path().into()).unwrap()
+            LDefinition::from_fs(file.path(), Language::EnUs, &ident_parser, &template_parser)
+                .unwrap()
         };
-        let definition =
-            LDefinition::from_raw(raw_definition, &ident_parser, &template_parser).unwrap();
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
             PseudoNode::Message(contents) => {
@@ -471,9 +490,13 @@ mod tests {
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let raw_definition = RawDefinition::read(file.path().into()).unwrap();
-                let l_definition =
-                    LDefinition::from_raw(raw_definition, &ident_parser, &template_parser).unwrap();
+                let l_definition = LDefinition::from_fs(
+                    file.path(),
+                    Language::EnUs,
+                    &ident_parser,
+                    &template_parser,
+                )
+                .unwrap();
                 LNode::Namespace(l_definition.root)
             }
         });
