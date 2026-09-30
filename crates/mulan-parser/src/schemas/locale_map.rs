@@ -220,7 +220,7 @@ impl LNamespace {
                     parts: Vec1::from_rtail_and_head(rtail, key_part),
                 }
             };
-            match node_raw {
+            let (key_part, l_node) = match node_raw {
                 RawNode::Message(msg_raw) => {
                     let template = match template_parser.mulan_parse(msg_raw) {
                         Ok(t) => t,
@@ -233,10 +233,20 @@ impl LNamespace {
                             return Err(InvalidSyntaxError::InvalidTemplate(e));
                         }
                     };
-                    map.insert(key_part, LNode::Message(template));
+                    (key_part, LNode::Message(template))
                 }
-                RawNode::Namespace(ns_raw) => todo!(),
-            }
+                RawNode::Namespace(ns_raw) => (
+                    key_part.clone(),
+                    LNode::Namespace(Self::from_raw(
+                        ns_raw,
+                        locale,
+                        Some(&construct_key(key_part)),
+                        ident_parser,
+                        template_parser,
+                    )?),
+                ),
+            };
+            map.insert(key_part, l_node);
         }
         Ok(Self { map })
     }
