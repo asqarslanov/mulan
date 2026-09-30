@@ -18,9 +18,9 @@ pub mod bundle;
 pub mod locale_map;
 
 /// Tries to transform a [`LocaleMap`] to a [`Bundle`].
-pub fn transpose<'input>(
+pub fn transpose(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
+    locale_map: &LocaleMap,
     main_locale: LDefinition,
 ) -> Result<Bundle, TransposeError> {
     let root = traverse_namespace(config, None, main_locale.root, locale_map)?;
@@ -30,11 +30,11 @@ pub fn transpose<'input>(
 /// A brancher that, given a [`RawNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
-fn handle_node<'input>(
+fn handle_node(
     config: &mulan_config::Config,
     l_node: LNode,
     key: DottedKey,
-    locale_map: &'input LocaleMap,
+    locale_map: &LocaleMap,
 ) -> Result<Node, TransposeError> {
     let node = match l_node {
         LNode::Message(l_template) => {
@@ -52,9 +52,9 @@ fn handle_node<'input>(
 
 /// Given a [`Template`] from the main locale, collects its counterparts from
 /// other locales and builds a proper instance of [`Translations`].
-fn translations<'input>(
+fn translations(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
+    locale_map: &LocaleMap,
     key: DottedKey,
     main_translation: Template,
 ) -> Result<Translations, TransposeError> {
@@ -111,11 +111,11 @@ fn translations<'input>(
 /// everything into a proper [`Namespace`].
 ///
 /// If traversing the root namespace, set `namespace_key` to [`None`].
-fn traverse_namespace<'input>(
+fn traverse_namespace(
     config: &mulan_config::Config,
     namespace_key: Option<&DottedKey>,
     namespace: LNamespace,
-    locale_map: &'input LocaleMap,
+    locale_map: &LocaleMap,
 ) -> Result<Namespace, TransposeError> {
     let mut map = BTreeMap::new();
     for (key_part, l_node) in namespace.map {

@@ -280,7 +280,7 @@ pub enum LNode {
 
 impl LocaleMap {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn from_fs<'input>(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
+    pub fn from_fs(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
