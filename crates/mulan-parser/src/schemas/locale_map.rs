@@ -65,7 +65,7 @@ pub struct LDefinition {
 
 impl LDefinition {
     ///
-    fn from_fs<'input>(locales_dir: &Path, locale: Language) -> Result<Self, LocaleMapError> {
+    fn from_fs(locales_dir: &Path, locale: Language) -> Result<Self, LocaleMapError> {
         let path = {
             locales_dir
                 .join(locale.tag().as_ref())
