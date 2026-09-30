@@ -16,7 +16,8 @@ use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
     InvalidKeyError, InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError,
 };
-use crate::{DottedKey, Identifier, Template};
+use crate::identifier::Word;
+use crate::{DottedKey, Identifier, Tag, Template, TemplatePart};
 
 /// A simple collection of locale [`LDefinition`]s parsed with [`serde`].
 ///
@@ -118,6 +119,10 @@ impl LNamespace {
                     errors,
                 })
             })?;
+            match node_raw {
+                RawNode::Message(msg_raw) => todo!(),
+                RawNode::Namespace(ns_raw) => todo!(),
+            }
         }
         todo!();
     }
@@ -151,23 +156,14 @@ enum RawNode {
 
 impl LocaleMap {
     /// Locates and parses YAML locale definition files to Rust values.
-    pub fn from_fs<'input>(
-        config: &mulan_config::Config,
-        ident_parser: &impl ChumskyParser<'input, Identifier>,
-        template_parser: &impl ChumskyParser<'input, Template>,
-    ) -> Result<Self, LocaleMapError> {
+    pub fn from_fs<'input>(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
         let locales_dir = config.meta.root_dir.join("locales/");
         let locales = {
             config
                 .locales
                 .iter()
                 .map(|&locale| {
-                    let l_definition = LDefinition::from_fs(
-                        &locales_dir.to_path(""),
-                        locale,
-                        ident_parser,
-                        template_parser,
-                    )?;
+                    let l_definition = LDefinition::from_fs(&locales_dir.to_path(""), locale)?;
                     Ok((locale, l_definition))
                 })
                 .collect::<Result<_, _>>()?
@@ -215,35 +211,33 @@ impl RawDefinition {
 
 impl LDefinition {
     ///
-    fn from_fs<'input>(
-        locales_dir: &Path,
-        locale: Language,
-        ident_parser: &impl ChumskyParser<'input, Identifier>,
-        template_parser: &impl ChumskyParser<'input, Template>,
-    ) -> Result<Self, LocaleMapError> {
+    fn from_fs<'input>(locales_dir: &Path, locale: Language) -> Result<Self, LocaleMapError> {
         let path = {
             locales_dir
                 .join(locale.tag().as_ref())
                 .with_extension("yaml")
         };
         let raw_definition = RawDefinition::read(path.into())?;
-        Self::from_raw(raw_definition, locale, ident_parser, template_parser)
-            .map_err(LocaleMapError::InvalidSyntax)
+        Self::from_raw(&raw_definition, locale).map_err(LocaleMapError::InvalidSyntax)
     }
 
     ///
-    fn from_raw<'input>(
-        raw_definition: &'input RawDefinition,
+    fn from_raw(
+        raw_definition: &RawDefinition,
         locale: Language,
-        ident_parser: &impl ChumskyParser<'input, Identifier>,
-        template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
+        let word_parser = Word::chumsky_parser();
+        let ident_parser = Identifier::chumsky_parser(&word_parser);
+        let _key_parser = DottedKey::chumsky_parser(&ident_parser);
+        let tag_parser = Tag::chumsky_parser(&ident_parser);
+        let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
+        let template_parser = Template::chumsky_parser(&template_part_parser);
         let root = LNamespace::from_raw(
             &raw_definition.root,
             locale,
             None,
-            ident_parser,
-            template_parser,
+            &ident_parser,
+            &template_parser,
         )?;
         Ok(Self { root })
     }
@@ -312,15 +306,12 @@ mod tests {
     use std::io::Write as _;
     use std::iter;
 
-    use foldhash::HashMap;
     use indoc::indoc;
     use mitsein::str1;
     use rstest::rstest;
     use tempfile::NamedTempFile;
 
     use super::*;
-    use crate::identifier::{Identifier, Word};
-    use crate::{DottedKey, Tag, TemplatePart};
 
     #[rstest]
     #[case(<&str>::default(), Some(iter::empty()))]
@@ -479,8 +470,7 @@ mod tests {
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            LDefinition::from_fs(file.path(), Language::EnUs, &ident_parser, &template_parser)
-                .unwrap()
+            LDefinition::from_fs(file.path(), Language::EnUs).unwrap()
         };
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
@@ -490,13 +480,7 @@ mod tests {
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let l_definition = LDefinition::from_fs(
-                    file.path(),
-                    Language::EnUs,
-                    &ident_parser,
-                    &template_parser,
-                )
-                .unwrap();
+                let l_definition = LDefinition::from_fs(file.path(), Language::EnUs).unwrap();
                 LNode::Namespace(l_definition.root)
             }
         });
