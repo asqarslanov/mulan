@@ -34,6 +34,14 @@ pub struct LocaleMap {
     pub locales: HashMap<Language, LDefinition>,
 }
 
+/// [`LDefinition`]'s deserializer.
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+struct RawDefinition {
+    /// Maps to [`LDefinition::root`].
+    #[serde(flatten)]
+    root: RawNamespace,
+}
+
 /// A strongly-typed single-language definition of a locale
 /// (read from a locale file such as `locales/en-US/locale.yaml`).
 ///
@@ -53,182 +61,6 @@ pub struct LDefinition {
     /// The `root` namespace is the outermost namespace.
     /// It is always present, even if the locale definition is empty.
     pub(super) root: LNamespace,
-}
-
-/// [`LDefinition`]'s deserializer.
-#[derive(Debug, PartialEq, Eq, Deserialize)]
-struct RawDefinition {
-    /// Maps to [`LDefinition::root`].
-    #[serde(flatten)]
-    root: RawNamespace,
-}
-
-/// A strongly-typed "grouping" of messages to organize them conveniently.
-///
-/// Key parts from different namespaces don't collide and can take
-/// the same values.
-///
-/// Loosely-typed counterpart: [`RawNamespace`].
-///
-/// ```yaml
-/// ns1:
-///   msg1: "Foo"
-///   msg2: "Bar"
-/// ns2:
-///   msg1: "Lorem"
-///   msg2: "Ipsum"
-/// ```
-///
-/// Namespaces can nest to produce more complex hieararchies of messages.
-///
-/// ```yaml
-/// one-namespace:
-///   foo: "Lorem"
-///   bar: "Ipsum"
-///   another-namespace:
-///     baz: "Dolor"
-/// ```
-#[derive(Debug, PartialEq, Eq)]
-pub struct LNamespace {
-    /// Maps raw key parts to namespace nodes (see [`LNode`]).
-    ///
-    /// All nodes within a namespace must have unique keys
-    /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: HashMap<Identifier, LNode>,
-}
-
-/// [`LNamespace`]'s deserializer.
-#[derive(Debug, PartialEq, Eq, Deserialize)]
-struct RawNamespace {
-    /// Maps to [`LNamespace::map`].
-    #[serde(flatten)]
-    map: HashMap<CompactString1, RawNode>,
-}
-
-impl LNamespace {
-    fn from_raw<'input>(
-        raw: &'input RawNamespace,
-        locale: Language,
-        parent_key: Option<&DottedKey>,
-        ident_parser: &impl ChumskyParser<'input, Identifier>,
-        template_parser: &impl ChumskyParser<'input, Template>,
-    ) -> Result<Self, InvalidSyntaxError> {
-        let mut map = HashMap::new();
-        for (key_raw, node_raw) in &raw.map {
-            let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
-                InvalidSyntaxError::InvalidKey(InvalidKeyError {
-                    locale,
-                    parent_key: parent_key.cloned(),
-                    errors,
-                })
-            })?;
-            let construct_key = |key_part| {
-                let rtail = parent_key.map_or_default(|key| key.parts.to_vec());
-                DottedKey {
-                    parts: Vec1::from_rtail_and_head(rtail, key_part),
-                }
-            };
-            match node_raw {
-                RawNode::Message(msg_raw) => {
-                    let template = match template_parser.mulan_parse(msg_raw) {
-                        Ok(t) => t,
-                        Err(errors) => {
-                            let e = InvalidTemplateError {
-                                locale,
-                                key: construct_key(key_part),
-                                errors,
-                            };
-                            return Err(InvalidSyntaxError::InvalidTemplate(e));
-                        }
-                    };
-                    map.insert(key_part, LNode::Message(template));
-                }
-                RawNode::Namespace(ns_raw) => todo!(),
-            }
-        }
-        Ok(Self { map })
-    }
-}
-
-/// A value in an [`LNamespace`] in an [`LDefinition`].
-///
-/// Can either be a message template or another namespace.
-///
-/// Loosely-typed counterpart: [`RawNode`].
-#[derive(Debug, EnumTryAs, PartialEq, Eq)]
-pub enum LNode {
-    /// Raw text that will later be properly parsed
-    /// to a [`Template`](crate::Template).
-    Message(Template),
-
-    /// A nested namespace.
-    Namespace(LNamespace),
-}
-
-/// [`LNode`]'s deserializer.
-#[derive(Debug, PartialEq, Eq, Deserialize)]
-#[serde(untagged)]
-enum RawNode {
-    /// Maps to [`LNode::Message`].
-    Message(CompactString),
-
-    /// Maps to [`LNode::Namespace`].
-    Namespace(RawNamespace),
-}
-
-impl LocaleMap {
-    /// Locates and parses YAML locale definition files to Rust values.
-    pub fn from_fs<'input>(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
-        let locales_dir = config.meta.root_dir.join("locales/");
-        let locales = {
-            config
-                .locales
-                .iter()
-                .map(|&locale| {
-                    let l_definition = LDefinition::from_fs(&locales_dir.to_path(""), locale)?;
-                    Ok((locale, l_definition))
-                })
-                .collect::<Result<_, _>>()?
-        };
-        Ok(Self { locales })
-    }
-}
-
-/// Errors of [`LDefinition::at`].
-#[derive(Debug, PartialEq, Eq)]
-pub enum LDefinitionAtError {
-    /// The path doesn't exist.
-    NotFound {
-        /// The index (0-based) of the first key part we couldn't find.
-        index: usize,
-    },
-
-    /// Tried to access a key part as a namespace, but it turned out
-    /// to point at a message.
-    NotANamespace {
-        /// The index (0-based) of the misinterpreted key part.
-        index: usize,
-    },
-}
-
-impl RawDefinition {
-    /// Parses a YAML locale definition file to a Rust value.
-    fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
-        let file_contents = match fs::read_to_string(&path) {
-            Ok(contents) => contents,
-            Err(error) => {
-                let path = path.into_owned();
-                return Err(LocaleMapError::ReadFile(ReadFileError { path, error }));
-            }
-        };
-        serde_saphyr::from_str(&file_contents).map_err(|err| {
-            LocaleMapError::Yaml(YamlError {
-                inner: Box::new(err),
-                filename: path.into_owned(),
-                source_code: file_contents,
-            })
-        })
-    }
 }
 
 impl LDefinition {
@@ -320,6 +152,174 @@ impl LDefinition {
             .map
             .get(last_key_part)
             .ok_or(LDefinitionAtError::NotFound { index })
+    }
+}
+
+/// [`LNamespace`]'s deserializer.
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+struct RawNamespace {
+    /// Maps to [`LNamespace::map`].
+    #[serde(flatten)]
+    map: HashMap<CompactString1, RawNode>,
+}
+
+/// A strongly-typed "grouping" of messages to organize them conveniently.
+///
+/// Key parts from different namespaces don't collide and can take
+/// the same values.
+///
+/// Loosely-typed counterpart: [`RawNamespace`].
+///
+/// ```yaml
+/// ns1:
+///   msg1: "Foo"
+///   msg2: "Bar"
+/// ns2:
+///   msg1: "Lorem"
+///   msg2: "Ipsum"
+/// ```
+///
+/// Namespaces can nest to produce more complex hieararchies of messages.
+///
+/// ```yaml
+/// one-namespace:
+///   foo: "Lorem"
+///   bar: "Ipsum"
+///   another-namespace:
+///     baz: "Dolor"
+/// ```
+#[derive(Debug, PartialEq, Eq)]
+pub struct LNamespace {
+    /// Maps raw key parts to namespace nodes (see [`LNode`]).
+    ///
+    /// All nodes within a namespace must have unique keys
+    /// (i.e., a message can't have the same key as a sibling namespace).
+    pub(super) map: HashMap<Identifier, LNode>,
+}
+
+impl LNamespace {
+    fn from_raw<'input>(
+        raw: &'input RawNamespace,
+        locale: Language,
+        parent_key: Option<&DottedKey>,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, InvalidSyntaxError> {
+        let mut map = HashMap::new();
+        for (key_raw, node_raw) in &raw.map {
+            let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
+                InvalidSyntaxError::InvalidKey(InvalidKeyError {
+                    locale,
+                    parent_key: parent_key.cloned(),
+                    errors,
+                })
+            })?;
+            let construct_key = |key_part| {
+                let rtail = parent_key.map_or_default(|key| key.parts.to_vec());
+                DottedKey {
+                    parts: Vec1::from_rtail_and_head(rtail, key_part),
+                }
+            };
+            match node_raw {
+                RawNode::Message(msg_raw) => {
+                    let template = match template_parser.mulan_parse(msg_raw) {
+                        Ok(t) => t,
+                        Err(errors) => {
+                            let e = InvalidTemplateError {
+                                locale,
+                                key: construct_key(key_part),
+                                errors,
+                            };
+                            return Err(InvalidSyntaxError::InvalidTemplate(e));
+                        }
+                    };
+                    map.insert(key_part, LNode::Message(template));
+                }
+                RawNode::Namespace(ns_raw) => todo!(),
+            }
+        }
+        Ok(Self { map })
+    }
+}
+
+/// [`LNode`]'s deserializer.
+#[derive(Debug, PartialEq, Eq, Deserialize)]
+#[serde(untagged)]
+enum RawNode {
+    /// Maps to [`LNode::Message`].
+    Message(CompactString),
+
+    /// Maps to [`LNode::Namespace`].
+    Namespace(RawNamespace),
+}
+
+/// A value in an [`LNamespace`] in an [`LDefinition`].
+///
+/// Can either be a message template or another namespace.
+///
+/// Loosely-typed counterpart: [`RawNode`].
+#[derive(Debug, EnumTryAs, PartialEq, Eq)]
+pub enum LNode {
+    /// Raw text that will later be properly parsed
+    /// to a [`Template`](crate::Template).
+    Message(Template),
+
+    /// A nested namespace.
+    Namespace(LNamespace),
+}
+
+impl LocaleMap {
+    /// Locates and parses YAML locale definition files to Rust values.
+    pub fn from_fs<'input>(config: &mulan_config::Config) -> Result<Self, LocaleMapError> {
+        let locales_dir = config.meta.root_dir.join("locales/");
+        let locales = {
+            config
+                .locales
+                .iter()
+                .map(|&locale| {
+                    let l_definition = LDefinition::from_fs(&locales_dir.to_path(""), locale)?;
+                    Ok((locale, l_definition))
+                })
+                .collect::<Result<_, _>>()?
+        };
+        Ok(Self { locales })
+    }
+}
+
+/// Errors of [`LDefinition::at`].
+#[derive(Debug, PartialEq, Eq)]
+pub enum LDefinitionAtError {
+    /// The path doesn't exist.
+    NotFound {
+        /// The index (0-based) of the first key part we couldn't find.
+        index: usize,
+    },
+
+    /// Tried to access a key part as a namespace, but it turned out
+    /// to point at a message.
+    NotANamespace {
+        /// The index (0-based) of the misinterpreted key part.
+        index: usize,
+    },
+}
+
+impl RawDefinition {
+    /// Parses a YAML locale definition file to a Rust value.
+    fn read(path: Cow<'_, Path>) -> Result<Self, LocaleMapError> {
+        let file_contents = match fs::read_to_string(&path) {
+            Ok(contents) => contents,
+            Err(error) => {
+                let path = path.into_owned();
+                return Err(LocaleMapError::ReadFile(ReadFileError { path, error }));
+            }
+        };
+        serde_saphyr::from_str(&file_contents).map_err(|err| {
+            LocaleMapError::Yaml(YamlError {
+                inner: Box::new(err),
+                filename: path.into_owned(),
+                source_code: file_contents,
+            })
+        })
     }
 }
 
