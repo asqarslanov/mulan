@@ -502,7 +502,8 @@ mod tests {
         let definition = {
             let mut file = NamedTempFile::new().unwrap();
             write!(file, "{DEFINITION_RAW}").unwrap();
-            LDefinition::from_fs(file.path(), Language::EnUs).unwrap()
+            let raw_definition = RawDefinition::read(file.path().into()).unwrap();
+            LDefinition::from_raw(&raw_definition, Language::EnUs).unwrap()
         };
         let actual_output = definition.at(&key);
         let expected_output = expected_output.map(|node| match node {
@@ -512,7 +513,8 @@ mod tests {
             PseudoNode::Namespace(contents) => {
                 let mut file = NamedTempFile::new().unwrap();
                 write!(file, "{contents}").unwrap();
-                let l_definition = LDefinition::from_fs(file.path(), Language::EnUs).unwrap();
+                let raw_definition = RawDefinition::read(file.path().into()).unwrap();
+                let l_definition = LDefinition::from_raw(&raw_definition, Language::EnUs).unwrap();
                 LNode::Namespace(l_definition.root)
             }
         });
