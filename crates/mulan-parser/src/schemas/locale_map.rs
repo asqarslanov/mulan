@@ -6,15 +6,17 @@ use std::fs;
 use std::path::Path;
 
 use compact_str::CompactString;
-use foldhash::HashMap;
+use foldhash::{HashMap, HashMapExt as _};
 use mitsein::compact_string1::CompactString1;
+use mitsein::vec1::Vec1;
 use mulan_config::Language;
 use serde::Deserialize;
 use strum::EnumTryAs;
 
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
-    InvalidKeyError, InvalidSyntaxError, LocaleMapError, ReadFileError, YamlError,
+    InvalidKeyError, InvalidSyntaxError, InvalidTemplateError, LocaleMapError, ReadFileError,
+    YamlError,
 };
 use crate::identifier::Word;
 use crate::{DottedKey, Identifier, Tag, Template, TemplatePart};
@@ -111,20 +113,40 @@ impl LNamespace {
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
+        let mut map = HashMap::new();
         for (key_raw, node_raw) in &raw.map {
-            let key = ident_parser.mulan_parse(key_raw).map_err(|errors| {
+            let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
                 InvalidSyntaxError::InvalidKey(InvalidKeyError {
                     locale,
                     parent_key: parent_key.cloned(),
                     errors,
                 })
             })?;
+            let construct_key = |key_part| {
+                let rtail = parent_key.map_or_default(|key| key.parts.to_vec());
+                DottedKey {
+                    parts: Vec1::from_rtail_and_head(rtail, key_part),
+                }
+            };
             match node_raw {
-                RawNode::Message(msg_raw) => todo!(),
+                RawNode::Message(msg_raw) => {
+                    let template = match template_parser.mulan_parse(msg_raw) {
+                        Ok(t) => t,
+                        Err(errors) => {
+                            let e = InvalidTemplateError {
+                                locale,
+                                key: construct_key(key_part),
+                                errors,
+                            };
+                            return Err(InvalidSyntaxError::InvalidTemplate(e));
+                        }
+                    };
+                    map.insert(key_part, LNode::Message(template));
+                }
                 RawNode::Namespace(ns_raw) => todo!(),
             }
         }
-        todo!();
+        Ok(Self { map })
     }
 }
 
