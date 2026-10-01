@@ -1,7 +1,7 @@
 //! The parent module of [`mod@locale_map`] and [`mod@bundle`].
 //!
 //! Defines the transformation logic from [`LocaleMap`] to [`Bundle`]
-//! (see the [`transform`] function).
+//! (see the [`transpose`] function).
 
 use std::collections::BTreeMap;
 
@@ -10,77 +10,41 @@ use mitsein::iter1::IteratorExt as _;
 use mitsein::vec1::Vec1;
 
 use self::bundle::{Bundle, Namespace, Node, Translations};
-use self::locale_map::{
-    Definition, DefinitionAtError, LocaleMap, RawDottedKey, RawNamespace, RawNode,
-};
-use crate::chumsky_parse::ChumskyParser;
-use crate::errors::{
-    InvalidKeyError, InvalidTemplateError, NotAMessageError, NotANamespaceError, TransformError,
-    UnknownParametersError,
-};
-use crate::{Identifier, Template};
+use self::locale_map::{LDefinition, LDefinitionAtError, LNamespace, LNode, LocaleMap};
+use crate::errors::{NotAMessageError, NotANamespaceError, TransposeError, UnknownParametersError};
+use crate::{DottedKey, Identifier, Template};
 
 pub mod bundle;
 pub mod locale_map;
 
-/// Tries to transform a [`LocaleMap`] to a validated [`Bundle`].
-pub fn transform<'input>(
+/// Tries to transform a [`LocaleMap`] to a [`Bundle`].
+pub fn transpose(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
-    main_locale: &'input Definition,
-    ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<Bundle, TransformError> {
-    let root = traverse_namespace(
-        config,
-        None,
-        &main_locale.root,
-        locale_map,
-        ident_parser,
-        template_parser,
-    )?;
+    locale_map: &LocaleMap,
+    main_locale: LDefinition,
+) -> Result<Bundle, TransposeError> {
+    let root = traverse_namespace(config, None, main_locale.root, locale_map)?;
     Ok(Bundle { root })
 }
 
-/// A brancher that, given a [`RawNode`] from the main locale,
+/// A brancher that, given an [`LNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
-fn handle_node<'input>(
+fn handle_node(
     config: &mulan_config::Config,
-    raw_node: &'input RawNode,
-    key: &RawDottedKey,
-    locale_map: &'input LocaleMap,
-    ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<Node, TransformError> {
-    let node = match raw_node {
-        RawNode::Message(raw_template) => {
-            let template = {
-                template_parser
-                    .mulan_parse(raw_template)
-                    .map_err(|errors| {
-                        TransformError::InvalidTemplate(InvalidTemplateError {
-                            locale: config.main_locale,
-                            key: key.clone(),
-                            errors,
-                        })
-                    })?
-            };
-            Node::Message(translations(
-                config,
-                locale_map,
-                key,
-                template,
-                template_parser,
-            )?)
+    l_node: LNode,
+    key: DottedKey,
+    locale_map: &LocaleMap,
+) -> Result<Node, TransposeError> {
+    let node = match l_node {
+        LNode::Message(l_template) => {
+            Node::Message(translations(config, locale_map, key, l_template)?)
         }
-        RawNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
+        LNode::Namespace(inner_namespace) => Node::Namespace(traverse_namespace(
             config,
-            Some(key),
+            Some(&key),
             inner_namespace,
             locale_map,
-            ident_parser,
-            template_parser,
         )?),
     };
     Ok(node)
@@ -88,13 +52,12 @@ fn handle_node<'input>(
 
 /// Given a [`Template`] from the main locale, collects its counterparts from
 /// other locales and builds a proper instance of [`Translations`].
-fn translations<'input>(
+fn translations(
     config: &mulan_config::Config,
-    locale_map: &'input LocaleMap,
-    key: &RawDottedKey,
+    locale_map: &LocaleMap,
+    key: DottedKey,
     main_translation: Template,
-    template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<Translations, TransformError> {
+) -> Result<Translations, TransposeError> {
     let main_params: HashSet<&Identifier> = main_translation.parameter_iter().collect();
     let mut other_translations = BTreeMap::new();
     for locale in config.locales_except_main() {
@@ -104,49 +67,38 @@ fn translations<'input>(
                 .get(&locale)
                 .expect("all locales should've been read when parsing `input`")
         };
-        let raw_node = match definition.at(key) {
+        let l_node = match definition.at(&key) {
             Ok(node) => node,
             Err(e) => match e {
-                DefinitionAtError::NotFound { index: _ } => {
+                LDefinitionAtError::NotFound { index: _ } => {
                     // If a locale doesn't have a message that exists
                     // in the main locale, we just skip this message.
                     // The main locale will later act as a fallback.
                     continue;
                 }
-                DefinitionAtError::NotANamespace { index } => {
+                LDefinitionAtError::NotANamespace { index } => {
                     let segments = Vec1::try_from(&key.parts[..=index])
                         .expect("`..=n` slices are always non-empty");
-                    let key = RawDottedKey { parts: segments };
+                    let key = DottedKey { parts: segments };
                     let err = NotANamespaceError { locale, key };
-                    return Err(TransformError::NotANamespace(err));
+                    return Err(TransposeError::NotANamespace(err));
                 }
             },
         };
-        let Some(raw_template) = raw_node.try_as_message_ref() else {
-            let key = key.clone();
+        let Some(template) = l_node.try_as_message_ref() else {
             let err = NotAMessageError { locale, key };
-            return Err(TransformError::NotAMessage(err));
-        };
-        let template = match template_parser.mulan_parse(raw_template) {
-            Ok(template) => template,
-            Err(errors) => {
-                return Err(TransformError::InvalidTemplate(InvalidTemplateError {
-                    locale,
-                    key: key.clone(),
-                    errors,
-                }));
-            }
+            return Err(TransposeError::NotAMessage(err));
         };
         let params = template.parameter_iter().collect::<HashSet<_>>();
         let unknown_params = params.difference(&main_params).copied();
         if let Ok(unknown_params) = unknown_params.try_into_iter1() {
-            return Err(TransformError::UnknownParameters(UnknownParametersError {
+            return Err(TransposeError::UnknownParameters(UnknownParametersError {
                 locale,
-                key: key.clone(),
+                key,
                 parameters: unknown_params.cloned().collect1(),
             }));
         }
-        other_translations.insert(locale, template);
+        other_translations.insert(locale, template.clone());
     }
     Ok(Translations {
         main: main_translation,
@@ -154,48 +106,23 @@ fn translations<'input>(
     })
 }
 
-/// Recursively goes over a [`RawNamespace`] of the main locale,
+/// Recursively goes over an [`LNamespace`] of the main locale,
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 ///
 /// If traversing the root namespace, set `namespace_key` to [`None`].
-fn traverse_namespace<'input>(
+fn traverse_namespace(
     config: &mulan_config::Config,
-    namespace_key: Option<&RawDottedKey>,
-    namespace: &'input RawNamespace,
-    locale_map: &'input LocaleMap,
-    ident_parser: &impl ChumskyParser<'input, Identifier>,
-    template_parser: &impl ChumskyParser<'input, Template>,
-) -> Result<Namespace, TransformError> {
+    namespace_key: Option<&DottedKey>,
+    namespace: LNamespace,
+    locale_map: &LocaleMap,
+) -> Result<Namespace, TransposeError> {
     let mut map = BTreeMap::new();
-    for (raw_key_part, raw_node) in &namespace.map {
-        let key_part = ident_parser.mulan_parse(raw_key_part).map_err(|errors| {
-            TransformError::InvalidKey(InvalidKeyError {
-                locale: config.main_locale,
-                parent_key: namespace_key.cloned(),
-                errors,
-            })
-        })?;
-        let rtail = {
-            namespace_key
-                .map(|key| key.parts.to_vec())
-                .unwrap_or_default()
-        };
-        let key = RawDottedKey {
-            parts: Vec1::from_rtail_and_head(
-                rtail,
-                raw_key_part.clone(), /* after obtaining `key_part`,
-                                       * we're sure `raw_key_part` is valid */
-            ),
-        };
-        let node = handle_node(
-            config,
-            raw_node,
-            &key,
-            locale_map,
-            ident_parser,
-            template_parser,
-        )?;
+    for (key_part, l_node) in namespace.map {
+        let rtail = namespace_key.map(|k| k.parts.to_vec()).unwrap_or_default();
+        let parts = Vec1::from_rtail_and_head(rtail, key_part.clone());
+        let key = DottedKey { parts };
+        let node = handle_node(config, l_node, key, locale_map)?;
         map.insert(key_part, node);
     }
     Ok(Namespace { map })

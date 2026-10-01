@@ -18,11 +18,9 @@
     )
 )]
 
-use self::identifier::Word;
 pub use self::identifier::{DottedKey, Identifier};
 pub use self::schemas::bundle::{Bundle, Namespace, Node, Translations};
 use self::schemas::locale_map::LocaleMap;
-pub use self::schemas::locale_map::RawDottedKey;
 pub use self::template::{Tag, Template, TemplatePart};
 use crate::errors::BundleFromFsError;
 
@@ -43,19 +41,7 @@ impl Bundle {
                 .remove(&config.main_locale)
                 .expect("all locales should've been read when building `locale_map`")
         };
-        let word_parser = Word::chumsky_parser();
-        let ident_parser = Identifier::chumsky_parser(&word_parser);
-        let _key_parser = DottedKey::chumsky_parser(&ident_parser);
-        let tag_parser = Tag::chumsky_parser(&ident_parser);
-        let template_part_parser = TemplatePart::chumsky_parser(&tag_parser);
-        let template_parser = Template::chumsky_parser(&template_part_parser);
-        self::schemas::transform(
-            config,
-            &locale_map,
-            &main_locale,
-            &ident_parser,
-            &template_parser,
-        )
-        .map_err(BundleFromFsError::Transform)
+        self::schemas::transpose(config, &locale_map, main_locale)
+            .map_err(BundleFromFsError::Transform)
     }
 }

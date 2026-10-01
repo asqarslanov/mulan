@@ -22,7 +22,7 @@ use crate::identifier::Identifier;
 /// ```js
 /// `Hello, ${name}!`
 /// ```
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Template {
     parts: Vec<TemplatePart>,
 }

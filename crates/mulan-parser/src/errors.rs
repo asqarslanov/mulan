@@ -9,7 +9,7 @@ use mitsein::btree_set1::BTreeSet1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
 
-use crate::{Identifier, RawDottedKey};
+use crate::{DottedKey, Identifier};
 
 /// Errors of [`crate::Bundle::from_fs`].
 #[derive(Debug)]
@@ -18,7 +18,7 @@ pub enum BundleFromFsError {
     Read(LocaleMapError),
 
     /// Failed to build a [`crate::Bundle`].
-    Transform(TransformError),
+    Transform(TransposeError),
 }
 
 /// Errors of [`crate::schemas::locale_map::LocaleMap::from_fs`].
@@ -29,6 +29,19 @@ pub enum LocaleMapError {
 
     /// Failed to parse a YAML file according to the schema.
     Yaml(YamlError),
+
+    /// Failed to parse Mulan-specific syntax.
+    Syntax(SyntaxError),
+}
+
+/// Errors of [`crate::schemas::locale_map::LDefinition::from_raw`].
+#[derive(Debug)]
+pub enum SyntaxError {
+    /// A key was not parsed successfully (wrong syntax).
+    InvalidKey(InvalidKeyError),
+
+    /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
+    InvalidTemplate(InvalidTemplateError),
 }
 
 /// See [`LocaleMapError::ReadFile`].
@@ -46,15 +59,9 @@ pub struct YamlError {
     pub source_code: String,
 }
 
-/// Errors of [`crate::schemas::transform`].
+/// Errors of [`crate::schemas::transpose`].
 #[derive(Debug)]
-pub enum TransformError {
-    /// A key was not parsed successfully (wrong syntax).
-    InvalidKey(InvalidKeyError),
-
-    /// A [`crate::Template`] was not parsed succesfully (wrong syntax).
-    InvalidTemplate(InvalidTemplateError),
-
+pub enum TransposeError {
     /// A key corresponding to a namespace in the main locale
     /// points to a message in another locale.
     NotANamespace(NotANamespaceError),
@@ -68,46 +75,46 @@ pub enum TransformError {
     UnknownParameters(UnknownParametersError),
 }
 
-/// See [`TransformError::InvalidKey`].
+/// See [`SyntaxError::InvalidKey`].
 #[derive(Debug)]
 pub struct InvalidKeyError {
     pub locale: Language,
 
     /// [`None`] if no parent exists (i.e., the root namespace's node).
-    pub parent_key: Option<RawDottedKey>,
+    pub parent_key: Option<DottedKey>,
 
     pub errors: ChumskyAllErrors,
 }
 
-/// See [`TransformError::InvalidTemplate`].
+/// See [`SyntaxError::InvalidTemplate`].
 #[derive(Debug)]
 pub struct InvalidTemplateError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
     pub errors: ChumskyAllErrors,
 }
 
-/// See [`TransformError::NotANamespace`].
+/// See [`TransposeError::NotANamespace`].
 #[derive(Debug)]
 pub struct NotANamespaceError {
     pub locale: Language,
 
     /// The misinterpreted key that should point to a namespace.
-    pub key: RawDottedKey,
+    pub key: DottedKey,
 }
 
-/// See [`TransformError::NotAMessage`].
+/// See [`TransposeError::NotAMessage`].
 #[derive(Debug)]
 pub struct NotAMessageError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
 }
 
-/// See [`TransformError::UnknownParameters`].
+/// See [`TransposeError::UnknownParameters`].
 #[derive(Debug)]
 pub struct UnknownParametersError {
     pub locale: Language,
-    pub key: RawDottedKey,
+    pub key: DottedKey,
     pub parameters: BTreeSet1<Identifier>,
 }
 
