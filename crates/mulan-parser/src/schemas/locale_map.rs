@@ -272,9 +272,9 @@ impl LNode {
                 Self::Message(template)
             }
             RawNode::Namespace(ns_raw) => {
-                let l_namespace =
+                let namespace =
                     LNamespace::from_raw(ns_raw, locale, Some(key), ident_parser, template_parser)?;
-                Self::Namespace(l_namespace)
+                Self::Namespace(namespace)
             }
         };
         Ok(l_node)
