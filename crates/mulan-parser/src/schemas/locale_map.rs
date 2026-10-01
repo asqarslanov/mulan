@@ -262,21 +262,20 @@ impl LNode {
     ) -> Result<Self, InvalidSyntaxError> {
         let l_node = match raw {
             RawNode::Message(msg_raw) => {
-                LNode::Message(template_parser.mulan_parse(msg_raw).map_err(|errors| {
+                let template = template_parser.mulan_parse(msg_raw).map_err(|errors| {
                     InvalidSyntaxError::InvalidTemplate(InvalidTemplateError {
                         locale,
                         key: key.clone(),
                         errors,
                     })
-                })?)
+                })?;
+                Self::Message(template)
             }
-            RawNode::Namespace(ns_raw) => LNode::Namespace(LNamespace::from_raw(
-                ns_raw,
-                locale,
-                Some(key),
-                ident_parser,
-                template_parser,
-            )?),
+            RawNode::Namespace(ns_raw) => {
+                let l_namespace =
+                    LNamespace::from_raw(ns_raw, locale, Some(key), ident_parser, template_parser)?;
+                Self::Namespace(l_namespace)
+            }
         };
         Ok(l_node)
     }
