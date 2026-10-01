@@ -214,38 +214,11 @@ impl LNamespace {
                     errors,
                 })
             })?;
-            let construct_key = |key_part| {
-                let rtail = parent_key.map_or_default(|key| key.parts.to_vec());
-                DottedKey {
-                    parts: Vec1::from_rtail_and_head(rtail, key_part),
-                }
+            let rtail = parent_key.map_or_default(|key| key.parts.to_vec());
+            let key = DottedKey {
+                parts: Vec1::from_rtail_and_head(rtail, key_part.clone()),
             };
-            let (key_part, l_node) = match node_raw {
-                RawNode::Message(msg_raw) => {
-                    let template = match template_parser.mulan_parse(msg_raw) {
-                        Ok(t) => t,
-                        Err(errors) => {
-                            let e = InvalidTemplateError {
-                                locale,
-                                key: construct_key(key_part),
-                                errors,
-                            };
-                            return Err(InvalidSyntaxError::InvalidTemplate(e));
-                        }
-                    };
-                    (key_part, LNode::Message(template))
-                }
-                RawNode::Namespace(ns_raw) => (
-                    key_part.clone(),
-                    LNode::Namespace(Self::from_raw(
-                        ns_raw,
-                        locale,
-                        Some(&construct_key(key_part)),
-                        ident_parser,
-                        template_parser,
-                    )?),
-                ),
-            };
+            let l_node = LNode::from_raw(node_raw, locale, &key, ident_parser, template_parser)?;
             map.insert(key_part, l_node);
         }
         Ok(Self { map })
@@ -275,6 +248,36 @@ pub enum LNode {
 
     /// A nested namespace.
     Namespace(LNamespace),
+}
+
+impl LNode {
+    fn from_raw<'input>(
+        raw: &'input RawNode,
+        locale: Language,
+        key: &DottedKey,
+        ident_parser: &impl ChumskyParser<'input, Identifier>,
+        template_parser: &impl ChumskyParser<'input, Template>,
+    ) -> Result<Self, InvalidSyntaxError> {
+        let l_node = match raw {
+            RawNode::Message(msg_raw) => {
+                LNode::Message(template_parser.mulan_parse(msg_raw).map_err(|errors| {
+                    InvalidSyntaxError::InvalidTemplate(InvalidTemplateError {
+                        locale,
+                        key: key.clone(),
+                        errors,
+                    })
+                })?)
+            }
+            RawNode::Namespace(ns_raw) => LNode::Namespace(LNamespace::from_raw(
+                ns_raw,
+                locale,
+                Some(key),
+                ident_parser,
+                template_parser,
+            )?),
+        };
+        Ok(l_node)
+    }
 }
 
 impl LocaleMap {
