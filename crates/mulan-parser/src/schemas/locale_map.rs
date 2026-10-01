@@ -2,11 +2,11 @@
 //! from the filesystem.
 
 use std::borrow::Cow;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
 use compact_str::CompactString;
-use foldhash::{HashMap, HashMapExt as _};
 use mitsein::compact_string1::CompactString1;
 use mitsein::vec1::Vec1;
 use mulan_config::Language;
@@ -31,7 +31,7 @@ pub struct LocaleMap {
     /// Maps a language tag to the contents of the corresponding locale.
     ///
     /// May not include all locales specified in [`mulan_config::Config`].
-    pub locales: HashMap<Language, LDefinition>,
+    pub locales: BTreeMap<Language, LDefinition>,
 }
 
 /// [`LDefinition`]'s deserializer.
@@ -160,7 +160,7 @@ impl LDefinition {
 pub(super) struct RawNamespace {
     /// Maps to [`LNamespace::map`].
     #[serde(flatten)]
-    map: HashMap<CompactString1, RawNode>,
+    map: BTreeMap<CompactString1, RawNode>,
 }
 
 /// A strongly-typed "grouping" of messages to organize them conveniently.
@@ -194,7 +194,7 @@ pub struct LNamespace {
     ///
     /// All nodes within a namespace must have unique keys
     /// (i.e., a message can't have the same key as a sibling namespace).
-    pub(super) map: HashMap<Identifier, LNode>,
+    pub(super) map: BTreeMap<Identifier, LNode>,
 }
 
 impl LNamespace {
@@ -206,7 +206,7 @@ impl LNamespace {
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
-        let mut map = HashMap::with_capacity(raw.map.len());
+        let mut map = BTreeMap::new();
         for (key_raw, node_raw) in &raw.map {
             let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
                 InvalidSyntaxError::InvalidKey(InvalidKeyError {
@@ -393,13 +393,13 @@ mod tests {
             (
                 str1!("foo").into(),
                 RawNode::Namespace(RawNamespace {
-                    map: HashMap::from_iter([
+                    map: BTreeMap::from_iter([
                         (str1!("a").into(), RawNode::Message("Lorem".into())),
                         (str1!("b").into(), RawNode::Message("Ipsum".into())),
                         (
                             str1!("bar").into(),
                             RawNode::Namespace(RawNamespace {
-                                map: HashMap::from_iter([
+                                map: BTreeMap::from_iter([
                                     (str1!("a").into(), RawNode::Message("Dolor".into())),
                                     (str1!("b").into(), RawNode::Message("Sit".into())),
                                     (str1!("c").into(), RawNode::Message("Amet".into())),
@@ -412,7 +412,7 @@ mod tests {
             (
                 str1!("baz").into(),
                 RawNode::Namespace(RawNamespace {
-                    map: HashMap::from_iter([
+                    map: BTreeMap::from_iter([
                         (str1!("a").into(), RawNode::Message("Lorem Ipsum".into())),
                         (str1!("b").into(), RawNode::Message("Dolor Sit Amet".into())),
                     ]),
