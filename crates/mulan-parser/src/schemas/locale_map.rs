@@ -198,6 +198,7 @@ pub struct LNamespace {
 }
 
 impl LNamespace {
+    ///
     fn from_raw<'input>(
         raw: &'input RawNamespace,
         locale: Language,
@@ -251,6 +252,7 @@ pub enum LNode {
 }
 
 impl LNode {
+    ///
     fn from_raw<'input>(
         raw: &'input RawNode,
         locale: Language,
