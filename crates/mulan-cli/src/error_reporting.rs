@@ -666,7 +666,7 @@ impl self::ToReport for mulan_parser::errors::LocaleMapError {
         match self {
             Self::ReadFile(e) => e.to_report(config),
             Self::Yaml(e) => e.to_report(config),
-            Self::InvalidSyntax(e) => e.to_report(config),
+            Self::Syntax(e) => e.to_report(config),
         }
     }
 }
@@ -863,7 +863,7 @@ impl self::Reportable for mulan_parser::errors::YamlError {
     }
 }
 
-impl self::ToReport for mulan_parser::errors::InvalidSyntaxError {
+impl self::ToReport for mulan_parser::errors::SyntaxError {
     fn to_report(&self, config: &mulan_config::Config) -> miette::Report {
         match self {
             Self::InvalidKey(e) => e.to_report(config),

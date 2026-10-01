@@ -15,8 +15,7 @@ use strum::EnumTryAs;
 
 use crate::chumsky_parse::ChumskyParser;
 use crate::errors::{
-    InvalidKeyError, InvalidSyntaxError, InvalidTemplateError, LocaleMapError, ReadFileError,
-    YamlError,
+    InvalidKeyError, InvalidTemplateError, LocaleMapError, ReadFileError, SyntaxError, YamlError,
 };
 use crate::identifier::Word;
 use crate::{DottedKey, Identifier, Tag, Template, TemplatePart};
@@ -72,14 +71,11 @@ impl LDefinition {
                 .with_extension("yaml")
         };
         let raw_definition = RawDefinition::read(path.into())?;
-        Self::from_raw(&raw_definition, locale).map_err(LocaleMapError::InvalidSyntax)
+        Self::from_raw(&raw_definition, locale).map_err(LocaleMapError::Syntax)
     }
 
     ///
-    fn from_raw(
-        raw_definition: &RawDefinition,
-        locale: Language,
-    ) -> Result<Self, InvalidSyntaxError> {
+    fn from_raw(raw_definition: &RawDefinition, locale: Language) -> Result<Self, SyntaxError> {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
         let _key_parser = DottedKey::chumsky_parser(&ident_parser);
@@ -205,11 +201,11 @@ impl LNamespace {
         parent_key: Option<&DottedKey>,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
-    ) -> Result<Self, InvalidSyntaxError> {
+    ) -> Result<Self, SyntaxError> {
         let mut map = BTreeMap::new();
         for (key_raw, node_raw) in &raw.map {
             let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
-                InvalidSyntaxError::InvalidKey(InvalidKeyError {
+                SyntaxError::InvalidKey(InvalidKeyError {
                     locale,
                     parent_key: parent_key.cloned(),
                     errors,
@@ -259,11 +255,11 @@ impl LNode {
         key: &DottedKey,
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
-    ) -> Result<Self, InvalidSyntaxError> {
+    ) -> Result<Self, SyntaxError> {
         let l_node = match raw {
             RawNode::Message(msg_raw) => {
                 let template = template_parser.mulan_parse(msg_raw).map_err(|errors| {
-                    InvalidSyntaxError::InvalidTemplate(InvalidTemplateError {
+                    SyntaxError::InvalidTemplate(InvalidTemplateError {
                         locale,
                         key: key.clone(),
                         errors,

@@ -31,12 +31,12 @@ pub enum LocaleMapError {
     Yaml(YamlError),
 
     /// Failed to parse Mulan-specific syntax.
-    InvalidSyntax(InvalidSyntaxError),
+    Syntax(SyntaxError),
 }
 
 /// Errors of [`crate::schemas::locale_map::LDefinition::from_raw`].
 #[derive(Debug)]
-pub enum InvalidSyntaxError {
+pub enum SyntaxError {
     /// A key was not parsed successfully (wrong syntax).
     InvalidKey(InvalidKeyError),
 
