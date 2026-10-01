@@ -74,7 +74,8 @@ impl LDefinition {
         Self::from_raw(&raw_definition, locale).map_err(LocaleMapError::Syntax)
     }
 
-    /// Validates a [`RawDefinition`] and produces a more strongly-typed version of it.
+    /// Validates a [`RawDefinition`] and produces a more strongly-typed
+    /// version of it.
     fn from_raw(raw_definition: &RawDefinition, locale: Language) -> Result<Self, SyntaxError> {
         let word_parser = Word::chumsky_parser();
         let ident_parser = Identifier::chumsky_parser(&word_parser);
@@ -194,7 +195,8 @@ pub struct LNamespace {
 }
 
 impl LNamespace {
-    /// Validates a [`RawNamespace`] and produces a more strongly-typed version of it.
+    /// Validates a [`RawNamespace`] and produces a more strongly-typed
+    /// version of it.
     fn from_raw<'input>(
         raw: &'input RawNamespace,
         locale: Language,
@@ -248,7 +250,8 @@ pub enum LNode {
 }
 
 impl LNode {
-    /// Validates a [`RawNode`] and produces a more strongly-typed version of it.
+    /// Validates a [`RawNode`] and produces a more strongly-typed
+    /// version of it.
     fn from_raw<'input>(
         raw: &'input RawNode,
         locale: Language,
