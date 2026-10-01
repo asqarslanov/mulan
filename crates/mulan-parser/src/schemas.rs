@@ -27,7 +27,7 @@ pub fn transpose(
     Ok(Bundle { root })
 }
 
-/// A brancher that, given a [`RawNode`] from the main locale,
+/// A brancher that, given an [`LNode`] from the main locale,
 /// either processes it as a message ([`translations`])
 /// or as a namespace ([`traverse_namespace`]) to get a proper [`Node`].
 fn handle_node(
@@ -106,7 +106,7 @@ fn translations(
     })
 }
 
-/// Recursively goes over a [`RawNamespace`] of the main locale,
+/// Recursively goes over an [`LNamespace`] of the main locale,
 /// collects corresponding nodes from other locales, and combines
 /// everything into a proper [`Namespace`].
 ///

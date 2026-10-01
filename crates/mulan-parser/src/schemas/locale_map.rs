@@ -157,7 +157,7 @@ impl LDefinition {
 
 /// [`LNamespace`]'s deserializer.
 #[derive(Debug, PartialEq, Eq, Deserialize)]
-struct RawNamespace {
+pub(super) struct RawNamespace {
     /// Maps to [`LNamespace::map`].
     #[serde(flatten)]
     map: HashMap<CompactString1, RawNode>,
@@ -270,8 +270,7 @@ enum RawNode {
 /// Loosely-typed counterpart: [`RawNode`].
 #[derive(Debug, EnumTryAs, PartialEq, Eq)]
 pub enum LNode {
-    /// Raw text that will later be properly parsed
-    /// to a [`Template`](crate::Template).
+    /// Raw text that will later be properly parsed to a [`Template`].
     Message(Template),
 
     /// A nested namespace.
