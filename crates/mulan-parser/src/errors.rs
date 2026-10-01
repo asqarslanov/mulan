@@ -30,7 +30,7 @@ pub enum LocaleMapError {
     /// Failed to parse a YAML file according to the schema.
     Yaml(YamlError),
 
-    ///
+    /// Failed to parse Mulan-specific syntax.
     InvalidSyntax(InvalidSyntaxError),
 }
 
