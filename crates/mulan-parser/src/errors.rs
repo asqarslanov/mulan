@@ -75,7 +75,7 @@ pub enum TransposeError {
     UnknownParameters(UnknownParametersError),
 }
 
-/// See [`InvalidSyntaxError::InvalidKey`].
+/// See [`SyntaxError::InvalidKey`].
 #[derive(Debug)]
 pub struct InvalidKeyError {
     pub locale: Language,
@@ -86,7 +86,7 @@ pub struct InvalidKeyError {
     pub errors: ChumskyAllErrors,
 }
 
-/// See [`InvalidSyntaxError::InvalidTemplate`].
+/// See [`SyntaxError::InvalidTemplate`].
 #[derive(Debug)]
 pub struct InvalidTemplateError {
     pub locale: Language,
