@@ -206,7 +206,7 @@ impl LNamespace {
         ident_parser: &impl ChumskyParser<'input, Identifier>,
         template_parser: &impl ChumskyParser<'input, Template>,
     ) -> Result<Self, InvalidSyntaxError> {
-        let mut map = HashMap::new();
+        let mut map = HashMap::with_capacity(raw.map.len());
         for (key_raw, node_raw) in &raw.map {
             let key_part = ident_parser.mulan_parse(key_raw).map_err(|errors| {
                 InvalidSyntaxError::InvalidKey(InvalidKeyError {
