@@ -37,7 +37,7 @@ compact_str = "0.10.0"
 figment2 = "0.11.5"
 foldhash = "0.2.0"
 indent = "0.1.1"
-indoc = "2.0.7"
+indoc = "2.0.8"
 itertools = "0.15.0"
 miette = "7.6.0"
 mitsein = {
@@ -57,7 +57,7 @@ serdev = "0.3.2"
 strum = "0.28.0"
 tempfile = "3.27.0"
 thiserror = "2.0.21"
-toml = { version = "1.1.7", features = ["fast_hash"] }
+toml = { version = "1.1.8", features = ["fast_hash"] }
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
