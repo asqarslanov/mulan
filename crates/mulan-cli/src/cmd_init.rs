@@ -182,7 +182,18 @@ impl InitConfig {
     /// Requests values to build this type from the user
     /// via an interactive [`mod@cliclack`] menu.
     fn interactive_prompt() -> io::Result<Self> {
-        let locales = Self::prompt_locales(&[Language::EnUs, Language::RuRu])?;
+        let locales = Self::prompt_locales(&[
+            Language::En,
+            Language::EnGb,
+            Language::EnUs,
+            Language::Eo,
+            Language::Es,
+            Language::EsEs,
+            Language::Es419,
+            Language::Fr,
+            Language::Ru,
+            Language::RuRu,
+        ])?;
         let main_locale = Self::prompt_main_locale(&locales)?;
         let generate = Self::prompt_generate()?.map(Vec1::from_one);
         Ok(Self {
@@ -317,8 +328,26 @@ fn create_locale_files(locales: &[Language]) -> Result<(), CreateLocalesError> {
     })?;
     for locale in locales {
         let contents = serde_saphyr::to_string(&match locale {
-            Language::RuRu => ExampleLocale {
+            Language::RuRu | Language::Ru => ExampleLocale {
                 greeting: "Привет, {name}!",
+            },
+            Language::Fr | Language::FrCa => ExampleLocale {
+                greeting: "Bonjour, {name}!",
+            },
+            Language::Eo => ExampleLocale {
+                greeting: "Saluton, {name}!",
+            },
+            Language::Tt => ExampleLocale {
+                greeting: "Сәлам, {name}!",
+            },
+            Language::Es | Language::EsEs | Language::EsMx | Language::EsUs => ExampleLocale {
+                greeting: "¡Hola, {name}!",
+            },
+            Language::EnGb => ExampleLocale {
+                greeting: "Morning, {name}!",
+            },
+            Language::EnUs => ExampleLocale {
+                greeting: "Howdy, {name}!",
             },
             _ => ExampleLocale {
                 greeting: "Hello, {name}!",
